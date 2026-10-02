@@ -271,11 +271,13 @@ export function parseCss(src) {
   }
 
   // «color: red⏎ font-size: 20px»: el valor s'ha empassat la declaració
-  // següent perquè falta el «;»
+  // següent perquè falta el «;». El text entre cometes no compta
+  // (content: "Nota: llegeix" és correcte).
   function checkMissingSemicolon(value) {
-    const match = /(\s)([a-zA-Z-]+)\s*:\s*\S/.exec(value.text);
+    const outsideStrings = value.text.replace(/(["'])(?:\\.|(?!\1)[^\\\n])*\1?/g, (s) => ' '.repeat(s.length));
+    const match = /(\s)([a-zA-Z-]+)\s*:\s*\S/.exec(outsideStrings);
     if (!match) return;
-    const before = value.text.slice(0, match.index);
+    const before = outsideStrings.slice(0, match.index);
     if (before.split('(').length !== before.split(')').length) return;   // dins d'un url(…)
     const offset = value.start + match.index;
     report('missing-semicolon', value.start, offset, { next: match[2] });

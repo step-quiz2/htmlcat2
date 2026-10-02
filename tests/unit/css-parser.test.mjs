@@ -53,6 +53,13 @@ test('els dos punts d\'un url() no són un punt i coma oblidat', () => {
   assert.deepEqual(codes('a { background: url(http://x.cat/a.png) no-repeat; }'), []);
 });
 
+test('els dos punts dins d\'una cadena no són un punt i coma oblidat', () => {
+  assert.deepEqual(codes('p::before {\n  content: "Atenció, nota: llegeix";\n}'), []);
+  assert.deepEqual(codes("p::before { content: 'a \\' b: c'; }"), []);
+  // Però després de la cadena sí que es detecta
+  assert.deepEqual(codes('p::before {\n  content: "a: b"\n  color: red;\n}'), ['missing-semicolon']);
+});
+
 test('falta la «}» i comença una altra regla', () => {
   const src = 'h1 {\n  color: red;\n\np {\n  margin: 0;\n}';
   const { rules, problems } = parseCss(src);

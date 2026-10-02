@@ -281,8 +281,8 @@ Fases del BLUEPRINT §9.1:
 - [x] **Fase 1 — Nucli del llenguatge:** tokenitzador d'HTML, analitzador de CSS, arbre del codi font, ressaltat.
 - [x] **Fase 2 — Editor, previsualització i editor lliure.**
 - [ ] **Fase 3 — Revisor de codi v1 i panell ⚠ Problemes.** Inclou: identificadors de
-      regla per als codis que encara no en tenen (HANDOFF §4) i corregir un fals «falta
-      `;`» de `css-parser.js` quan el valor és una cadena amb «paraula:»
+      regla per als codis que encara no en tenen (HANDOFF §4). Fet: `css-parser.js` ja no
+      dona un fals «falta `;`» quan el valor és una cadena amb «paraula:»
       (`content: "Atenció, nota: llegeix";`).
 - [ ] **Fase 4 — Primer capítol complet** (esquelet del curs, progrés, comprovacions, tests).
 - [ ] **Fase 5 — Continguts:** un capítol per PR.
