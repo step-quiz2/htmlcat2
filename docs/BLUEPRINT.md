@@ -1,6 +1,6 @@
 # HTMLCat — Build Blueprint (cold-start brief for Claude)
 
-> **Audience:** a Claude instance that starts with zero context in the new `step-quiz/htmlcat` repository.
+> **Audience:** a Claude instance that starts with zero context in the new `step-quiz/htmlcat` repository. *(Note 2026-10-02: the canonical repository is now `step-quiz2/htmlcat2`; see `docs/STATE.md` §3.)*
 > **Origin:** written on 2026-10-02 after a full code review of `step-quiz/pycat` (HEAD `4af142f`) and `step-quiz/jscat` (HEAD `9c328c1`), plus browser experiments in Chromium (Appendix A).
 > **Lifetime:** this is a *kickoff* document. `docs/STATE.md` is the single source of truth for *what exists*; this file is the design reference for what is not built yet, and the rationale (*why*) for what is. When a decision here is reversed, record it in `docs/STATE.md` §Decisions and add a one-line note next to the affected section here. Never let this file silently rot (see §3.2, anti-pattern A1).
 
@@ -619,7 +619,7 @@ Optional extras after 15: CSS Grid; transitions; a bridge chapter to JSCat Part 
 
 ### 8.1 Unit tests (zero dependencies)
 
-`node --test tests/unit/` — tokenizer, CSS parser, source tree diagnostics, every lint rule (positive and negative cases, Catalan messages exist for every rule id), checks schema, `dedent`, `buildSrcdoc` (fragment/document, link inlining, base/CSP injection), storage wrapper (with a fake `localStorage`).
+`node --test tests/unit/*.test.mjs` — tokenizer, CSS parser, source tree diagnostics, every lint rule (positive and negative cases, Catalan messages exist for every rule id), checks schema, `dedent`, `buildSrcdoc` (fragment/document, link inlining, base/CSP injection), storage wrapper (with a fake `localStorage`).
 
 ### 8.2 Static course checks (zero dependencies)
 
@@ -660,7 +660,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node --test tests/unit/
+      - run: node --test tests/unit/*.test.mjs
       - run: node tests/course-static.mjs
       - run: npm ci
         working-directory: tests
@@ -669,6 +669,8 @@ jobs:
       - run: node course-browser.mjs
         working-directory: tests
 ```
+
+> **Note (2026-10-02):** the test commands in §8.1, §8.4 and §9.2 used to pass the directory `tests/unit/` to `node --test`; on Node 22 that fails ("Cannot find module"), so they now use the glob. The real workflow is `.github/workflows/ci.yml`: it was lost once when the project was moved by web upload (A2), and `tests/course-static.mjs` now fails if it is missing.
 
 Notes: commit this file with Git (A2). In a Claude Code cloud container, Chromium is preinstalled (`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`): do **not** run `playwright install` there. The deployed product never depends on Node.
 
@@ -695,7 +697,7 @@ Build the vertical slice (Phase 4) **before** writing many chapters: PyCat's his
 
 - Branch per task (use the branch name the session assigns, if any).
 - Commit messages in Catalan, imperative, descriptive ("Afegeix el tokenitzador d'HTML amb posicions de línia"); never the skip tokens of §1.3.
-- Before pushing: `node --test tests/unit/`, `node tests/course-static.mjs`, `node tests/course-browser.mjs`; re-read your own diff adversarially.
+- Before pushing: `node --test tests/unit/*.test.mjs`, `node tests/course-static.mjs`, `node tests/course-browser.mjs`; re-read your own diff adversarially.
 - Open the PR automatically. Body in Catalan with sections **Què canvia**, **Per què**, **Com comprovar-ho** (copy-paste steps for the owner: open the Cloudflare preview URL or `python3 -m http.server` in `site/`), **Tests** (commands and results), **Documentació** (what was updated in `docs/STATE.md`).
 - Update `docs/STATE.md` in the same PR whenever behaviour, contracts, content or pending work change.
 

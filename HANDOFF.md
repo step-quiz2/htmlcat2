@@ -1,7 +1,7 @@
 # HANDOFF — start here (for a Claude session with no prior context)
 
-Last updated: 2026-10-02, after PR #4 (phase 2) was merged into `main`.
-Written by the Claude session that built phases 0–2. Keep it short and current:
+Last updated: 2026-10-02, after the project moved to `step-quiz2/htmlcat2` and the files
+lost in that move were restored. Phases 0–2 were built by an earlier Claude session. Keep it short and current:
 when you finish a phase, rewrite the "Where we are" and "Next task" sections.
 
 ## 1. What this is
@@ -9,6 +9,10 @@ when you finish a phase, rewrite the "Where we are" and "Next task" sections.
 HTMLCat: a static, build-free course (HTML + CSS + clean code) for 15-year-olds,
 in Catalan, deployed by Cloudflare Pages from `main` (output dir `site/`,
 `htmlcat.pages.dev`). Sibling projects: `step-quiz/pycat`, `step-quiz/jscat`.
+
+Canonical repository: **`step-quiz2/htmlcat2`** (confirmed by the owner, 2026-10-02).
+The history of phases 0–2 (PRs #1–#4) lives in the old repository; the code was
+copied here by a GitHub web upload, which dropped every dot-file (see §6).
 
 ## 2. Read in this order
 
@@ -21,15 +25,16 @@ in Catalan, deployed by Cloudflare Pages from `main` (output dir `site/`,
 
 ## 3. Where we are
 
-- Phase 0 ✅ repo, licence, CI (`.github/workflows/ci.yml`), Cloudflare connected.
+- Phase 0 ✅ repo, licence, CI (`.github/workflows/ci.yml`, restored after the move).
 - Phase 1 ✅ `site/js/lang/` (HTML tokenizer, source tree with structural problems,
   tolerant CSS parser) + `site/js/editor/highlight.js`.
 - Phase 2 ✅ editor (`editor/editor.js`, `editing.js`), sandboxed preview
   (`preview/preview.js`, `srcdoc.js`), simulator component (`sim/simulador.js`),
   free editor at `site/editor/`, asset pack `site/recursos/`.
 - 93 unit tests + static checks + browser checks (incl. an end-to-end editor test), all green.
-- Still pending from phase 0 (owner's job): confirm `/tests/` and `/docs/` return 404
-  on the deployed site; add custom domain `htmlcat.step-quiz.net`.
+- Still pending from phase 0 (owner's job): confirm Cloudflare Pages deploys
+  `step-quiz2/htmlcat2` (it was connected to the old repo); confirm `/tests/` and `/docs/`
+  return 404 on the deployed site; add custom domain `htmlcat.step-quiz.net`.
 
 ## 4. Next task: phase 3 — linter v1 + "⚠ Problemes" panel
 
@@ -70,6 +75,11 @@ Phase 4 after that: course shell, checks DSL, chapter 1 end-to-end (BLUEPRINT §
   In a Claude Code cloud container Chromium is preinstalled: do not run `playwright install`.
 
 ## 6. Lessons learned in phases 0–2 (avoid repeating)
+
+- **Never move or update files through the GitHub web UI** (BLUEPRINT A2). Moving the
+  project to `htmlcat2` by web upload silently dropped `.github/workflows/ci.yml`,
+  `.editorconfig` and `.gitignore`, so CI stopped running and STATE.md was wrong.
+  `tests/course-static.mjs` now fails if any of them is missing.
 
 - **Verify that doc edits really landed.** In phase 1 a `grep -c` returning 0 stopped an
   `&&` chain, so the STATE.md update silently never ran and the PR description was wrong.

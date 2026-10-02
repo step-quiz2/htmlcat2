@@ -206,6 +206,7 @@ motiu; si se'n canvia alguna, s'anota aquí amb la data i el motiu.
 | 2026-10-02 | D5: la previsualització bloqueja imatges i fonts externes (CSP); imatges a `site/recursos/` | Privacitat dels alumnes i tests deterministes |
 | 2026-10-02 | `buildSrcdoc` retorna `{ html, missingFiles }` (el BLUEPRINT deia només el text) | Per poder avisar d'un `<link>` a un fitxer que no existeix |
 | 2026-10-02 | Sense autocompletat de moment | Ha de ser progressiu (només el que ja s'ha ensenyat) i depèn del vocabulari del curs (fase 4) |
+| 2026-10-02 | El repositori definitiu és `step-quiz2/htmlcat2` | Ho ha confirmat el propietari. L'historial de les fases 0–2 (PR #1–#4) és a l'antic repositori; el codi es va copiar aquí amb una pujada pel web, que va perdre `.github/`, `.editorconfig` i `.gitignore` (restaurats amb Git el mateix dia) |
 
 ### Decisions pendents de confirmar amb el propietari
 
@@ -241,7 +242,7 @@ cd tests && npm ci && node course-browser.mjs   # navegador (Playwright + Chromi
 | Test | Què comprova |
 |---|---|
 | `unit/` | Cada mòdul pur de `site/js/` (93 tests): tokenitzador, arbre i errors d'estructura, analitzador de CSS, ressaltat (conserva el codi, escapa, una línia per entrada, rendiment), robustesa amb 500 codis aleatoris, edició (Retorn, Tab, Maj+Tab), `localStorage`, document de previsualització i textos de la interfície |
-| `course-static.mjs` | Cada pàgina té `<!DOCTYPE html>`, `lang="ca"`, `charset` i `<title>`; cap `style=""` ni `on…=""`; cap tabulació; tots els enllaços relatius existeixen; sintaxi de cada `.js`; cap menció de CC BY-NC-ND |
+| `course-static.mjs` | Cada pàgina té `<!DOCTYPE html>`, `lang="ca"`, `charset` i `<title>`; cap `style=""` ni `on…=""`; cap tabulació; tots els enllaços relatius existeixen; sintaxi de cada `.js`; cap menció de CC BY-NC-ND; existeixen `.editorconfig`, `.gitignore` i `.github/workflows/ci.yml` (una pujada pel web no els inclou) |
 | `course-browser.mjs` | Cada pàgina, a 360 i 1280 px: cap error a la consola, cap petició fallida, cap petició a servidors externs, cap desplaçament horitzontal. A més, prova l'editor lliure de punta a punta: escriure, indentació automàtica, resultat en directe, Ctrl+Z, `sandbox` i CSP correctes, cap script ni imatge externa, enllaços interceptats, CSS aplicat i codi desat després de recarregar |
 
 La GitHub Action `.github/workflows/ci.yml` executa els tres a cada push i a
@@ -251,11 +252,12 @@ cada pull request (pestanya «Actions» de GitHub).
 
 ## 5. Publicació
 
-Cloudflare Pages està connectat al repositori (projecte `htmlcat`, adreça
-`htmlcat.pages.dev`): publica `main` i fa una previsualització de cada PR.
-Configuració esperada: *framework preset* «None», ordre de compilació buida,
-carpeta de sortida `site`. Pendent: comprovar que `/tests/` i `/docs/` donen la
-pàgina 404 i afegir el domini `htmlcat.step-quiz.net` (D8).
+Cloudflare Pages (projecte `htmlcat`, adreça `htmlcat.pages.dev`) estava
+connectat a l'antic repositori. **Pendent:** comprovar que publica aquest
+(`step-quiz2/htmlcat2`), la branca `main`, i que fa una previsualització de
+cada PR. Configuració esperada: *framework preset* «None», ordre de compilació
+buida, carpeta de sortida `site`. També pendent: comprovar que `/tests/` i
+`/docs/` donen la pàgina 404 i afegir el domini `htmlcat.step-quiz.net` (D8).
 
 `site/_headers` afegeix `X-Content-Type-Options`, `Referrer-Policy` i
 `Permissions-Policy`. **No** s'hi han de posar COOP/COEP (BLUEPRINT §3.2, A15)
@@ -268,8 +270,9 @@ ni capçaleres de memòria cau llarga.
 Fases del BLUEPRINT §9.1:
 
 - [ ] **Fase 0 — Arrencada.** Fet: documentació, llicència, `site/` provisional,
-      tests, GitHub Action i Cloudflare Pages (publica cada PR). Falta: comprovar
-      que `/tests/` i `/docs/` donen 404 i el domini `htmlcat.step-quiz.net`.
+      tests i GitHub Action. Falta: comprovar que Cloudflare Pages publica
+      `step-quiz2/htmlcat2` (§5), que `/tests/` i `/docs/` donen 404 i el
+      domini `htmlcat.step-quiz.net`.
 - [ ] Respondre les decisions pendents (§3): D3, D4, D6–D12.
 - [x] **Fase 1 — Nucli del llenguatge:** tokenitzador d'HTML, analitzador de CSS, arbre del codi font, ressaltat.
 - [x] **Fase 2 — Editor, previsualització i editor lliure.**
