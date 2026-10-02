@@ -25,20 +25,33 @@ test('la CSP bloqueja scripts i peticions externes', () => {
   assert.doesNotMatch(DEFAULT_CSP, /\*|https?:/);
 });
 
-test('mode document: la CSP i el base van just després de <head>', () => {
+test('mode document: la CSP i el base van just després del doctype', () => {
   const src = '<!DOCTYPE html>\n<html lang="ca">\n  <head>\n    <title>X</title>\n  </head>\n  <body></body>\n</html>';
   const { html } = buildSrcdoc({ files: { 'index.html': src }, mode: 'document', assetBase: BASE });
-  assert.ok(html.startsWith('<!DOCTYPE html>\n<html lang="ca">\n  <head><meta http-equiv="Content-Security-Policy"'));
-  assert.ok(html.includes(`<base href="${BASE}">\n    <title>X</title>`));
+  assert.equal(html, `<!DOCTYPE html><meta http-equiv="Content-Security-Policy" content="${DEFAULT_CSP}">` +
+    `<base href="${BASE}">` + src.slice('<!DOCTYPE html>'.length));
 });
 
-test('mode document sense <head> ni <html>', () => {
-  let { html } = buildSrcdoc({ files: { 'index.html': '<html><p>x</p></html>' }, mode: 'document', assetBase: BASE });
-  assert.ok(html.startsWith('<html><meta http-equiv'));
-  ({ html } = buildSrcdoc({ files: { 'index.html': '<!DOCTYPE html><p>x</p>' }, mode: 'document', assetBase: BASE }));
-  assert.ok(html.startsWith('<!DOCTYPE html><meta http-equiv'));
-  ({ html } = buildSrcdoc({ files: { 'index.html': '<p>x</p>' }, mode: 'document', assetBase: BASE }));
-  assert.ok(html.startsWith('<meta http-equiv'));
+test('mode document: amb contingut abans de <html> o <head>, la CSP continua anant al principi', () => {
+  // El navegador ignora una CSP que no és dins del <head>
+  const src = '<!DOCTYPE html>\n<h1>Hola</h1>\n<html lang="ca">\n<head>\n<title>X</title>\n</head>\n</html>';
+  const { html } = buildSrcdoc({ files: { 'index.html': src }, mode: 'document', assetBase: BASE });
+  assert.ok(html.startsWith('<!DOCTYPE html><meta http-equiv="Content-Security-Policy"'));
+  assert.ok(html.indexOf('<base') < html.indexOf('<h1>'));
+});
+
+test('mode document sense doctype, o amb un doctype que el navegador no té en compte', () => {
+  for (const src of ['<html><p>x</p></html>', '<p>x</p>', '<p>x</p>\n<!DOCTYPE html>', 'Hola <!DOCTYPE html><head></head>']) {
+    const { html } = buildSrcdoc({ files: { 'index.html': src }, mode: 'document', assetBase: BASE });
+    assert.ok(html.startsWith('<meta http-equiv="Content-Security-Policy"'), src);
+    assert.ok(html.endsWith(src), src);
+  }
+});
+
+test('mode document: espais i comentaris abans del doctype', () => {
+  const src = '\n<!-- La meva pàgina -->\n<!DOCTYPE html>\n<html lang="ca"></html>';
+  const { html } = buildSrcdoc({ files: { 'index.html': src }, mode: 'document', assetBase: BASE });
+  assert.ok(html.startsWith('\n<!-- La meva pàgina -->\n<!DOCTYPE html><meta http-equiv'));
 });
 
 test('el <link> a un fitxer virtual es substitueix pel seu CSS', () => {
@@ -55,7 +68,13 @@ test('el <link> a un fitxer virtual es substitueix pel seu CSS', () => {
 test('<link> just després de <head>, amb ./, majúscules i altres atributs', () => {
   const src = '<HEAD><LINK HREF="./estils.css" REL="Stylesheet" type="text/css"></HEAD>';
   const { html } = buildSrcdoc({ files: { 'index.html': src, 'estils.css': 'a{}' }, mode: 'document', assetBase: BASE });
-  assert.match(html, /^<HEAD><meta http-equiv="Content-Security-Policy"[^>]*><base [^>]*><style data-file="estils.css">\na\{\}<\/style><\/HEAD>$/);
+  assert.match(html, /^<meta http-equiv="Content-Security-Policy"[^>]*><base [^>]*><HEAD><style data-file="estils.css">\na\{\}<\/style><\/HEAD>$/);
+});
+
+test('<link> just després del doctype: primer la CSP, després el CSS', () => {
+  const src = '<!DOCTYPE html><link rel="stylesheet" href="estils.css">';
+  const { html } = buildSrcdoc({ files: { 'index.html': src, 'estils.css': 'a{}' }, mode: 'document', assetBase: BASE });
+  assert.match(html, /^<!DOCTYPE html><meta http-equiv="Content-Security-Policy"[^>]*><base [^>]*><style data-file="estils.css">\na\{\}<\/style>$/);
 });
 
 test('un <link> a un fitxer que no existeix es comunica', () => {

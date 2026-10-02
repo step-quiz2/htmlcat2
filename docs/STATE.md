@@ -161,7 +161,10 @@ proteccions independents, que el test de navegador comprova per separat:
    els estils. **Mai `allow-scripts`.**
 2. Una CSP injectada al principi del `<head>`:
    `default-src 'none'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self'`
-   (bloqueja scripts i qualsevol petició externa: decisió D5).
+   (bloqueja scripts i qualsevol petició externa: decisió D5). En mode
+   `document` s'injecta just després del doctype (o al principi), no després
+   del `<head>` de l'alumne: si l'alumne escriu alguna cosa abans de `<html>`,
+   el navegador posaria la CSP dins del `<body>` i l'ignoraria.
 
 També s'hi injecta `<base href=".../recursos/">`: `<img src="gat.svg">`
 funciona igual a l'editor lliure i als capítols. En mode `document`, cada
@@ -205,6 +208,7 @@ motiu; si se'n canvia alguna, s'anota aquí amb la data i el motiu.
 | 2026-10-02 | D2: el fitxer CSS dels exercicis es diu `estils.css` | Ídem |
 | 2026-10-02 | D5: la previsualització bloqueja imatges i fonts externes (CSP); imatges a `site/recursos/` | Privacitat dels alumnes i tests deterministes |
 | 2026-10-02 | `buildSrcdoc` retorna `{ html, missingFiles }` (el BLUEPRINT deia només el text) | Per poder avisar d'un `<link>` a un fitxer que no existeix |
+| 2026-10-02 | En mode `document`, la CSP i el `<base>` s'injecten just després del doctype (abans: després del `<head>` de l'alumne) | Amb text abans de `<html>` la CSP quedava dins del `<body>`, el navegador la ignorava i les imatges externes es carregaven (comprovat a Chromium) |
 | 2026-10-02 | Sense autocompletat de moment | Ha de ser progressiu (només el que ja s'ha ensenyat) i depèn del vocabulari del curs (fase 4) |
 | 2026-10-02 | El repositori definitiu és `step-quiz2/htmlcat2` | Ho ha confirmat el propietari. L'historial de les fases 0–2 (PR #1–#4) és a l'antic repositori; el codi es va copiar aquí amb una pujada pel web, que va perdre `.github/`, `.editorconfig` i `.gitignore` (restaurats amb Git el mateix dia) |
 
@@ -241,9 +245,9 @@ cd tests && npm ci && node course-browser.mjs   # navegador (Playwright + Chromi
 
 | Test | Què comprova |
 |---|---|
-| `unit/` | Cada mòdul pur de `site/js/` (93 tests): tokenitzador, arbre i errors d'estructura, analitzador de CSS, ressaltat (conserva el codi, escapa, una línia per entrada, rendiment), robustesa amb 500 codis aleatoris, edició (Retorn, Tab, Maj+Tab), `localStorage`, document de previsualització i textos de la interfície |
+| `unit/` | Cada mòdul pur de `site/js/` (96 tests): tokenitzador, arbre i errors d'estructura, analitzador de CSS, ressaltat (conserva el codi, escapa, una línia per entrada, rendiment), robustesa amb 500 codis aleatoris, edició (Retorn, Tab, Maj+Tab), `localStorage`, document de previsualització i textos de la interfície |
 | `course-static.mjs` | Cada pàgina té `<!DOCTYPE html>`, `lang="ca"`, `charset` i `<title>`; cap `style=""` ni `on…=""`; cap tabulació; tots els enllaços relatius existeixen; sintaxi de cada `.js`; cap menció de CC BY-NC-ND; existeixen `.editorconfig`, `.gitignore` i `.github/workflows/ci.yml` (una pujada pel web no els inclou) |
-| `course-browser.mjs` | Cada pàgina, a 360 i 1280 px: cap error a la consola, cap petició fallida, cap petició a servidors externs, cap desplaçament horitzontal. A més, prova l'editor lliure de punta a punta: escriure, indentació automàtica, resultat en directe, Ctrl+Z, `sandbox` i CSP correctes, cap script ni imatge externa, enllaços interceptats, CSS aplicat i codi desat després de recarregar |
+| `course-browser.mjs` | Cada pàgina, a 360 i 1280 px: cap error a la consola, cap petició fallida, cap petició a servidors externs, cap desplaçament horitzontal. A més, prova l'editor lliure de punta a punta: escriure, indentació automàtica, resultat en directe, Ctrl+Z, `sandbox` i CSP correctes (també amb text abans de `<html>`), cap script ni imatge externa, enllaços interceptats, CSS aplicat i codi desat després de recarregar |
 
 La GitHub Action `.github/workflows/ci.yml` executa els tres a cada push i a
 cada pull request (pestanya «Actions» de GitHub).

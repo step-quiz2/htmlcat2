@@ -14,7 +14,8 @@
 //   4. té desplaçament horitzontal (no cap a l'amplada de la pantalla).
 //
 // A més, prova de punta a punta l'editor lliure (checkFreeEditor):
-// escriure, indentació, resultat en directe, seguretat i desar.
+// escriure, indentació, resultat en directe, seguretat (també amb text
+// abans de <html>) i desar.
 //
 // A la fase 4 s'hi afegiran les comprovacions dels exercicis: la solució
 // de referència supera les comprovacions i el codi inicial no
@@ -181,6 +182,18 @@ async function checkFreeEditor() {
   const message = await page.locator('.sim-message').innerText();
   if (!message.includes('https://example.com')) fail('no s\'avisa de l\'enllaç: ' + JSON.stringify(message));
   if (!(await previewText()).includes('Pomes')) fail('l\'enllaç ha fet sortir la previsualització');
+
+  // 5b. La CSP protegeix encara que l'alumne escrigui alguna cosa abans de
+  //     <html> (el navegador ignora una CSP que no és dins del <head>)
+  const before = await editor.inputValue();
+  await editor.fill('<!DOCTYPE html>\n<h1>Abans</h1>\n<html lang="ca">\n<head>\n<title>X</title>\n</head>\n' +
+    '<body>\n<img src="https://example.com/y.png" alt="y">\n</body>\n</html>\n');
+  await page.waitForTimeout(800);
+  const cspParent = await preview.locator('meta[http-equiv="Content-Security-Policy"]')
+    .evaluate((meta) => meta.parentElement.localName);
+  if (cspParent !== 'head') fail(`la CSP ha quedat dins de <${cspParent}>: el navegador només la té en compte dins de <head>`);
+  if (externalRequests.length) fail('amb text abans de <html>, la previsualització ha fet una petició externa: ' + externalRequests[0]);
+  await editor.fill(before);
 
   // 6. Tab al CSS i canvi de pestanya
   await page.locator('.sim-tab', { hasText: 'estils.css' }).click();

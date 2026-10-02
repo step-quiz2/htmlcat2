@@ -31,7 +31,7 @@ copied here by a GitHub web upload, which dropped every dot-file (see §6).
 - Phase 2 ✅ editor (`editor/editor.js`, `editing.js`), sandboxed preview
   (`preview/preview.js`, `srcdoc.js`), simulator component (`sim/simulador.js`),
   free editor at `site/editor/`, asset pack `site/recursos/`.
-- 93 unit tests + static checks + browser checks (incl. an end-to-end editor test), all green.
+- 96 unit tests + static checks + browser checks (incl. an end-to-end editor test), all green.
 - Still pending from phase 0 (owner's job): confirm Cloudflare Pages deploys
   `step-quiz2/htmlcat2` (it was connected to the old repo); confirm `/tests/` and `/docs/`
   return 404 on the deployed site; add custom domain `htmlcat.step-quiz.net`.

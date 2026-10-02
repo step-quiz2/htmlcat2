@@ -14,6 +14,9 @@
 //   · <meta http-equiv="Content-Security-Policy"> (cap petició externa)
 //   · <base href="…/recursos/"> (les imatges de l'alumne es busquen al
 //     paquet d'imatges, sigui quina sigui la pàgina on és el simulador)
+// En mode 'document' s'injecten just després del doctype, no després del
+// <head> de l'alumne: si l'alumne escriu alguna cosa abans de <html> o de
+// <head>, el navegador posaria la CSP dins del <body>, i allà l'ignora.
 //
 // Les línies que veu l'alumne no canvien: el revisor de codi treballa
 // sobre els fitxers originals, no sobre aquest text.
@@ -69,7 +72,7 @@ export function buildSrcdoc({ files, mode = 'fragment', assetBase, csp = DEFAULT
     else missingFiles.push(href);
   }
 
-  edits.push({ ...headInsertionPoint(tokens), insert: head });
+  edits.push({ ...headInsertionPoint(htmlFile, tokens), insert: head });
   // De darrere cap endavant (amb el mateix inici, primer la substitució més llarga)
   edits.sort((a, b) => b.from - a.from || b.to - a.to);
   let html = htmlFile;
@@ -77,14 +80,17 @@ export function buildSrcdoc({ files, mode = 'fragment', assetBase, csp = DEFAULT
   return { html, missingFiles };
 }
 
-// Just després de <head>; si no n'hi ha, després de <html>; si tampoc,
-// després del doctype; si tampoc, al principi.
-function headInsertionPoint(tokens) {
-  for (const name of ['head', 'html']) {
-    const tag = tokens.find((t) => t.type === 'startTag' && t.name === name);
-    if (tag) return { from: tag.end, to: tag.end };
+// Just després del doctype, si el navegador el té en compte (només hi ha
+// espais o comentaris al davant); si no, al principi. Així el <meta> és el
+// primer element que troba el navegador, que el posa sempre dins del <head>
+// (el crea ell mateix); després hi afegeix els atributs del <html> de
+// l'alumne (lang="ca") i n'ignora el <head>, que ja existeix.
+function headInsertionPoint(src, tokens) {
+  for (const token of tokens) {
+    if (token.type === 'doctype') return { from: token.end, to: token.end };
+    const blank = token.type === 'comment' ||
+      (token.type === 'text' && !src.slice(token.start, token.end).trim());
+    if (!blank) break;
   }
-  const doctype = tokens.find((t) => t.type === 'doctype');
-  const at = doctype ? doctype.end : 0;
-  return { from: at, to: at };
+  return { from: 0, to: 0 };
 }
