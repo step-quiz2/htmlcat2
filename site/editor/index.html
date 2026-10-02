@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Editor lliure — HTMLCat</title>
+  <meta name="description" content="Escriu HTML i CSS i mira'n el resultat al moment.">
+  <link rel="icon" href="../img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link rel="stylesheet" href="../css/simulador.css">
+  <script type="module" src="../js/pages/editor-page.js"></script>
+</head>
+<body>
+  <div class="pantalla">
+    <header class="barra">
+      <a class="logo logo--petit" href="../">
+        <img src="../img/logo.svg" alt="">
+        HTMLCat
+      </a>
+      <h1 class="barra__titol">Editor lliure</h1>
+    </header>
+
+    <main class="pantalla__contingut">
+      <div class="simulador sim--pantalla" data-id="editor" data-mode="document">
+        <script type="text/plain" data-file="index.html">
+          <!DOCTYPE html>
+          <html lang="ca">
+            <head>
+              <meta charset="UTF-8">
+              <title>La meva pàgina</title>
+              <link rel="stylesheet" href="estils.css">
+            </head>
+            <body>
+              <h1>Hola, món!</h1>
+              <p>Canvia aquest text i mira el resultat.</p>
+              <img src="gat.svg" alt="Un gat taronja" width="120">
+            </body>
+          </html>
+        </script>
+        <script type="text/plain" data-file="estils.css">
+          h1 {
+            color: teal;
+          }
+
+          p {
+            font-size: 1.25rem;
+          }
+        </script>
+      </div>
+    </main>
+
+    <footer class="peu peu--compacte">
+      <p>
+        © 2026 David Arso Civil · INS Miquel Tarradell ·
+        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ca">CC BY-NC-SA 4.0</a> ·
+        <a href="../LICENSE.txt">MIT</a>
+      </p>
+    </footer>
+  </div>
+</body>
+</html>

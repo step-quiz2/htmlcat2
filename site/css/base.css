@@ -1,0 +1,134 @@
+/* ════════════════════════════════════════════════════════
+   base.css — Reinici, tipografia i estructura bàsica
+   Depèn de tokens.css.
+   ════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-text);
+  font-size: var(--size-text);
+  line-height: var(--line-text);
+}
+
+a {
+  color: var(--color-accent);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+code {
+  font-family: var(--font-code);
+}
+
+.pagina {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.pagina-contingut {
+  flex: 1;
+  width: 100%;
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-3);
+}
+
+.peu {
+  padding: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.peu p {
+  margin: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-code);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.logo img {
+  width: 2rem;
+  height: 2rem;
+}
+
+.avis {
+  padding: var(--space-3);
+  border-left: 4px solid var(--color-accent);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+/* ── Pàgines a pantalla completa (editor lliure) ── */
+
+.pantalla {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.pantalla__contingut {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.barra {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+}
+
+.barra__titol {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 400;
+}
+
+.logo--petit {
+  font-size: 1.125rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.logo--petit img {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.peu--compacte {
+  padding: var(--space-1) var(--space-3);
+  font-size: 0.75rem;
+}
+
+.boto {
+  display: inline-block;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+  font-weight: 700;
+  text-decoration: none;
+}

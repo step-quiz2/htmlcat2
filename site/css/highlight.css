@@ -1,0 +1,29 @@
+/* ════════════════════════════════════════════════════════
+   highlight.css — Colors del ressaltat de sintaxi
+   Classes generades per js/editor/highlight.js. Els colors
+   són variables de tokens.css (temes clar i fosc).
+   ════════════════════════════════════════════════════════ */
+
+.code-example {
+  margin: var(--space-3) 0;
+  padding: var(--space-3);
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  font-family: var(--font-code);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.hl-tag { color: var(--hl-tag); }
+.hl-attr { color: var(--hl-attr); }
+.hl-val { color: var(--hl-val); }
+.hl-cm { color: var(--hl-comment); font-style: italic; }
+.hl-doc { color: var(--hl-doctype); }
+.hl-ent { color: var(--hl-entity); }
+.hl-sel { color: var(--hl-selector); }
+.hl-at { color: var(--hl-at-rule); }
+.hl-prop { color: var(--hl-property); }
+.hl-cssval { color: var(--hl-css-value); }
+.hl-imp { color: var(--hl-important); font-weight: 700; }

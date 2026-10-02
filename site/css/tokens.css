@@ -1,0 +1,88 @@
+/* ════════════════════════════════════════════════════════
+   tokens.css — Variables de disseny d'HTMLCat
+   Colors, espais, tipografies i mides. Els temes només
+   redefineixen aquestes variables: cap component no
+   esmenta cap tema.
+   ════════════════════════════════════════════════════════ */
+
+:root {
+  --font-text: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-code: ui-monospace, "Cascadia Mono", "Courier New", monospace;
+  --size-text: 1.0625rem;   /* 17 px */
+  --line-text: 1.6;
+
+  --color-bg: #ffffff;
+  --color-surface: #f4f4f5;
+  --color-border: #d4d4d8;
+  --color-text: #18181b;
+  --color-muted: #52525b;
+  --color-accent: #c2410c;
+  --color-accent-text: #ffffff;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --space-5: 2.5rem;
+  --radius: 8px;
+  --measure: 70ch;
+
+  /* Ressaltat de sintaxi (contrast AA sobre --color-surface) */
+  --hl-tag: #9d174d;
+  --hl-attr: #92400e;
+  --hl-val: #166534;
+  --hl-comment: #52525b;
+  --hl-doctype: #6d28d9;
+  --hl-entity: #0e7490;
+  --hl-selector: #1d4ed8;
+  --hl-at-rule: #6d28d9;
+  --hl-property: #92400e;
+  --hl-css-value: #166534;
+  --hl-important: #b91c1c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #18181b;
+    --color-surface: #27272a;
+    --color-border: #3f3f46;
+    --color-text: #f4f4f5;
+    --color-muted: #a1a1aa;
+    --color-accent: #fb923c;
+    --color-accent-text: #18181b;
+
+    --hl-tag: #f472b6;
+    --hl-attr: #fbbf24;
+    --hl-val: #86efac;
+    --hl-comment: #a1a1aa;
+    --hl-doctype: #c4b5fd;
+    --hl-entity: #67e8f9;
+    --hl-selector: #93c5fd;
+    --hl-at-rule: #c4b5fd;
+    --hl-property: #fbbf24;
+    --hl-css-value: #86efac;
+    --hl-important: #fca5a5;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #18181b;
+  --color-surface: #27272a;
+  --color-border: #3f3f46;
+  --color-text: #f4f4f5;
+  --color-muted: #a1a1aa;
+  --color-accent: #fb923c;
+  --color-accent-text: #18181b;
+
+  --hl-tag: #f472b6;
+  --hl-attr: #fbbf24;
+  --hl-val: #86efac;
+  --hl-comment: #a1a1aa;
+  --hl-doctype: #c4b5fd;
+  --hl-entity: #67e8f9;
+  --hl-selector: #93c5fd;
+  --hl-at-rule: #c4b5fd;
+  --hl-property: #fbbf24;
+  --hl-css-value: #86efac;
+  --hl-important: #fca5a5;
+}

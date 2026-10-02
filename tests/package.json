@@ -1,0 +1,12 @@
+{
+  "name": "htmlcat-tests",
+  "private": true,
+  "type": "module",
+  "description": "Eines de test d'HTMLCat. No es publiquen: el web (site/) no té dependències.",
+  "scripts": {
+    "test": "node --test unit/*.test.mjs && node course-static.mjs && node course-browser.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}

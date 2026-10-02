@@ -1,0 +1,276 @@
+/* ════════════════════════════════════════════════════════
+   simulador.css — Estils del simulador (editor + resultat)
+   Totes les classes comencen per «sim-». Depèn de tokens.css
+   i de highlight.css.
+
+   Editor: el <textarea> (transparent) i el <pre> (amb colors)
+   han de tenir EXACTAMENT la mateixa lletra, mida, interlineat
+   i marges; si no, el cursor no coincideix amb el text.
+   ════════════════════════════════════════════════════════ */
+
+.sim {
+  --sim-line: 1.5rem;          /* interlineat de l'editor (24 px) */
+  --sim-pad: 0.75rem;          /* marge interior de l'editor */
+
+  display: flex;
+  flex-direction: column;
+  height: var(--sim-height, 26rem);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+/* ── Barra superior: pestanyes de fitxers i botons ── */
+
+.sim-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.sim-tabs,
+.sim-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.sim-tab,
+.sim-button {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.sim-tab {
+  font-family: var(--font-code);
+}
+
+.sim-tab[aria-selected="true"] {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+}
+
+.sim-button:hover,
+.sim-tab:hover {
+  border-color: var(--color-accent);
+}
+
+/* ── Zona principal: codi i resultat ── */
+
+.sim-main {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  flex: 1;
+  min-height: 0;
+}
+
+.sim-code {
+  display: flex;
+  min-height: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sim-code__panel {
+  flex: 1;
+  min-width: 0;
+}
+
+.sim-code__panel[hidden] {
+  display: none;
+}
+
+.sim-result {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.sim-result__header {
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.sim-result__body {
+  flex: 1;
+  min-height: 0;
+}
+
+.sim-preview__frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #ffffff;   /* com una pàgina nova al navegador, també en tema fosc */
+}
+
+@media (min-width: 48rem) {
+  .sim-main {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: none;
+  }
+
+  .sim-code {
+    border-right: 1px solid var(--color-border);
+    border-bottom: 0;
+  }
+}
+
+/* ── Missatges breus (enllaços, formularis…) ── */
+
+.sim-message {
+  display: none;
+  padding: var(--space-2) var(--space-3);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.sim-message--visible {
+  display: block;
+}
+
+/* ── Editor ── */
+
+.sim-editor {
+  display: flex;
+  height: 100%;
+  background: var(--color-surface);
+  font-family: var(--font-code);
+  font-size: 1rem;              /* 16 px: Safari de l'iPhone no fa zoom */
+  line-height: var(--sim-line);
+}
+
+.sim-editor__gutter {
+  flex: none;
+  min-width: 2.75rem;
+  padding: var(--sim-pad) var(--space-2) var(--sim-pad) 0;
+  overflow: hidden;
+  border-right: 1px solid var(--color-border);
+  color: var(--color-muted);
+  text-align: right;
+  user-select: none;
+}
+
+.sim-editor__line-number {
+  height: var(--sim-line);
+}
+
+.sim-editor__body {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.sim-editor__highlight,
+.sim-editor__input {
+  margin: 0;
+  padding: var(--sim-pad);
+  border: 0;
+  font: inherit;
+  letter-spacing: normal;
+  font-variant-ligatures: none;
+  tab-size: 2;
+  white-space: pre;
+  overflow-wrap: normal;
+}
+
+.sim-editor__highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  color: var(--color-text);
+  pointer-events: none;
+}
+
+.sim-editor__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  resize: none;
+  overflow: auto;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--color-text);
+  outline: none;
+}
+
+.sim-editor__input::selection {
+  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+
+.sim-editor:focus-within {
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+}
+
+.sim-editor__marks {
+  position: absolute;
+  top: var(--sim-pad);
+  right: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.sim-editor__mark {
+  position: absolute;
+  top: calc(var(--line) * var(--sim-line));
+  right: 0;
+  left: 0;
+  height: var(--sim-line);
+}
+
+.sim-editor__mark--error {
+  background: color-mix(in srgb, #dc2626 18%, transparent);
+}
+
+.sim-editor__mark--warning {
+  background: color-mix(in srgb, #d97706 18%, transparent);
+}
+
+.sim-editor__toast {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  background: var(--color-text);
+  color: var(--color-bg);
+  font-family: var(--font-text);
+  font-size: 0.8125rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.sim-editor__toast--visible {
+  opacity: 1;
+}
+
+/* ── Editor lliure: ocupa tota la pantalla ── */
+
+.sim--pantalla {
+  --sim-height: 100%;
+  flex: 1;
+  border-width: 1px 0 0;
+  border-radius: 0;
+}

@@ -1,0 +1,207 @@
+#!/usr/bin/env node
+// ════════════════════════════════════════════════════════
+// tests/course-browser.mjs — Comprovacions amb navegador real
+//
+// Ús (des de tests/, després de «npm ci»):
+//     node course-browser.mjs
+//
+// Serveix site/ amb un petit servidor HTTP i obre cada pàgina amb
+// Chromium (Playwright) a dues amplades (mòbil 360 px i escriptori
+// 1280 px). Falla (codi 1) si alguna pàgina:
+//   1. escriu errors a la consola del navegador o llança excepcions;
+//   2. té peticions que fallen (recurs inexistent, error de xarxa);
+//   3. fa una petició a un servidor extern (privacitat dels alumnes);
+//   4. té desplaçament horitzontal (no cap a l'amplada de la pantalla).
+//
+// A més, prova de punta a punta l'editor lliure (checkFreeEditor):
+// escriure, indentació, resultat en directe, seguretat i desar.
+//
+// A la fase 4 s'hi afegiran les comprovacions dels exercicis: la solució
+// de referència supera les comprovacions i el codi inicial no
+// (docs/BLUEPRINT.md §8.3).
+// ════════════════════════════════════════════════════════
+
+import { createServer } from 'node:http';
+import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
+import { join, dirname, extname, relative, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { chromium } from 'playwright';
+
+const SITE = join(dirname(fileURLToPath(import.meta.url)), '..', 'site');
+const VIEWPORTS = [
+  { name: 'mòbil', width: 360, height: 740 },
+  { name: 'escriptori', width: 1280, height: 800 },
+];
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.woff2': 'font/woff2',
+  '.txt': 'text/plain; charset=utf-8',
+};
+
+function listPages(dir) {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) return listPages(path);
+    return extname(entry.name) === '.html' ? [path] : [];
+  });
+}
+
+// Servidor estàtic semblant a Cloudflare Pages: carpeta → index.html,
+// fitxer inexistent → 404.html amb codi 404.
+function startServer() {
+  const server = createServer((req, res) => {
+    let path = join(SITE, decodeURIComponent(new URL(req.url, 'http://x').pathname));
+    if (!path.startsWith(SITE)) { res.writeHead(403).end(); return; }
+    if (existsSync(path) && statSync(path).isDirectory()) path = join(path, 'index.html');
+    if (!existsSync(path)) {
+      res.writeHead(404, { 'content-type': MIME['.html'] }).end(readFileSync(join(SITE, '404.html')));
+      return;
+    }
+    res.writeHead(200, { 'content-type': MIME[extname(path)] || 'application/octet-stream' });
+    res.end(readFileSync(path));
+  });
+  return new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve(server)));
+}
+
+const server = await startServer();
+const origin = `http://127.0.0.1:${server.address().port}`;
+const browser = await chromium.launch();
+const problems = [];
+let visits = 0;
+
+for (const file of listPages(SITE)) {
+  const url = origin + '/' + relative(SITE, file).split(sep).join('/');
+  for (const viewport of VIEWPORTS) {
+    const page = await browser.newPage({ viewport });
+    const where = `${relative(SITE, file)} (${viewport.name})`;
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') problems.push(`${where}: error a la consola: ${msg.text()}`);
+    });
+    page.on('pageerror', (err) => problems.push(`${where}: excepció: ${err.message}`));
+    page.on('requestfailed', (req) => problems.push(`${where}: ha fallat ${req.url()}`));
+    page.on('request', (req) => {
+      if (!req.url().startsWith(origin) && !req.url().startsWith('data:')) {
+        problems.push(`${where}: petició externa a ${req.url()}`);
+      }
+    });
+    page.on('response', (res) => {
+      if (res.status() >= 400 && res.url() !== url) problems.push(`${where}: ${res.status()} a ${res.url()}`);
+    });
+
+    await page.goto(url, { waitUntil: 'networkidle' });
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    if (overflow > 0) problems.push(`${where}: desplaçament horitzontal de ${overflow} px`);
+    await page.close();
+    visits++;
+  }
+}
+
+// ── Editor lliure: prova de punta a punta ──
+await checkFreeEditor();
+
+await browser.close();
+server.close();
+
+if (problems.length) {
+  console.error(`❌ ${problems.length} problema(es):\n` + problems.map((p) => '  · ' + p).join('\n'));
+  process.exit(1);
+}
+console.log(`✅ Tot correcte (${visits} visites de pàgina)`);
+
+async function checkFreeEditor() {
+  const where = 'editor lliure';
+  const fail = (msg) => problems.push(`${where}: ${msg}`);
+  const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+  const externalRequests = [];
+  // La CSP de la previsualització bloqueja les peticions externes abans que
+  // surtin a la xarxa (Chromium les registra com a fallides amb «csp»):
+  // només compten les que acaben de debò.
+  page.on('requestfinished', (req) => { if (req.url().includes('example.com')) externalRequests.push(req.url()); });
+  page.on('requestfailed', (req) => {
+    if (req.url().includes('example.com') && req.failure()?.errorText !== 'csp') externalRequests.push(req.url());
+  });
+  page.on('pageerror', (err) => fail(`excepció: ${err.message}`));
+  page.on('dialog', (dialog) => { fail(`diàleg inesperat: ${dialog.message()}`); dialog.dismiss(); });
+
+  await page.goto(origin + '/editor/', { waitUntil: 'networkidle' });
+  await page.evaluate(() => localStorage.clear());
+  await page.reload({ waitUntil: 'networkidle' });
+
+  const editor = page.locator('.sim-code__panel:not([hidden]) textarea');
+  const preview = page.frameLocator('.sim-preview__frame');
+  const previewText = () => preview.locator('body').innerText();
+
+  // 1. El codi inicial es veu al resultat
+  if (!(await previewText()).includes('Hola, món!')) fail('el resultat no mostra el codi inicial');
+
+  // 2. Escriure HTML amb Retorn: indentació automàtica i resultat en directe
+  await editor.click();
+  await editor.press('Control+End');
+  await editor.evaluate((ta) => {
+    const pos = ta.value.indexOf('</body>');
+    ta.setSelectionRange(pos, pos);
+  });
+  await page.keyboard.type('<ul>');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('<li>Pomes</li>');
+  const value = await editor.inputValue();
+  if (!value.includes('<ul>\n    <li>Pomes</li>')) fail('el Retorn no ha indentat la línia nova: ' + JSON.stringify(value.slice(value.indexOf('<ul>'), value.indexOf('<ul>') + 30)));
+  await page.waitForTimeout(600);
+  if (!(await previewText()).includes('Pomes')) fail('el resultat no s\'ha actualitzat');
+
+  // 3. Ctrl+Z desfà
+  await page.keyboard.press('Control+z');
+  if ((await editor.inputValue()).includes('<li>Pomes</li>')) fail('Ctrl+Z no ha desfet el text');
+  await page.keyboard.type('<li>Pomes</li>');
+
+  // 4. Seguretat (dues proteccions independents, es comproven per separat):
+  //    a) l'iframe no pot executar scripts (sandbox sense allow-scripts);
+  //    b) la CSP del document bloqueja scripts i peticions externes.
+  const sandbox = await page.locator('.sim-preview__frame').getAttribute('sandbox');
+  if (sandbox !== 'allow-same-origin') fail(`l'iframe té sandbox="${sandbox}" (ha de ser "allow-same-origin")`);
+  const csp = await preview.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content');
+  if (!/default-src 'none'/.test(csp) || /script-src/.test(csp)) fail('la CSP de la previsualització no bloqueja els scripts: ' + csp);
+  await page.keyboard.type('<script>parent.document.title = "PIRATEJAT"</script>');
+  await page.keyboard.type('<img src="https://example.com/x.png" alt="x" onerror="parent.document.title = \'PIRATEJAT\'">');
+  await page.waitForTimeout(800);
+  if ((await page.title()).includes('PIRATEJAT')) fail('el codi de l\'alumne ha pogut executar JavaScript');
+  if (externalRequests.length) fail('la previsualització ha fet una petició externa: ' + externalRequests[0]);
+
+  // 5. Un clic a un enllaç no surt de la previsualització
+  await page.keyboard.type('<a href="https://example.com">Enllaç</a>');
+  await page.waitForTimeout(600);
+  await preview.locator('a', { hasText: 'Enllaç' }).click();
+  await page.waitForTimeout(200);
+  const message = await page.locator('.sim-message').innerText();
+  if (!message.includes('https://example.com')) fail('no s\'avisa de l\'enllaç: ' + JSON.stringify(message));
+  if (!(await previewText()).includes('Pomes')) fail('l\'enllaç ha fet sortir la previsualització');
+
+  // 6. Tab al CSS i canvi de pestanya
+  await page.locator('.sim-tab', { hasText: 'estils.css' }).click();
+  const css = page.locator('.sim-code__panel:not([hidden]) textarea');
+  await css.click();
+  await css.press('Control+End');
+  await page.keyboard.type('\nli {');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('color: red;');
+  if (!(await css.inputValue()).includes('li {\n  color: red;')) fail('el Retorn després de «{» no ha indentat');
+  await page.waitForTimeout(600);
+  const color = await preview.locator('li').first().evaluate((li) => getComputedStyle(li).color);
+  if (color !== 'rgb(255, 0, 0)') fail('el CSS no s\'aplica al resultat (color: ' + color + ')');
+
+  // 7. El codi es desa: després de recarregar hi continua
+  await page.waitForTimeout(700);
+  await page.reload({ waitUntil: 'networkidle' });
+  if (!(await page.locator('.sim-code__panel textarea').first().inputValue()).includes('<li>Pomes</li>')) {
+    fail('el codi no s\'ha desat al navegador');
+  }
+  await page.evaluate(() => localStorage.clear());
+  await page.close();
+  visits++;
+}

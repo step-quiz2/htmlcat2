@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HTMLCat — Aprèn HTML i CSS en català</title>
+  <meta name="description" content="Curs interactiu per aprendre HTML i CSS al navegador, en català, i a escriure codi net.">
+  <link rel="icon" href="img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/highlight.css">
+  <script type="module" src="js/pages/landing-page.js"></script>
+</head>
+<body>
+  <div class="pagina">
+    <main class="pagina-contingut">
+      <p class="logo">
+        <img src="img/logo.svg" alt="">
+        HTMLCat
+      </p>
+      <h1>Aprèn HTML i CSS al navegador, en català</h1>
+      <p>
+        Un curs per escriure les teves pròpies pàgines web amb <strong>codi net i ben estructurat</strong>.
+        Sense instal·lar res.
+      </p>
+      <p>Aprendràs a escriure codi com aquest, i a entendre'l:</p>
+      <pre class="code-example" data-lang="html" tabindex="0">&lt;!DOCTYPE html&gt;
+&lt;html lang="ca"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;La meva pàgina&lt;/title&gt;
+    &lt;link rel="stylesheet" href="estils.css"&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;!-- Capçalera --&gt;
+    &lt;h1&gt;Hola, món!&lt;/h1&gt;
+    &lt;p class="avis"&gt;Aquesta pàgina l'he escrit jo.&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</pre>
+      <pre class="code-example" data-lang="css" tabindex="0">/* estils.css */
+h1 {
+  color: teal;
+}
+
+.avis {
+  padding: 1rem;
+  border-left: 4px solid orange;
+}</pre>
+      <p>
+        <a class="boto" href="editor/">Prova l'editor lliure →</a>
+      </p>
+      <p class="avis">
+        🚧 <strong>En construcció.</strong> Els primers capítols arribaran aviat; l'editor lliure ja funciona.
+      </p>
+      <p>
+        Mentrestant, pots aprendre a programar amb
+        <a href="https://karelcat.step-quiz.net">KarelCat</a> i
+        <a href="https://pycat.step-quiz.net">PyCat</a>.
+      </p>
+    </main>
+    <footer class="peu">
+      <p>
+        © 2026 <strong>David Arso Civil</strong> · INS Miquel Tarradell ·
+        Contingut: <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ca">CC BY-NC-SA 4.0</a> ·
+        Codi: <a href="LICENSE.txt">llicència MIT</a>
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
