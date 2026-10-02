@@ -11,11 +11,13 @@
 //   1. escriu errors a la consola del navegador o llança excepcions;
 //   2. té peticions que fallen (recurs inexistent, error de xarxa);
 //   3. fa una petició a un servidor extern (privacitat dels alumnes);
-//   4. té desplaçament horitzontal (no cap a l'amplada de la pantalla).
+//   4. té desplaçament horitzontal (no cap a l'amplada de la pantalla);
+//   5. té ids repetits.
 //
 // A més, prova de punta a punta l'editor lliure (checkFreeEditor):
 // escriure, indentació, resultat en directe, seguretat (també amb text
-// abans de <html>) i desar.
+// abans de <html>) i desar. I munta dos exemples no editables a la mateixa
+// pàgina, com als capítols (checkSeveralSimulators): cap id repetit.
 //
 // A la fase 4 s'hi afegiran les comprovacions dels exercicis: la solució
 // de referència supera les comprovacions i el codi inicial no
@@ -98,6 +100,8 @@ for (const file of listPages(SITE)) {
     await page.goto(url, { waitUntil: 'networkidle' });
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     if (overflow > 0) problems.push(`${where}: desplaçament horitzontal de ${overflow} px`);
+    const repeated = await page.evaluate(duplicateIds);
+    if (repeated.length) problems.push(`${where}: ids repetits: ${repeated.join(', ')}`);
     await page.close();
     visits++;
   }
@@ -105,6 +109,7 @@ for (const file of listPages(SITE)) {
 
 // ── Editor lliure: prova de punta a punta ──
 await checkFreeEditor();
+await checkSeveralSimulators();
 
 await browser.close();
 server.close();
@@ -217,4 +222,46 @@ async function checkFreeEditor() {
   await page.evaluate(() => localStorage.clear());
   await page.close();
   visits++;
+}
+
+// S'executa dins de la pàgina: ids que hi apareixen més d'una vegada
+function duplicateIds() {
+  const ids = [...document.querySelectorAll('[id]')].map((el) => el.id);
+  return [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))];
+}
+
+// Dos exemples no editables (sense data-id) a la mateixa pàgina, com
+// passarà als capítols: les pestanyes no poden repetir ids, i cada panell
+// ha d'apuntar a la pestanya del seu simulador.
+async function checkSeveralSimulators() {
+  const where = 'diversos simuladors';
+  const page = await browser.newPage();
+  page.on('pageerror', (err) => problems.push(`${where}: excepció: ${err.message}`));
+  await page.goto(origin + '/', { waitUntil: 'networkidle' });
+
+  const brokenPanels = await page.evaluate(async () => {
+    const { mountSimulator } = await import('/js/sim/simulador.js');
+    for (let n = 0; n < 2; n++) {
+      const host = document.createElement('div');
+      host.className = 'simulador';
+      host.setAttribute('data-readonly', '');
+      for (const [file, code] of [['index.html', '<p>Hola</p>\n'], ['estils.css', 'p {\n  color: teal;\n}\n']]) {
+        const block = document.createElement('script');
+        block.type = 'text/plain';
+        block.dataset.file = file;
+        block.textContent = code;
+        host.append(block);
+      }
+      document.body.append(host);
+      mountSimulator(host);
+    }
+    return [...document.querySelectorAll('[role="tabpanel"]')].filter((panel) => {
+      const tab = document.getElementById(panel.getAttribute('aria-labelledby'));
+      return !tab || tab.closest('.simulador') !== panel.closest('.simulador');
+    }).length;
+  });
+  const repeated = await page.evaluate(duplicateIds);
+  if (repeated.length) problems.push(`${where}: ids repetits: ${repeated.join(', ')}`);
+  if (brokenPanels) problems.push(`${where}: ${brokenPanels} panell(s) apunten a una pestanya d'un altre simulador`);
+  await page.close();
 }

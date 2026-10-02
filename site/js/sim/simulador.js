@@ -35,6 +35,10 @@ const PREVIEW_DELAY = 300;
 const SAVE_DELAY = 500;
 const MESSAGE_TIME = 4000;
 
+// Simuladors muntats a la pàgina: dona ids únics a les pestanyes (els
+// exemples no editables no tenen data-id i n'hi pot haver molts)
+let mountedCount = 0;
+
 /**
  * Llegeix la definició d'un simulador del seu element.
  *
@@ -89,6 +93,7 @@ export function mountSimulator(host, { fileActions = false } = {}) {
     }
   }
   const names = Object.keys(files);
+  const idPrefix = `sim${++mountedCount}`;
 
   // ── Estructura ──
   host.textContent = '';
@@ -173,7 +178,7 @@ export function mountSimulator(host, { fileActions = false } = {}) {
   const editors = {};
   names.forEach((name, i) => {
     const tab = button('sim-tab', name);
-    tab.id = `${host.dataset.id || 'sim'}-tab-${i}`;
+    tab.id = `${idPrefix}-tab-${i}`;
     tab.setAttribute('role', 'tab');
     const panel = el('div', 'sim-code__panel');
     panel.setAttribute('role', 'tabpanel');
