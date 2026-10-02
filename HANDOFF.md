@@ -1,8 +1,9 @@
 # HANDOFF — start here (for a Claude session with no prior context)
 
 Last updated: 2026-10-02, after the project moved to `step-quiz2/htmlcat2` and the files
-lost in that move were restored. Phases 0–2 were built by an earlier Claude session. Keep it short and current:
-when you finish a phase, rewrite the "Where we are" and "Next task" sections.
+lost in that move were restored. Phases 0–2 were built by an earlier Claude session.
+Keep it short and current: when you finish a phase, rewrite the "Where we are" and
+"Next task" sections.
 
 ## 1. What this is
 
@@ -51,6 +52,14 @@ Follow BLUEPRINT §4.7 and Appendix C. Concretely:
    unknown property / invalid value via an injected `supports(prop, value)` —
    browser: `CSS.supports`; Node tests: a stub). Each rule has `since` (chapter),
    `severity`, `phase: 'static'`. The free editor enables all rules.
+   Some existing problem codes have no rule id in Appendix C yet: choose one for
+   HTML `mismatched-end-tag`, `unclosed-comment`, `unterminated-tag`,
+   `unterminated-attribute-value` and CSS `missing-colon`, `empty-value`,
+   `unclosed-string`. Also fix (with a test) a false positive of `css-parser.js`
+   `checkMissingSemicolon`: it ignores strings, so `content: "Atenció, nota: llegeix";`
+   reports `missing-semicolon`. `html/indentation` (warning from chapter 1) is the
+   riskiest rule: define it precisely (inline elements, multi-line text, `<pre>`,
+   `<style>`) and test it on real examples before enabling it.
 3. Panel in `sim/simulador.js`: list (max 10, errors first), click → caret to line,
    gutter marks via the existing `editor.setMarks([{ line, kind }])`, short
    `aria-live` status line ("2 errors, 1 avís"), debounce ≈ 400 ms.

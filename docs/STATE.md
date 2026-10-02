@@ -280,7 +280,10 @@ Fases del BLUEPRINT §9.1:
 - [ ] Respondre les decisions pendents (§3): D3, D4, D6–D12.
 - [x] **Fase 1 — Nucli del llenguatge:** tokenitzador d'HTML, analitzador de CSS, arbre del codi font, ressaltat.
 - [x] **Fase 2 — Editor, previsualització i editor lliure.**
-- [ ] **Fase 3 — Revisor de codi v1 i panell ⚠ Problemes.**
+- [ ] **Fase 3 — Revisor de codi v1 i panell ⚠ Problemes.** Inclou: identificadors de
+      regla per als codis que encara no en tenen (HANDOFF §4) i corregir un fals «falta
+      `;`» de `css-parser.js` quan el valor és una cadena amb «paraula:»
+      (`content: "Atenció, nota: llegeix";`).
 - [ ] **Fase 4 — Primer capítol complet** (esquelet del curs, progrés, comprovacions, tests).
 - [ ] **Fase 5 — Continguts:** un capítol per PR.
 - [ ] **Fase 6 — Activitats i eines:** Parsons, qüestionaris, 🌳 Arbre, exportar/importar el progrés.
