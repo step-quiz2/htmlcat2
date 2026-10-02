@@ -65,6 +65,13 @@ site/                  ← l'única carpeta que es publica
   js/lang/html-tokenizer.js  Mòdul pur: tokenitzador d'HTML amb posicions (§2.1)
   js/lang/html-model.js      Mòdul pur: arbre del codi font i errors d'estructura (§2.1)
   js/lang/css-parser.js      Mòdul pur: analitzador de CSS tolerant (§2.2)
+  js/lang/css-spec.js        Propietats CSS habituals (per suggerir «potser volies dir…»)
+  js/lint/lint.js            Mòdul pur: revisor de codi, lintStatic i summarize (§2.6)
+  js/lint/rules-html.js      Mòdul pur: regles d'HTML (§2.6)
+  js/lint/rules-css.js       Mòdul pur: regles de CSS (§2.6)
+  js/lint/messages.ca.js     Mòdul pur: què diu cada regla, en català
+  js/lint/lines.js           Mòdul pur: indentació de les línies (per a les regles d'indentació)
+  js/lint/suggest.js         Mòdul pur: el nom vàlid més semblant («titel» → title)
   js/editor/highlight.js     Mòdul pur: ressaltat d'HTML i CSS (§2.3)
   js/editor/editing.js       Mòdul pur: què fan Retorn, Tab i Maj+Tab
   js/editor/editor.js        Editor: textarea sobre un <pre> ressaltat, números de línia, marques
@@ -188,6 +195,75 @@ Safari de l'iPhone no faci zoom.
 
 Si el navegador no deixa desar, el simulador ho avisa una vegada.
 
+### 2.6 Revisor de codi: `lintStatic({ files, mode, chapter, env })`
+
+«El navegador perdona, HTMLCat t'ho explica.» Revisa els fitxers de l'alumne
+(HTML i CSS, també el CSS de dins dels `<style>`) i retorna una llista de
+problemes ordenada (errors, avisos, suggeriments; després per fitxer i línia):
+`{ file, rule, severity, start, end, line, col, data, text, hint }`. `text` i
+`hint` són en català (`messages.ca.js`): què passa i com arreglar-ho.
+
+- **Per capítol:** una regla només s'activa des del capítol on s'ensenya el
+  concepte (`since <= chapter`). Sense `chapter` (editor lliure), totes.
+- **Per mode:** les regles de document sencer (`html/doctype`, `lang`,
+  `charset`, `title`) només en mode `document`.
+- **`env.supports(propietat, valor)`:** al navegador és `CSS.supports` (el
+  navegador mateix diu què és vàlid); als tests, una imitació
+  (`tests/unit/lint-helpers.mjs`). Sense, les regles de propietats i valors no fan res.
+- **Indentació:** només es revisen les línies que comencen amb una etiqueta, un
+  comentari, un selector, una declaració o una `}`, sempre respecte a la línia
+  del pare tal com és (un error no se n'emporta d'altres). Si hi ha errors
+  d'estructura (HTML) o claus desaparellades (CSS), no es revisa: primer cal
+  arreglar els errors. El contingut de `<pre>` no es revisa mai.
+- **`summarize(problems, max = 10)`** prepara la llista per al panell: els errors
+  d'un en un; els avisos repetits (mateixa regla i fitxer) en una sola entrada
+  («i 4 més com aquest»).
+- Rendiment mesurat (Node, 300 línies): HTML ≈ 3,6 ms i CSS ≈ 1 ms.
+
+Catàleg (E error, A avís). «Cap.» = capítol a partir del qual s'activa.
+
+| Regla | Cap. | | Detecta |
+|---|---|---|---|
+| `html/unclosed-element` | 1 | E | Element que no es tanca (també `<li>` abans d'un altre `<li>`) |
+| `html/stray-end-tag` | 1 | E | `</x>` sense cap `<x>` obert |
+| `html/mismatched-end-tag` | 1 | E | `<h1>…</h2>` |
+| `html/misnested` | 1 | E | `<b><i>…</b></i>` |
+| `html/void-end-tag` | 1 | E | `</br>`, `</img>` |
+| `html/p-closed-by-block` | 1 | E | Un bloc dins de `<p>` (el navegador tanca el `<p>`) |
+| `html/duplicate-attribute` | 1 | E | El mateix atribut dues vegades |
+| `html/unterminated-tag` | 1 | E | Etiqueta sense `>` |
+| `html/unterminated-attribute-value` | 1 | E | Valor d'atribut sense la cometa de tancament |
+| `html/unknown-element` | 1 | E | `<titel>`, `<parragraf>` (suggereix el nom correcte) |
+| `html/uppercase` | 1 | A | Etiquetes o atributs en majúscules (no a l'SVG) |
+| `html/unquoted-attribute` | 1 | A | `class=avis` |
+| `html/indentation` | 1 | A | La indentació no reflecteix el niuament (2 espais), o tabuladors |
+| `html/doctype` | 1 | E | Falta `<!DOCTYPE html>`, no és el primer o és antic (mode document) |
+| `html/title` | 1 | E | Falta `<title>` o és buit (mode document) |
+| `html/lang` | 1 | A | Falta `<html lang="…">` (mode document) |
+| `html/charset` | 1 | A | Falta `<meta charset="UTF-8">` o no és UTF-8 (mode document) |
+| `html/unclosed-comment` | 2 | E | `<!--` sense `-->` |
+| `html/deprecated-element` | 2 | A | `<center>`, `<font>`, `<big>`… |
+| `html/heading-order` | 2 | A | De `<h1>` a `<h3>` sense `<h2>` |
+| `html/single-h1` | 2 | A | Més d'un `<h1>` |
+| `html/br-spacing` | 2 | A | Dos o més `<br>` seguits |
+| `html/list-structure` | 3 | E | `<li>` fora de llista; text o altres elements dins de `<ul>`/`<ol>` |
+| `html/inline-style` | 9 | A | Atribut `style=""` |
+| `css/unbalanced-braces` | 9 | E | Falta `{` o `}`, o sobra una `}` |
+| `css/missing-semicolon` | 9 | E | Falta `;` entre dues declaracions |
+| `css/missing-colon` | 9 | E | `color red;` |
+| `css/empty-value` | 9 | E | `color: ;` |
+| `css/unclosed-comment` | 9 | E | `/*` sense `*/` |
+| `css/unclosed-string` | 9 | E | Cadena sense la cometa de tancament |
+| `css/unknown-property` | 9 | E | `colr`, `color-de-fons` (suggereix el nom correcte) |
+| `css/invalid-value` | 9 | E | Valor no vàlid; missatges propis per a color en català, coma decimal i número sense unitat |
+| `css/last-semicolon` | 9 | A | L'última declaració sense `;` |
+| `css/one-declaration-per-line` | 9 | A | Dues declaracions a la mateixa línia |
+| `css/indentation` | 9 | A | Declaracions no indentades 2 espais, `}` mal alineada (no als `<style>`) |
+
+Les regles que necessiten el document ja pintat (enllaç a un `#id` que no
+existeix, imatge no trobada, selector que no selecciona res, contrast) i les dels
+capítols 4–14 s'afegiran amb cada capítol (BLUEPRINT apèndix C).
+
 ---
 
 ## 3. Decisions preses
@@ -210,6 +286,9 @@ motiu; si se'n canvia alguna, s'anota aquí amb la data i el motiu.
 | 2026-10-02 | `buildSrcdoc` retorna `{ html, missingFiles }` (el BLUEPRINT deia només el text) | Per poder avisar d'un `<link>` a un fitxer que no existeix |
 | 2026-10-02 | En mode `document`, la CSP i el `<base>` s'injecten just després del doctype (abans: després del `<head>` de l'alumne) | Amb text abans de `<html>` la CSP quedava dins del `<body>`, el navegador la ignorava i les imatges externes es carregaven (comprovat a Chromium) |
 | 2026-10-02 | Sense autocompletat de moment | Ha de ser progressiu (només el que ja s'ha ensenyat) i depèn del vocabulari del curs (fase 4) |
+| 2026-10-02 | Revisor de codi: `html/p-closed-by-block` i `html/unknown-element` des del capítol 1 (el BLUEPRINT deia 2) | Al capítol 1 ja s'ensenyen `<p>` i `<h1>` (un títol dins d'un paràgraf és un error típic) i els noms d'etiqueta mal escrits són habituals des del primer dia |
+| 2026-10-02 | Revisor de codi: regles noves que el BLUEPRINT no tenia (`html/mismatched-end-tag`, `unterminated-tag`, `unterminated-attribute-value`, `unclosed-comment`; `css/missing-colon`, `empty-value`, `unclosed-comment`, `unclosed-string`, `last-semicolon`) | Els analitzadors ja detectaven aquests errors; `css/last-semicolon` (avís) ensenya a posar `;` sempre, que evita l'error `css/missing-semicolon` |
+| 2026-10-02 | Panell ⚠ Problemes: els errors es mostren tots; els avisos repetits s'agrupen | Cada error és diferent i important; els avisos d'estil (sobretot d'indentació) podrien omplir la llista |
 | 2026-10-02 | El repositori definitiu és `step-quiz2/htmlcat2` | Ho ha confirmat el propietari. L'historial de les fases 0–2 (PR #1–#4) és a l'antic repositori; el codi es va copiar aquí amb una pujada pel web, que va perdre `.github/`, `.editorconfig` i `.gitignore` (restaurats amb Git el mateix dia) |
 
 ### Decisions pendents de confirmar amb el propietari
@@ -245,7 +324,7 @@ cd tests && npm ci && node course-browser.mjs   # navegador (Playwright + Chromi
 
 | Test | Què comprova |
 |---|---|
-| `unit/` | Cada mòdul pur de `site/js/` (96 tests): tokenitzador, arbre i errors d'estructura, analitzador de CSS, ressaltat (conserva el codi, escapa, una línia per entrada, rendiment), robustesa amb 500 codis aleatoris, edició (Retorn, Tab, Maj+Tab), `localStorage`, document de previsualització i textos de la interfície |
+| `unit/` | Cada mòdul pur de `site/js/` (152 tests): tokenitzador, arbre i errors d'estructura, analitzador de CSS, ressaltat (conserva el codi, escapa, una línia per entrada, rendiment), robustesa amb 500 codis aleatoris (també el revisor), edició (Retorn, Tab, Maj+Tab), `localStorage`, document de previsualització, textos de la interfície i revisor de codi: per a cada regla, un codi que la dispara i un que no (un test falla si una regla no en té), missatges sense buits, activació per capítol i mode, ordre, agrupació, rendiment, i que el codi d'exemple de l'editor lliure i de la portada no tingui cap problema |
 | `course-static.mjs` | Cada pàgina té `<!DOCTYPE html>`, `lang="ca"`, `charset` i `<title>`; cap `style=""` ni `on…=""`; cap tabulació; tots els enllaços relatius existeixen; sintaxi de cada `.js`; cap menció de CC BY-NC-ND; existeixen `.editorconfig`, `.gitignore` i `.github/workflows/ci.yml` (una pujada pel web no els inclou) |
 | `course-browser.mjs` | Cada pàgina, a 360 i 1280 px: cap error a la consola, cap petició fallida, cap petició a servidors externs, cap desplaçament horitzontal, cap id repetit. Dos exemples no editables a la mateixa pàgina no repeteixen els ids de les pestanyes. A més, prova l'editor lliure de punta a punta: escriure, indentació automàtica, resultat en directe, Ctrl+Z, `sandbox` i CSP correctes (també amb text abans de `<html>`), cap script ni imatge externa, enllaços interceptats, CSS aplicat i codi desat després de recarregar |
 

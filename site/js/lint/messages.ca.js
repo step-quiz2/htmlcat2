@@ -1,0 +1,244 @@
+// ════════════════════════════════════════════════════════
+// lint/messages.ca.js — Què diu el revisor de codi, en català
+// (mòdul pur, separat de la lògica de les regles)
+//
+// Per a cada regla, una funció que rep les dades del problema i retorna
+// { text, hint }: text diu QUÈ passa (i què ha fet el navegador en
+// silenci); hint, COM arreglar-ho. To: proper, en segona persona del
+// singular, sense retrets.
+//
+// API pública:
+//   MESSAGES             { 'html/…': (data) => ({ text, hint }), … }
+//   describe(id, data)   → { text, hint }
+// ════════════════════════════════════════════════════════
+
+const tag = (name) => `<${name}>`;
+const espais = (n) => (n === 1 ? '1 espai' : `${n} espais`);
+
+const INDENT_HINT_HTML = 'La indentació mostra el niuament: cada element que és dins d\'un altre va 2 espais més a la dreta que el seu pare.';
+const INDENT_HINT_CSS = 'Les declaracions van 2 espais més a la dreta que el selector, i la } tanca la regla alineada amb el selector.';
+const TAB_HINT = 'Fes servir espais: la tecla Tab de l\'editor ja n\'escriu 2.';
+
+// subject: «Aquesta línia», «L'etiqueta </ul>» o «La }» (sempre femení)
+function indentationText({ expected, actual, tab }, subject) {
+  if (tab) return `${subject} està indentada amb tabuladors.`;
+  if (expected === 0) return `${subject} no hauria d'estar indentada (té ${espais(actual)}).`;
+  return `${subject} hauria de tenir ${espais(expected)} d'indentació (en té ${actual}).`;
+}
+
+const DEPRECATED_INSTEAD = {
+  center: 'Per centrar, fes servir CSS (text-align: center).',
+  font: 'Per al color i la lletra, fes servir CSS (color, font-family).',
+  big: 'Per a la mida de la lletra, fes servir CSS (font-size).',
+  strike: 'Per a un text ratllat, fes servir <s> o <del>.',
+  tt: 'Per a codi, fes servir <code>.',
+  marquee: 'Els textos que es mouen molesten i no són accessibles: treu-lo.',
+  blink: 'Els textos que parpellegen molesten i no són accessibles: treu-lo.',
+};
+
+const VALUE_HINTS = {
+  'catalan-colour': ({ fix }) => `Els noms dels colors s'escriuen en anglès: ${fix}.`,
+  comma: ({ fix }) => `Els decimals s'escriuen amb punt, no amb coma: ${fix}.`,
+  unit: ({ fix }) => `Els números necessiten una unitat (px, em, rem, %…), per exemple ${fix}. Només el 0 pot anar sense.`,
+  generic: () => 'El navegador ignora tota la declaració. Revisa com s\'escriu el valor.',
+};
+
+export const MESSAGES = {
+  // ── HTML: estructura ──
+  'html/unclosed-element': ({ tag: name }) => ({
+    text: `L'element ${tag(name)} no està tancat.`,
+    hint: `Escriu </${name}> on s'acaba el seu contingut. El navegador l'ha tancat per tu, però potser no on volies.`,
+  }),
+  'html/stray-end-tag': ({ tag: name }) => ({
+    text: `</${name}> no tanca res: no hi ha cap ${tag(name)} obert.`,
+    hint: `Esborra'l, o obre el ${tag(name)} on toca. El navegador ho arregla a la seva manera, i potser no és el que volies.`,
+  }),
+  'html/mismatched-end-tag': ({ open, close }) => ({
+    text: `Obres ${tag(open)} però el tanques amb </${close}>.`,
+    hint: `L'etiqueta de tancament ha de tenir el mateix nom que la d'obertura: </${open}>.`,
+  }),
+  'html/misnested': ({ outer, inner }) => ({
+    text: `${tag(outer)} i ${tag(inner)} estan encavalcats: tanques </${outer}> abans de </${inner}>.`,
+    hint: `Tanca primer l'últim que has obert: ${tag(outer)}${tag(inner)}…</${inner}></${outer}>. El navegador ho ha arreglat afegint elements que tu no has escrit.`,
+  }),
+  'html/void-end-tag': ({ tag: name }) => ({
+    text: `${tag(name)} no es tanca mai: </${name}> sobra.`,
+    hint: `${tag(name)} és un element buit (no té contingut) i no té etiqueta de tancament. Esborra </${name}>.`,
+  }),
+  'html/p-closed-by-block': ({ tag: name }) => ({
+    text: name === 'p'
+      ? 'Un paràgraf no pot anar dins d\'un altre paràgraf.'
+      : `Un ${tag(name)} no pot anar dins d'un paràgraf <p>.`,
+    hint: `En trobar ${tag(name)}, el navegador ha tancat el <p> d'abans. Tanca el paràgraf amb </p> abans d'obrir ${tag(name)}.`,
+  }),
+  'html/duplicate-attribute': ({ tag: name, attr }) => ({
+    text: `L'atribut ${attr} surt dues vegades a ${tag(name)}.`,
+    hint: 'Deixa\'n només un: el navegador fa servir el primer i ignora els altres.',
+  }),
+  'html/unterminated-tag': ({ tag: name }) => ({
+    text: `A l'etiqueta <${name} li falta el > del final.`,
+    hint: 'Sense el >, el navegador llegeix el que ve després com si fos part de l\'etiqueta, i aquest text no es veu.',
+  }),
+  'html/unterminated-attribute-value': ({ attr }) => ({
+    text: `Falta la cometa que tanca el valor de ${attr}.`,
+    hint: `Els valors van entre cometes dobles: ${attr}="…". Sense la cometa de tancament, el navegador s'empassa el codi que ve després.`,
+  }),
+  'html/unclosed-comment': () => ({
+    text: 'El comentari no està tancat: falta -->.',
+    hint: 'Tot el que hi ha després de <!-- és comentari i no es veu, fins que escriguis -->.',
+  }),
+
+  // ── HTML: codi net ──
+  'html/uppercase': ({ kind, name, end }) => ({
+    text: kind === 'attr'
+      ? `Escriu el nom de l'atribut en minúscules: ${name}.`
+      : `Escriu el nom de l'etiqueta en minúscules: ${end ? `</${name}>` : tag(name)}.`,
+    hint: 'Al navegador li és igual, però l\'HTML net s\'escriu sempre en minúscules.',
+  }),
+  'html/unquoted-attribute': ({ attr, value }) => ({
+    text: `Posa el valor de ${attr} entre cometes: ${attr}="${value}".`,
+    hint: 'Sense cometes funciona mentre el valor no tingui espais; amb cometes dobles funciona sempre i el codi és més clar.',
+  }),
+  'html/indentation': (data) => ({
+    text: indentationText(data, data.close ? `L'etiqueta </${data.close}>` : 'Aquesta línia'),
+    hint: data.tab ? TAB_HINT
+      : data.close ? `L'etiqueta de tancament s'alinea amb la d'obertura (${tag(data.close)}, línia ${data.openLine}): així es veu d'un cop d'ull on comença i on acaba.`
+        : INDENT_HINT_HTML,
+  }),
+
+  // ── HTML: document sencer ──
+  'html/doctype': ({ kind }) => ({
+    text: {
+      missing: 'Falta <!DOCTYPE html> a la primera línia.',
+      late: '<!DOCTYPE html> ha d\'anar al principi de tot.',
+      old: 'Aquest doctype és antic: escriu només <!DOCTYPE html>.',
+    }[kind],
+    hint: kind === 'old'
+      ? '<!DOCTYPE html> és el doctype de l\'HTML actual.'
+      : 'Sense aquesta línia al principi, el navegador treballa en «mode antic» i alguns estils es veuen diferent.',
+  }),
+  'html/lang': ({ kind }) => ({
+    text: kind === 'no-html' ? 'Falta l\'element <html lang="ca">.' : 'A <html> li falta l\'atribut lang.',
+    hint: kind === 'no-html'
+      ? 'Tota la pàgina va dins de <html lang="ca">…</html>.'
+      : 'Escriu <html lang="ca">: així el navegador, els cercadors i els lectors de pantalla saben que la pàgina és en català.',
+  }),
+  'html/charset': ({ kind, value }) => ({
+    text: kind === 'value'
+      ? `La codificació ha de ser UTF-8, no «${value}».`
+      : 'Falta <meta charset="UTF-8"> dins del <head>.',
+    hint: 'Amb <meta charset="UTF-8">, les lletres com à, ç o l·l es veuen bé a tots els navegadors.',
+  }),
+  'html/title': ({ kind }) => ({
+    text: kind === 'empty' ? 'El <title> és buit.' : 'Falta el <title> dins del <head>.',
+    hint: 'El títol és el text de la pestanya del navegador i el que surt als cercadors.',
+  }),
+
+  // ── HTML: elements ──
+  'html/unknown-element': ({ tag: name, suggestion }) => ({
+    text: `L'element ${tag(name)} no existeix en HTML.`,
+    hint: suggestion
+      ? `Potser volies escriure ${tag(suggestion)}? El navegador l'accepta igualment, però no sap què vol dir.`
+      : 'Revisa com s\'escriu. El navegador l\'accepta igualment, però no sap què vol dir.',
+  }),
+  'html/deprecated-element': ({ tag: name }) => ({
+    text: `${tag(name)} és un element antic: ja no forma part de l'HTML.`,
+    hint: DEPRECATED_INSTEAD[name] || 'L\'aspecte de la pàgina es controla amb CSS.',
+  }),
+  'html/heading-order': ({ from, to }) => ({
+    text: `Passes de <h${from}> a <h${to}>: et saltes <h${from + 1}>.`,
+    hint: `Els títols fan d'índex de la pàgina: després d'un <h${from}> ve un <h${from + 1}>. Si el vols més petit, la mida es canvia amb CSS.`,
+  }),
+  'html/single-h1': () => ({
+    text: 'Hi ha més d\'un <h1> a la pàgina.',
+    hint: 'El <h1> és el títol principal i només n\'hi ha d\'haver un. Per als apartats, fes servir <h2>.',
+  }),
+  'html/br-spacing': () => ({
+    text: 'Fas servir diversos <br> seguits per separar.',
+    hint: '<br> és per saltar de línia dins d\'un text (una adreça, un poema). Per separar blocs, comença un paràgraf <p> nou.',
+  }),
+  'html/list-structure': ({ kind, tag: name, list }) => ({
+    text: {
+      'li-outside': 'Un <li> ha d\'anar dins d\'una llista <ul> o <ol>.',
+      'not-li': `Dins de ${tag(list)} només hi pot haver elements <li>, i hi ha un ${tag(name)}.`,
+      text: `Dins de ${tag(list)} hi ha text fora de cap <li>.`,
+    }[kind],
+    hint: {
+      'li-outside': 'Posa els <li> dins de <ul>…</ul> (llista amb pics) o d\'<ol>…</ol> (llista numerada).',
+      'not-li': `Posa el ${tag(name)} dins d'un <li>.`,
+      text: 'Cada element de la llista va dins de <li>…</li>.',
+    }[kind],
+  }),
+  'html/inline-style': ({ tag: name }) => ({
+    text: `L'atribut style de ${tag(name)} barreja l'estil amb el contingut.`,
+    hint: 'Posa una classe a l\'element (class="…") i escriu les declaracions en una regla del fitxer CSS.',
+  }),
+
+  // ── CSS: errors ──
+  'css/unbalanced-braces': ({ kind, selector }) => ({
+    text: {
+      'unclosed-block': `Falta la } que tanca la regla ${selector}.`,
+      'unexpected-close-brace': 'Aquesta } no tanca res.',
+      'missing-open-brace': `Falta la { després de ${selector}.`,
+    }[kind],
+    hint: {
+      'unclosed-block': 'Cada { necessita la seva }. Sense ella, el navegador s\'empassa la regla següent.',
+      'unexpected-close-brace': 'Sobra una clau de tancament: esborra-la, o comprova si falta una { abans.',
+      'missing-open-brace': 'Una regla és selector { declaracions }. Sense la {, el navegador ignora tota la regla.',
+    }[kind],
+  }),
+  'css/missing-semicolon': ({ next }) => ({
+    text: `Falta el ; abans de ${next}.`,
+    hint: 'Sense el punt i coma, el navegador llegeix les dues declaracions com si fossin una de sola, i les ignora totes dues.',
+  }),
+  'css/missing-colon': ({ text }) => ({
+    text: `Falten els dos punts (:) a «${text}».`,
+    hint: 'Cada declaració és propietat: valor; per exemple, color: teal;',
+  }),
+  'css/empty-value': ({ property }) => ({
+    text: `${property} no té cap valor.`,
+    hint: 'Escriu el valor després dels dos punts. Sense valor, el navegador ignora la declaració.',
+  }),
+  'css/unclosed-comment': () => ({
+    text: 'El comentari no està tancat: falta */.',
+    hint: 'Tot el que hi ha després de /* és comentari i el navegador no ho aplica, fins que escriguis */.',
+  }),
+  'css/unclosed-string': () => ({
+    text: 'Falta la cometa que tanca aquest text.',
+    hint: 'Un text entre cometes s\'ha de tancar a la mateixa línia, amb la mateixa cometa.',
+  }),
+  'css/unknown-property': ({ property, suggestion }) => ({
+    text: `La propietat ${property} no existeix.`,
+    hint: suggestion
+      ? `Potser volies escriure ${suggestion}? El navegador ignora les propietats que no coneix.`
+      : 'Revisa com s\'escriu: el navegador ignora les propietats que no coneix.',
+  }),
+  'css/invalid-value': (data) => ({
+    text: `«${data.value}» no és un valor vàlid per a ${data.property}.`,
+    hint: VALUE_HINTS[data.kind](data),
+  }),
+
+  // ── CSS: codi net ──
+  'css/last-semicolon': () => ({
+    text: 'Posa ; també després de l\'última declaració.',
+    hint: 'Si després hi afegeixes una línia i no te\'n recordes, les dues declaracions deixaran de funcionar.',
+  }),
+  'css/one-declaration-per-line': () => ({
+    text: 'Hi ha més d\'una declaració en aquesta línia.',
+    hint: 'Escriu cada declaració en una línia: el codi és més fàcil de llegir i de canviar.',
+  }),
+  'css/indentation': (data) => ({
+    text: indentationText(data, data.close ? 'La }' : 'Aquesta línia'),
+    hint: data.tab ? TAB_HINT : INDENT_HINT_CSS,
+  }),
+};
+
+/**
+ * @param {string} id
+ * @param {Object} data
+ * @returns {{ text: string, hint: string }}
+ */
+export function describe(id, data) {
+  const message = MESSAGES[id];
+  return message ? message(data) : { text: id, hint: '' };
+}
