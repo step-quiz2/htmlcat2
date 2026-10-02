@@ -15,12 +15,18 @@
 //
 // Atributs: data-id (obligatori si és editable: clau per desar el codi),
 // data-mode (fragment | document), data-readonly (tot l'exemple),
-// data-forms (permet formularis). Les comprovacions (data-goal-id) i el
-// panell de problemes arribaran a les fases 3 i 4.
+// data-forms (permet formularis). Les comprovacions (data-goal-id)
+// arribaran a la fase 4.
+//
+// Sota l'editor i el resultat, el panell ⚠ Problemes (sim/problems-panel.js)
+// mostra el que troba el revisor de codi (lint/lint.js) quan l'alumne
+// s'atura d'escriure, i les línies amb problemes es marquen a l'editor.
 //
 // API pública:
-//   mountSimulator(el, { fileActions }) → { getFiles() }
+//   mountSimulator(el, { fileActions, chapter }) → { getFiles() }
 //   fileActions: true afegeix els botons Obre / Desa (editor lliure)
+//   chapter: capítol de la pàgina; el revisor només aplica les regles del
+//            que ja s'ha ensenyat. Sense (editor lliure): totes.
 // ════════════════════════════════════════════════════════
 
 import { dedent } from '../util/text.js';
@@ -29,11 +35,17 @@ import { t } from '../i18n/ca.js';
 import { createEditor } from '../editor/editor.js';
 import { buildSrcdoc } from '../preview/srcdoc.js';
 import { createPreview } from '../preview/preview.js';
+import { lintStatic } from '../lint/lint.js';
+import { createProblemsPanel } from './problems-panel.js';
 
 const ASSET_BASE = new URL('../../recursos/', import.meta.url).href;
 const PREVIEW_DELAY = 300;
+const LINT_DELAY = 400;
 const SAVE_DELAY = 500;
 const MESSAGE_TIME = 4000;
+
+// El navegador mateix diu quines propietats i valors CSS són vàlids
+const cssSupports = (property, value) => CSS.supports(property, value);
 
 // Simuladors muntats a la pàgina: dona ids únics a les pestanyes (els
 // exemples no editables no tenen data-id i n'hi pot haver molts)
@@ -79,9 +91,9 @@ const langOf = (name) => (name.endsWith('.css') ? 'css' : 'html');
 
 /**
  * @param {HTMLElement} host element .simulador
- * @param {{ fileActions?: boolean }} [options]
+ * @param {{ fileActions?: boolean, chapter?: number }} [options]
  */
-export function mountSimulator(host, { fileActions = false } = {}) {
+export function mountSimulator(host, { fileActions = false, chapter = Infinity } = {}) {
   const def = readDefinition(host);
   const initialFiles = { ...def.files };
   const storageKey = def.id && !def.readonly ? 'code:' + def.id : null;
@@ -113,10 +125,11 @@ export function mountSimulator(host, { fileActions = false } = {}) {
   result.append(resultHeader, previewBox);
   main.append(code, result);
 
+  const problemsBox = el('div', 'sim-problems-box');
   const message = el('div', 'sim-message');
   message.setAttribute('role', 'status');
   message.setAttribute('aria-live', 'polite');
-  host.append(toolbar, main, message);
+  host.append(toolbar, main, problemsBox, message);
 
   // ── Missatges breus (enllaços, formularis, desar…) ──
   let messageTimer = null;
@@ -147,6 +160,7 @@ export function mountSimulator(host, { fileActions = false } = {}) {
   });
 
   let previewTimer = null;
+  let lintTimer = null;
   function updatePreview() {
     const { html, missingFiles } = buildSrcdoc({ files, mode: def.mode, assetBase: ASSET_BASE });
     preview.render(html);
@@ -196,6 +210,8 @@ export function mountSimulator(host, { fileActions = false } = {}) {
         files[name] = value;
         clearTimeout(previewTimer);
         previewTimer = setTimeout(updatePreview, PREVIEW_DELAY);
+        clearTimeout(lintTimer);
+        lintTimer = setTimeout(updateProblems, LINT_DELAY);
         scheduleSave();
       },
     });
@@ -275,8 +291,30 @@ export function mountSimulator(host, { fileActions = false } = {}) {
     return [input, open, download];
   }
 
+  // ── Panell ⚠ Problemes i marques a l'editor ──
+  const problemsPanel = createProblemsPanel(problemsBox, {
+    onSelect(problem) {
+      selectTab(names.indexOf(problem.file));
+      editors[problem.file].goTo(problem.start);
+    },
+  });
+
+  function updateProblems() {
+    const problems = lintStatic({ files, mode: def.mode, chapter, env: { supports: cssSupports } });
+    problemsPanel.update(problems);
+    for (const name of names) {
+      const lines = new Map();      // línia → 'error' | 'warning' (l'error mana)
+      for (const p of problems) {
+        if (p.file !== name || p.severity === 'info' || lines.get(p.line) === 'error') continue;
+        lines.set(p.line, p.severity);
+      }
+      editors[name].setMarks([...lines].map(([line, kind]) => ({ line, kind })));
+    }
+  }
+
   selectTab(0);
   updatePreview();
+  updateProblems();
 
   return { getFiles: () => ({ ...files }) };
 }

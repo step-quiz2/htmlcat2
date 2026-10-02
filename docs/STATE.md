@@ -26,10 +26,11 @@ aquest document (i el codi).
 
 ## 2. Què hi ha ara
 
-**Fase actual: 2 (editor i previsualització) acabada.** Hi ha l'editor
-lliure a `/editor/` amb previsualització en directe, sobre els analitzadors
-d'HTML i CSS de la fase 1. Encara no hi ha el revisor de codi (fase 3) ni cap
-capítol (fase 4).
+**Fase actual: 3 (revisor de codi i panell ⚠ Problemes) acabada.** Hi ha
+l'editor lliure a `/editor/` amb previsualització en directe i el panell
+⚠ Problemes, que explica en català els errors i els hàbits poc nets del codi,
+sobre els analitzadors d'HTML i CSS de la fase 1. Encara no hi ha cap capítol
+(fase 4).
 
 ```
 README.md              Presentació del projecte (per a persones)
@@ -78,6 +79,7 @@ site/                  ← l'única carpeta que es publica
   js/preview/srcdoc.js       Mòdul pur: document de la previsualització (§2.4)
   js/preview/preview.js      Iframe de previsualització protegit (§2.4)
   js/sim/simulador.js        Component simulador: pestanyes, editors, resultat, desar (§2.4)
+  js/sim/problems-panel.js   Panell ⚠ Problemes del simulador (§2.4)
   js/pages/landing-page.js   Punt d'entrada de la portada (ressalta els exemples)
   js/pages/editor-page.js    Punt d'entrada de l'editor lliure
 
@@ -157,8 +159,20 @@ i CSS ≈ 3,3 ms (anàlisi + ressaltat).
 | `data-readonly` | Al simulador: exemple no editable. A un bloc `data-file`: només aquell fitxer |
 | `data-forms` | Permet enviar formularis (es mostren les dades, no s'envien) |
 
-Encara no implementats (fases 3–4): `data-goal-id`, `data-checks`, `data-height`,
-`data-panel`, panell ⚠ Problemes, pantalla completa i autocompletat.
+Encara no implementats (fase 4 i següents): `data-goal-id`, `data-checks`,
+`data-height`, `data-panel`, pantalla completa i autocompletat.
+
+**Panell ⚠ Problemes** (`sim/problems-panel.js`): sota l'editor i el resultat,
+mostra el que troba el revisor de codi (§2.6) 400 ms després que l'alumne
+deixi d'escriure, i també en muntar el simulador. Com a molt 10 entrades,
+primer els errors; cada entrada diu la gravetat, el fitxer i la línia, el text,
+la pista (💡) i, en petit, l'id de la regla. Clicar-la (o prémer Retorn) obre
+la pestanya del fitxer i porta el cursor a la línia. Les línies amb errors o
+avisos es marquen a l'editor (vermell, ambre). Només la línia d'estat curta
+(«2 errors, 1 avís») és `aria-live`. `mountSimulator(el, { chapter })`: el
+revisor només aplica les regles fins a aquest capítol; sense (editor lliure),
+totes. Colors de gravetat: `--color-error`, `--color-warning`, `--color-info`
+a `tokens.css` (contrast ≥ 5,8:1 en els dos temes).
 
 **Previsualització** (`preview/preview.js` + `preview/srcdoc.js`): dues
 proteccions independents, que el test de navegador comprova per separat:
@@ -326,7 +340,7 @@ cd tests && npm ci && node course-browser.mjs   # navegador (Playwright + Chromi
 |---|---|
 | `unit/` | Cada mòdul pur de `site/js/` (152 tests): tokenitzador, arbre i errors d'estructura, analitzador de CSS, ressaltat (conserva el codi, escapa, una línia per entrada, rendiment), robustesa amb 500 codis aleatoris (també el revisor), edició (Retorn, Tab, Maj+Tab), `localStorage`, document de previsualització, textos de la interfície i revisor de codi: per a cada regla, un codi que la dispara i un que no (un test falla si una regla no en té), missatges sense buits, activació per capítol i mode, ordre, agrupació, rendiment, i que el codi d'exemple de l'editor lliure i de la portada no tingui cap problema |
 | `course-static.mjs` | Cada pàgina té `<!DOCTYPE html>`, `lang="ca"`, `charset` i `<title>`; cap `style=""` ni `on…=""`; cap tabulació; tots els enllaços relatius existeixen; sintaxi de cada `.js`; cap menció de CC BY-NC-ND; existeixen `.editorconfig`, `.gitignore` i `.github/workflows/ci.yml` (una pujada pel web no els inclou) |
-| `course-browser.mjs` | Cada pàgina, a 360 i 1280 px: cap error a la consola, cap petició fallida, cap petició a servidors externs, cap desplaçament horitzontal, cap id repetit. Dos exemples no editables a la mateixa pàgina no repeteixen els ids de les pestanyes. A més, prova l'editor lliure de punta a punta: escriure, indentació automàtica, resultat en directe, Ctrl+Z, `sandbox` i CSP correctes (també amb text abans de `<html>`), cap script ni imatge externa, enllaços interceptats, CSS aplicat i codi desat després de recarregar |
+| `course-browser.mjs` | Cada pàgina, a 360 i 1280 px: cap error a la consola, cap petició fallida, cap petició a servidors externs, cap desplaçament horitzontal, cap id repetit. Dos exemples no editables a la mateixa pàgina no repeteixen els ids de les pestanyes. A més, prova l'editor lliure de punta a punta: escriure, indentació automàtica, resultat en directe, Ctrl+Z, `sandbox` i CSP correctes (també amb text abans de `<html>`), cap script ni imatge externa, enllaços interceptats, CSS aplicat i codi desat després de recarregar. I el panell ⚠ Problemes: «Cap problema» amb el codi inicial, un `<p>` sense tancar surt amb la seva línia i es marca, el clic i el teclat porten el cursor a la línia (i canvien de pestanya), i una propietat CSS mal escrita es detecta amb el `CSS.supports` del navegador |
 
 La GitHub Action `.github/workflows/ci.yml` executa els tres a cada push i a
 cada pull request (pestanya «Actions» de GitHub).
@@ -359,10 +373,10 @@ Fases del BLUEPRINT §9.1:
 - [ ] Respondre les decisions pendents (§3): D3, D4, D6–D12.
 - [x] **Fase 1 — Nucli del llenguatge:** tokenitzador d'HTML, analitzador de CSS, arbre del codi font, ressaltat.
 - [x] **Fase 2 — Editor, previsualització i editor lliure.**
-- [ ] **Fase 3 — Revisor de codi v1 i panell ⚠ Problemes.** Inclou: identificadors de
-      regla per als codis que encara no en tenen (HANDOFF §4). Fet: `css-parser.js` ja no
-      dona un fals «falta `;`» quan el valor és una cadena amb «paraula:»
-      (`content: "Atenció, nota: llegeix";`).
+- [x] **Fase 3 — Revisor de codi v1 i panell ⚠ Problemes** (35 regles fins al capítol 9, §2.6).
+      Queda per a més endavant: les regles que necessiten el document pintat (fase 4 i
+      capítols 4, 5, 10 i 11), les dels capítols 4–14 (amb cada capítol) i les correccions
+      ràpides (fase 6). L'arbre del codi font encara no entén `<circle />` dins d'`<svg>`.
 - [ ] **Fase 4 — Primer capítol complet** (esquelet del curs, progrés, comprovacions, tests).
 - [ ] **Fase 5 — Continguts:** un capítol per PR.
 - [ ] **Fase 6 — Activitats i eines:** Parsons, qüestionaris, 🌳 Arbre, exportar/importar el progrés.

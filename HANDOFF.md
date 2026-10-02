@@ -1,7 +1,6 @@
 # HANDOFF — start here (for a Claude session with no prior context)
 
-Last updated: 2026-10-02, after the project moved to `step-quiz2/htmlcat2` and the files
-lost in that move were restored. Phases 0–2 were built by an earlier Claude session.
+Last updated: 2026-10-02, after phase 3 (linter + "⚠ Problemes" panel).
 Keep it short and current: when you finish a phase, rewrite the "Where we are" and
 "Next task" sections.
 
@@ -32,42 +31,34 @@ copied here by a GitHub web upload, which dropped every dot-file (see §6).
 - Phase 2 ✅ editor (`editor/editor.js`, `editing.js`), sandboxed preview
   (`preview/preview.js`, `srcdoc.js`), simulator component (`sim/simulador.js`),
   free editor at `site/editor/`, asset pack `site/recursos/`.
-- 96 unit tests + static checks + browser checks (incl. an end-to-end editor test), all green.
+- Phase 3 ✅ linter (`site/js/lint/`: 35 rules up to chapter 9, Catalan messages, STATE §2.6)
+  and the "⚠ Problemes" panel (`sim/problems-panel.js`, STATE §2.4).
+- 152 unit tests + static checks + browser checks (end-to-end editor and panel tests), all green.
 - Still pending from phase 0 (owner's job): confirm Cloudflare Pages deploys
   `step-quiz2/htmlcat2` (it was connected to the old repo); confirm `/tests/` and `/docs/`
   return 404 on the deployed site; add custom domain `htmlcat.step-quiz.net`.
 
-## 4. Next task: phase 3 — linter v1 + "⚠ Problemes" panel
+## 4. Next task: phase 4 — course vertical slice (chapter 1 end-to-end)
 
-Follow BLUEPRINT §4.7 and Appendix C. Concretely:
+Follow BLUEPRINT §9.1 (phase 4), §4.8–4.12, §5 and §8. Before writing chapter 1,
+ask the owner to confirm D3 (fragment vs document), D9 (curriculum) and D12
+(class/id naming): STATE §3. Concretely:
 
-1. `site/js/lint/messages.ca.js`: Catalan `{ text, hint }` per rule id (tone: warm,
-   2nd person singular, explain what the browser silently did and how to fix it).
-2. `site/js/lint/rules-html.js`, `rules-css.js`, `lint.js`: map the existing problem
-   codes of `html-model.js` and `css-parser.js` (STATE §2.1–2.2) to rule ids
-   (`html/unclosed-element`, `css/missing-semicolon`, …) and add the source-only rules
-   of Appendix C with `since <= 9` (uppercase, indentation, unquoted attribute,
-   doctype/lang/charset/title in document mode, unknown element, heading order,
-   single h1, br spacing, deprecated element, list structure, inline style,
-   unknown property / invalid value via an injected `supports(prop, value)` —
-   browser: `CSS.supports`; Node tests: a stub). Each rule has `since` (chapter),
-   `severity`, `phase: 'static'`. The free editor enables all rules.
-   Some existing problem codes have no rule id in Appendix C yet: choose one for
-   HTML `mismatched-end-tag`, `unclosed-comment`, `unterminated-tag`,
-   `unterminated-attribute-value` and CSS `missing-colon`, `empty-value`,
-   `unclosed-string`. Also fix (with a test) a false positive of `css-parser.js`
-   `checkMissingSemicolon`: it ignores strings, so `content: "Atenció, nota: llegeix";`
-   reports `missing-semicolon`. `html/indentation` (warning from chapter 1) is the
-   riskiest rule: define it precisely (inline elements, multi-line text, `<pre>`,
-   `<style>`) and test it on real examples before enabling it.
-3. Panel in `sim/simulador.js`: list (max 10, errors first), click → caret to line,
-   gutter marks via the existing `editor.setMarks([{ line, kind }])`, short
-   `aria-live` status line ("2 errors, 1 avís"), debounce ≈ 400 ms.
-4. Unit tests for every rule (positive + negative) and a test that every rule id has
-   a message; extend the browser e2e test (type a broken tag → panel shows it →
-   click → caret on that line). Update `docs/STATE.md` in the same PR.
+1. `site/js/course/data.js` (`CAPITOLS`, `REPTES`) and `course/shell.js`
+   (`initCoursePage()`: topbar, sidebar with ✓, prev/next, footer) reading
+   `body[data-pagina][data-num]` — never `location` (A9).
+2. `course/progress.js` (`progress` key, STATE §2.5) and the checks DSL v1:
+   `checks/schema.js` (pure) + `checks/checks.js`, evaluated in a hidden 800×600
+   check frame; "✓ Comprova" button and "✓ Comprovacions" panel (`data-goal-id`,
+   `data-checks`). The `lint` check type can reuse `lintStatic` (STATE §2.6).
+3. Mount simulators with `mountSimulator(el, { chapter })` (page `data-num`) so the
+   linter only applies what has been taught; lazy mount with `IntersectionObserver`.
+4. `site/curs/capitol-1.html` + `tests/solutions/cap-1-ex/`; static checks of §8.2 and
+   browser checks of §8.3 (solution passes, starter fails, every simulator mounts).
 
-Phase 4 after that: course shell, checks DSL, chapter 1 end-to-end (BLUEPRINT §9.1).
+Linter follow-ups (later): rendered rules (`html/missing-anchor`, `image-not-found`,
+`css/selector-matches-nothing`, `low-contrast`), rules for chapters 4–14 (one chapter
+at a time), quick-fixes (phase 6).
 
 ## 5. How to work (owner's rules — see also CLAUDE.md)
 
