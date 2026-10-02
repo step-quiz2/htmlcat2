@@ -1,0 +1,33 @@
+# Executa tots els tests d'HTMLCat a cada push i a cada pull request
+# (les mateixes ordres de docs/STATE.md §4).
+#
+# Aquest fitxer s'ha de pujar amb Git: una pujada pel web de GitHub no
+# inclou les carpetes que comencen per punt (com .github/).
+name: Comprova HTMLCat
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Tests unitaris
+        run: node --test tests/unit/*.test.mjs
+      - name: Comprovacions estàtiques
+        run: node tests/course-static.mjs
+      - name: Instal·la Playwright
+        run: npm ci
+        working-directory: tests
+      - name: Instal·la Chromium
+        run: npx playwright install --with-deps chromium
+        working-directory: tests
+      - name: Comprovacions amb navegador
+        run: node course-browser.mjs
+        working-directory: tests

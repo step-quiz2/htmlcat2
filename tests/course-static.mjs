@@ -15,7 +15,10 @@
 //      que existeix;
 //   5. cada fitxer .js de site/ té una sintaxi vàlida (node --check);
 //   6. cap fitxer publicat ni de llicència esmenta CC BY-NC-ND
-//      (la llicència és CC BY-NC-SA 4.0 + MIT).
+//      (la llicència és CC BY-NC-SA 4.0 + MIT);
+//   7. existeixen els fitxers ocults del projecte (.editorconfig,
+//      .gitignore, .github/workflows/ci.yml): una pujada pel web de
+//      GitHub no els inclou i es perden sense que ningú se n'adoni.
 //
 // Quan hi hagi capítols (fase 4) s'hi afegiran les comprovacions del curs:
 // dades ↔ fitxers, data-id i data-goal-id únics, blocs de codi, etc.
@@ -116,6 +119,12 @@ for (const file of siteFiles) {
 for (const name of ['README.md', 'LICENSE', 'LLICENCIA.md']) {
   const file = join(ROOT, name);
   if (/nc-nd/i.test(readFileSync(file, 'utf8'))) report(file, 'esmenta CC BY-NC-ND');
+}
+
+// ── Fitxers ocults del projecte ──
+for (const name of ['.editorconfig', '.gitignore', '.github/workflows/ci.yml']) {
+  const file = join(ROOT, name);
+  if (!existsSync(file)) report(file, 'no existeix (puja\'l amb Git: el web de GitHub no puja els fitxers que comencen per punt)');
 }
 
 if (problems.length) {

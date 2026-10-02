@@ -1,6 +1,6 @@
 # HTMLCat — Build Blueprint (cold-start brief for Claude)
 
-> **Audience:** a Claude instance that starts with zero context in the new `step-quiz/htmlcat` repository.
+> **Audience:** a Claude instance that starts with zero context in the new `step-quiz/htmlcat` repository. *(Note 2026-10-02: the canonical repository is now `step-quiz2/htmlcat2`; see `docs/STATE.md` §3.)*
 > **Origin:** written on 2026-10-02 after a full code review of `step-quiz/pycat` (HEAD `4af142f`) and `step-quiz/jscat` (HEAD `9c328c1`), plus browser experiments in Chromium (Appendix A).
 > **Lifetime:** this is a *kickoff* document. `docs/STATE.md` is the single source of truth for *what exists*; this file is the design reference for what is not built yet, and the rationale (*why*) for what is. When a decision here is reversed, record it in `docs/STATE.md` §Decisions and add a one-line note next to the affected section here. Never let this file silently rot (see §3.2, anti-pattern A1).
 
@@ -233,7 +233,7 @@ Identifier language: **JS identifiers, CSS class names of the engine and file na
 - `allow-forms` is added only for simulators with `data-forms` (form chapter). Without it, submission is blocked *before* the `submit` event fires; with it, a parent-registered `submit` listener can `preventDefault()` and show the `FormData` ("Això és el que s'enviaria al servidor"). Verified.
 - **Rendering:** set `iframe.srcdoc = buildSrcdoc(…)` after a 300 ms debounce, only if the string changed. On `load`: restore `scrollX/scrollY` saved before the update, re-install listeners, run rendered lint. If a browser proves unreliable at firing `load` (JSCat observed this when re-assigning an identical `srcdoc`), recreate the element (`jscat/js/domrunner.js` `_spawnIframe` pattern).
 - **Navigation:** install a capturing `click` listener on `contentDocument` from the parent (it fires even though the frame cannot run scripts — verified). For `<a href="#id">`, scroll the target into view inside the preview (or report "no hi ha cap element amb id=…"); for any other URL, `preventDefault()` and show a toast "Aquest enllaç portaria a: …". Nothing ever navigates the preview away.
-- **External requests:** inject `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self'">` as the first element of `<head>` (decision D5). Students use the local asset pack. *Verify* in Playwright that an external `<img>` is blocked and that a parent listener for `securitypolicyviolation` on the preview document fires, so the Problems panel can explain it.
+- **External requests:** inject `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self'">` as the first element of `<head>` (decision D5). *(Note 2026-10-02: in `document` mode it is inserted right after the doctype, not after the student's `<head>`: with text before `<html>`, the browser put it in `<body>` and ignored it — STATE §3.)* Students use the local asset pack. *Verify* in Playwright that an external `<img>` is blocked and that a parent listener for `securitypolicyviolation` on the preview document fires, so the Problems panel can explain it.
 - **Images not found:** after `load`, report every `img` with `complete && naturalWidth === 0` ("No s'ha trobat la imatge `gat.jpg`. Comprova el nom i la carpeta.").
 
 ### 4.5 Virtual files and resource resolution
@@ -619,7 +619,7 @@ Optional extras after 15: CSS Grid; transitions; a bridge chapter to JSCat Part 
 
 ### 8.1 Unit tests (zero dependencies)
 
-`node --test tests/unit/` — tokenizer, CSS parser, source tree diagnostics, every lint rule (positive and negative cases, Catalan messages exist for every rule id), checks schema, `dedent`, `buildSrcdoc` (fragment/document, link inlining, base/CSP injection), storage wrapper (with a fake `localStorage`).
+`node --test tests/unit/*.test.mjs` — tokenizer, CSS parser, source tree diagnostics, every lint rule (positive and negative cases, Catalan messages exist for every rule id), checks schema, `dedent`, `buildSrcdoc` (fragment/document, link inlining, base/CSP injection), storage wrapper (with a fake `localStorage`).
 
 ### 8.2 Static course checks (zero dependencies)
 
@@ -660,7 +660,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node --test tests/unit/
+      - run: node --test tests/unit/*.test.mjs
       - run: node tests/course-static.mjs
       - run: npm ci
         working-directory: tests
@@ -669,6 +669,8 @@ jobs:
       - run: node course-browser.mjs
         working-directory: tests
 ```
+
+> **Note (2026-10-02):** the test commands in §8.1, §8.4 and §9.2 used to pass the directory `tests/unit/` to `node --test`; on Node 22 that fails ("Cannot find module"), so they now use the glob. The real workflow is `.github/workflows/ci.yml`: it was lost once when the project was moved by web upload (A2), and `tests/course-static.mjs` now fails if it is missing.
 
 Notes: commit this file with Git (A2). In a Claude Code cloud container, Chromium is preinstalled (`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`): do **not** run `playwright install` there. The deployed product never depends on Node.
 
@@ -695,7 +697,7 @@ Build the vertical slice (Phase 4) **before** writing many chapters: PyCat's his
 
 - Branch per task (use the branch name the session assigns, if any).
 - Commit messages in Catalan, imperative, descriptive ("Afegeix el tokenitzador d'HTML amb posicions de línia"); never the skip tokens of §1.3.
-- Before pushing: `node --test tests/unit/`, `node tests/course-static.mjs`, `node tests/course-browser.mjs`; re-read your own diff adversarially.
+- Before pushing: `node --test tests/unit/*.test.mjs`, `node tests/course-static.mjs`, `node tests/course-browser.mjs`; re-read your own diff adversarially.
 - Open the PR automatically. Body in Catalan with sections **Què canvia**, **Per què**, **Com comprovar-ho** (copy-paste steps for the owner: open the Cloudflare preview URL or `python3 -m http.server` in `site/`), **Tests** (commands and results), **Documentació** (what was updated in `docs/STATE.md`).
 - Update `docs/STATE.md` in the same PR whenever behaviour, contracts, content or pending work change.
 
