@@ -30,6 +30,22 @@ const TEXTS = {
   'sim.form.empty': 'Aquest formulari no enviaria cap dada (els camps necessiten l\'atribut name).',
   'sim.missing.css': 'El fitxer «{file}» no existeix. Els fitxers d\'aquest exercici són: {files}.',
   'sim.help': 'Tab: indenta · Maj+Tab: desindenta · Esc i després Tab: surt de l\'editor',
+  'sim.problems': '⚠ Problemes',
+  'sim.problems.label': 'Problemes del codi',
+  'sim.problems.none': 'Cap problema ✓',
+  'sim.problems.error': '{n} error',
+  'sim.problems.errors': '{n} errors',
+  'sim.problems.warning': '{n} avís',
+  'sim.problems.warnings': '{n} avisos',
+  'sim.problems.info': '{n} suggeriment',
+  'sim.problems.infos': '{n} suggeriments',
+  'sim.problems.severity.error': 'Error',
+  'sim.problems.severity.warning': 'Avís',
+  'sim.problems.severity.info': 'Suggeriment',
+  'sim.problems.where': '{severity} · {file}, línia {line}',
+  'sim.problems.goto': 'Porta el cursor a la línia {line}',
+  'sim.problems.more': 'i {n} més com aquest',
+  'sim.problems.hidden': 'N\'hi ha més: arregla primer aquests.',
 };
 
 /**

@@ -1,11 +1,14 @@
 // Robustesa: amb codi aleatori (el que pot escriure un alumne a mitges),
-// cap analitzador no pot fallar i el ressaltat ha de conservar el codi.
+// cap analitzador ni el revisor de codi no poden fallar, i el ressaltat ha
+// de conservar el codi.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { tokenizeHtml } from '../../site/js/lang/html-tokenizer.js';
 import { buildSourceTree } from '../../site/js/lang/html-model.js';
 import { parseCss } from '../../site/js/lang/css-parser.js';
 import { highlight } from '../../site/js/editor/highlight.js';
+import { lintStatic } from '../../site/js/lint/lint.js';
+import { supports } from './lint-helpers.mjs';
 
 // Generador pseudoaleatori repetible (mateixos casos a cada execució)
 function rng(seed) {
@@ -36,5 +39,10 @@ test('500 codis aleatoris: res no falla i el codi es conserva', () => {
     parseCss(src);
     assert.equal(plain(highlight(src, 'html')), src, JSON.stringify(src));
     assert.equal(plain(highlight(src, 'css')), src, JSON.stringify(src));
+    for (const mode of ['fragment', 'document']) {
+      for (const problem of lintStatic({ files: { 'index.html': src, 'estils.css': src }, mode, env: { supports } })) {
+        assert.ok(problem.start >= 0 && problem.end <= src.length && problem.text, JSON.stringify(src));
+      }
+    }
   }
 });

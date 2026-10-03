@@ -16,8 +16,11 @@
 //
 // A més, prova de punta a punta l'editor lliure (checkFreeEditor):
 // escriure, indentació, resultat en directe, seguretat (també amb text
-// abans de <html>) i desar. I munta dos exemples no editables a la mateixa
-// pàgina, com als capítols (checkSeveralSimulators): cap id repetit.
+// abans de <html>) i desar. Prova el panell ⚠ Problemes (checkProblemsPanel):
+// detecta un error, el clic (o el teclat) porta el cursor a la línia, i el
+// CSS es valida amb el CSS.supports del navegador. I munta dos exemples no
+// editables a la mateixa pàgina, com als capítols (checkSeveralSimulators):
+// cap id repetit.
 //
 // A la fase 4 s'hi afegiran les comprovacions dels exercicis: la solució
 // de referència supera les comprovacions i el codi inicial no
@@ -109,6 +112,7 @@ for (const file of listPages(SITE)) {
 
 // ── Editor lliure: prova de punta a punta ──
 await checkFreeEditor();
+await checkProblemsPanel();
 await checkSeveralSimulators();
 
 await browser.close();
@@ -263,5 +267,62 @@ async function checkSeveralSimulators() {
   const repeated = await page.evaluate(duplicateIds);
   if (repeated.length) problems.push(`${where}: ids repetits: ${repeated.join(', ')}`);
   if (brokenPanels) problems.push(`${where}: ${brokenPanels} panell(s) apunten a una pestanya d'un altre simulador`);
+  await page.close();
+}
+
+// Panell ⚠ Problemes de l'editor lliure
+async function checkProblemsPanel() {
+  const where = 'panell de problemes';
+  const fail = (msg) => problems.push(`${where}: ${msg}`);
+  const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+  page.on('pageerror', (err) => fail(`excepció: ${err.message}`));
+  await page.goto(origin + '/editor/', { waitUntil: 'networkidle' });
+  await page.evaluate(() => localStorage.clear());
+  await page.reload({ waitUntil: 'networkidle' });
+
+  const status = page.locator('.sim-problems__status');
+  const entries = page.locator('.sim-problem');
+  const editor = page.locator('.sim-code__panel:not([hidden]) textarea');
+  const caretLine = () => editor.evaluate((ta) => ta.value.slice(0, ta.selectionStart).split('\n').length);
+
+  // 1. El codi inicial no té cap problema; la línia d'estat és una regió aria-live
+  if (!(await status.innerText()).includes('Cap problema')) fail('amb el codi inicial no diu «Cap problema»: ' + await status.innerText());
+  if (await status.getAttribute('aria-live') !== 'polite') fail('la línia d\'estat no és aria-live');
+
+  // 2. Un <p> sense tancar a la línia 10: surt al panell i la línia es marca
+  const lines = (await editor.inputValue()).split('\n');
+  lines[9] = '    <p>Sense tancar';
+  await editor.fill(lines.join('\n'));
+  await page.waitForTimeout(700);
+  const first = entries.first();
+  if (!(await first.innerText()).includes('<p> no està tancat')) fail('no surt l\'error del <p>: ' + await first.innerText());
+  if (!(await first.innerText()).includes('línia 10')) fail('l\'error no diu la línia 10');
+  if ((await status.innerText()) !== '1 error') fail('la línia d\'estat diu: ' + await status.innerText());
+  if (!(await page.locator('.sim-editor__mark--error').count())) fail('no es marca la línia amb l\'error');
+
+  // 3. Clic a l'entrada: el cursor va a la línia 10
+  await editor.evaluate((ta) => ta.setSelectionRange(0, 0));
+  await first.locator('button').click();
+  if (await caretLine() !== 10) fail(`el clic ha portat el cursor a la línia ${await caretLine()}, no a la 10`);
+  if (!(await editor.evaluate((ta) => ta === document.activeElement))) fail('després del clic, el focus no és a l\'editor');
+
+  // 4. CSS validat pel navegador: «colr» no existeix (suggeriment: color)
+  await page.locator('.sim-tab', { hasText: 'estils.css' }).click();
+  await page.locator('.sim-code__panel:not([hidden]) textarea').fill('h1 {\n  colr: teal;\n}\n');
+  await page.waitForTimeout(700);
+  const cssEntry = entries.filter({ hasText: 'colr' });
+  if (!(await cssEntry.count())) fail('no surt la propietat «colr»');
+  else if (!(await cssEntry.innerText()).includes('Potser volies escriure color?')) fail('no suggereix «color»');
+
+  // 5. Amb el teclat: des de la pestanya index.html, Retorn a l'entrada del CSS
+  //    canvia de pestanya i porta el cursor a la línia 2
+  await page.locator('.sim-tab', { hasText: 'index.html' }).click();
+  await cssEntry.locator('button').focus();
+  await page.keyboard.press('Enter');
+  const activeTab = await page.locator('.sim-tab[aria-selected="true"]').innerText();
+  if (activeTab !== 'estils.css') fail('l\'entrada del CSS no ha obert la pestanya estils.css');
+  if (await caretLine() !== 2) fail(`el teclat ha portat el cursor a la línia ${await caretLine()}, no a la 2`);
+
+  await page.evaluate(() => localStorage.clear());
   await page.close();
 }

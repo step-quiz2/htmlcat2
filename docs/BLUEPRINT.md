@@ -865,6 +865,8 @@ export function createPreview(frame, { onLoad, onLinkClick, onSubmit }) {
 
 `since` = chapter of §7. Severity: E error, W warning, I info. Phase: S static, R rendered.
 
+> **Note (2026-10-02):** the static rules up to chapter 9 are built; the real catalogue (with new ids and two `since` changes) is in `docs/STATE.md` §2.6, which wins over this table.
+
 | Id | Since | Sev | Phase | Detects |
 |---|---|---|---|---|
 | `html/unclosed-element` | 1 | E | S | Non-void element never closed |

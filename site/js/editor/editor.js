@@ -16,8 +16,9 @@
 // API pública:
 //   createEditor(container, { value, lang, readonly, label, onChange })
 //     → { textarea, getValue(), setValue(text, { undoable }),
-//         setMarks([{ line, kind }]), focus() }
+//         setMarks([{ line, kind }]), goTo(offset), focus() }
 //   kind: 'error' | 'warning'
+//   goTo(offset): posa el cursor a la posició i fa visible la seva línia
 // ════════════════════════════════════════════════════════
 
 import { highlightLines } from './highlight.js';
@@ -181,6 +182,18 @@ export function createEditor(container, { value = '', lang, readonly = false, la
     setMarks(list) {
       markList = list;
       renderMarks();
+    },
+    goTo(offset) {
+      ta.focus({ preventScroll: true });
+      ta.setSelectionRange(offset, offset);
+      const style = getComputedStyle(ta);
+      const lineHeight = parseFloat(style.lineHeight);
+      const top = parseFloat(style.paddingTop) + (ta.value.slice(0, offset).split('\n').length - 1) * lineHeight;
+      if (top < ta.scrollTop || top + lineHeight > ta.scrollTop + ta.clientHeight) {
+        ta.scrollTop = Math.max(0, top - ta.clientHeight / 3);
+      }
+      syncScroll();
+      root.scrollIntoView({ block: 'nearest' });
     },
     focus: () => ta.focus(),
   };
