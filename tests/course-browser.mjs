@@ -362,21 +362,25 @@ async function checkProblemsPanel() {
   if (!(await status.innerText()).includes('Cap problema')) fail('amb el codi inicial no diu «Cap problema»: ' + await status.innerText());
   if (await status.getAttribute('aria-live') !== 'polite') fail('la línia d\'estat no és aria-live');
 
-  // 2. Un <p> sense tancar a la línia 10: surt al panell i la línia es marca
+  // 2. El paràgraf del codi inicial, sense tancar: surt al panell amb la
+  //    seva línia i la línia es marca
   const lines = (await editor.inputValue()).split('\n');
-  lines[9] = '    <p>Sense tancar';
+  const index = lines.findIndex((line) => line.trim().startsWith('<p>'));
+  const pLine = index + 1;
+  lines[index] = lines[index].replace(/<p>.*$/, '<p>Sense tancar');
   await editor.fill(lines.join('\n'));
   await page.waitForTimeout(700);
   const first = entries.first();
+  if (index === -1) fail('el codi inicial no té cap <p>');
   if (!(await first.innerText()).includes('<p> no està tancat')) fail('no surt l\'error del <p>: ' + await first.innerText());
-  if (!(await first.innerText()).includes('línia 10')) fail('l\'error no diu la línia 10');
+  if (!(await first.innerText()).includes(`línia ${pLine}`)) fail(`l'error no diu la línia ${pLine}`);
   if ((await status.innerText()) !== '1 error') fail('la línia d\'estat diu: ' + await status.innerText());
   if (!(await page.locator('.sim-editor__mark--error').count())) fail('no es marca la línia amb l\'error');
 
-  // 3. Clic a l'entrada: el cursor va a la línia 10
+  // 3. Clic a l'entrada: el cursor va a la línia del <p>
   await editor.evaluate((ta) => ta.setSelectionRange(0, 0));
   await first.locator('button').click();
-  if (await caretLine() !== 10) fail(`el clic ha portat el cursor a la línia ${await caretLine()}, no a la 10`);
+  if (await caretLine() !== pLine) fail(`el clic ha portat el cursor a la línia ${await caretLine()}, no a la ${pLine}`);
   if (!(await editor.evaluate((ta) => ta === document.activeElement))) fail('després del clic, el focus no és a l\'editor');
 
   // 4. CSS validat pel navegador: «colr» no existeix (suggeriment: color)

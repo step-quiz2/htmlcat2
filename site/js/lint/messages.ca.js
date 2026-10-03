@@ -280,6 +280,33 @@ export const MESSAGES = {
         : 'Revisa el nom del fitxer, la carpeta i l\'extensió. Al capítol 5 hi ha la llista de les imatges que pots fer servir.',
     }[kind],
   }),
+  // ── HTML: estructura de la pàgina ──
+  'html/single-main': ({ kind, count, parent }) => ({
+    text: {
+      missing: 'Aquesta pàgina no té <main>.',
+      several: `Hi ha ${count} elements <main>: només n'hi pot haver un.`,
+      inside: `<main> no pot anar dins de ${tag(parent)}.`,
+    }[kind],
+    hint: {
+      missing: 'Posa el contingut principal de la pàgina (el que la fa diferent de les altres) dins de <main>…</main>. Els lectors de pantalla hi poden saltar directament.',
+      several: '<main> és el contingut principal i n\'hi ha un per pàgina. Per dividir-lo en parts, fes servir <section> o <article> a dins.',
+      inside: '<main> va directament dins del <body>: és el contingut principal de tota la pàgina, no d\'una part.',
+    }[kind],
+  }),
+  'html/head-in-body': () => ({
+    text: 'El navegador no fa cas d\'aquest <head>: és dins del cos de la pàgina.',
+    hint: '<head> és la informació sobre la pàgina (el títol, la codificació) i n\'hi ha un de sol, abans del <body>. Si volies la capçalera que es veu a dalt de la pàgina, l\'element és <header>.',
+  }),
+  'html/section-heading': ({ tag: name }) => ({
+    text: `${name === 'article' ? 'Aquest' : 'Aquesta'} ${tag(name)} no té cap títol.`,
+    hint: name === 'article'
+      ? 'Un <article> s\'entén tot sol, i per això comença amb el seu títol (<h2>, <h3>…).'
+      : 'Una <section> és una part del contingut amb el seu tema: comença-la amb un títol, com <h2>. Si només vols agrupar coses per donar-los estil, fes servir <div>.',
+  }),
+  'html/semantic-div': ({ attr, name, element }) => ({
+    text: `Aquest <div ${attr}="${name}"> hauria de ser un ${tag(element)}.`,
+    hint: `Fes servir ${tag(element)} en lloc de <div> (si vols, amb ${attr === 'class' ? 'la mateixa classe' : 'el mateix id'}). El navegador, els lectors de pantalla i els cercadors saben què és un ${tag(element)}; d'un <div>, no en saben res.`,
+  }),
   'html/inline-style': ({ tag: name }) => ({
     text: `L'atribut style de ${tag(name)} barreja l'estil amb el contingut.`,
     hint: 'Posa una classe a l\'element (class="…") i escriu les declaracions en una regla del fitxer CSS.',

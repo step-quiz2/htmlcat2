@@ -87,14 +87,15 @@ test('summarize: com a molt 10 entrades, avisos repetits agrupats', () => {
 
 const site = (path) => readFileSync(new URL('../../site/' + path, import.meta.url), 'utf8');
 
-test('el codi inicial de l\'editor lliure no té cap problema', () => {
-  const page = site('editor/index.html');
-  const files = {};
-  for (const [, name, code] of page.matchAll(/<script type="text\/plain" data-file="([^"]+)">([\s\S]*?)<\/script>/g)) {
-    files[name] = dedent(code);
+test('el codi inicial de l\'editor lliure (site/editor i el simulador de l\'arrel) no té cap problema', () => {
+  for (const page of [site('editor/index.html'), readFileSync(new URL('../../index.html', import.meta.url), 'utf8')]) {
+    const files = {};
+    for (const [, name, code] of page.matchAll(/<script type="text\/plain" data-file="([^"]+)">([\s\S]*?)<\/script>/g)) {
+      files[name] = dedent(code);
+    }
+    assert.deepEqual(Object.keys(files), ['index.html', 'estils.css']);
+    assert.deepEqual(lintCase({ files, mode: 'document' }).map((p) => `${p.file}:${p.line} ${p.rule}`), []);
   }
-  assert.deepEqual(Object.keys(files), ['index.html', 'estils.css']);
-  assert.deepEqual(lintCase({ files, mode: 'document' }).map((p) => `${p.file}:${p.line} ${p.rule}`), []);
 });
 
 test('els exemples de la portada no tenen cap problema', () => {

@@ -50,6 +50,11 @@ const CASES = {
   'html/obsolete-attribute': ['<img src="gat.svg" alt="Un gat" border="1">\n', '<img src="gat.svg" alt="Un gat" width="100">\n'],
   'html/img-size': ['<img src="gat.svg" alt="Un gat" width="100px">\n', '<img src="gat.svg" alt="Un gat" width="100" height="100">\n'],
   'html/image-not-found': ['<img src="gos.svg" alt="Un gos">\n', '<img src="animals/gos.svg" alt="Un gos">\n<img src="../recursos/gat.svg" alt="Un gat">\n'],
+  // HTML: estructura de la pàgina
+  'html/single-main': [documentCase(doc('    <main>\n      <h1>A</h1>\n    </main>\n    <main>\n      <p>B</p>\n    </main>\n')), documentCase(doc('    <main>\n      <h1>Hola</h1>\n    </main>\n'))],
+  'html/head-in-body': ['<head>\n  <h1>Botiga</h1>\n</head>\n', documentCase(doc())],
+  'html/section-heading': ['<section>\n  <p>x</p>\n</section>\n', '<section>\n  <h2>A</h2>\n  <p>x</p>\n</section>\n<article>\n  <header>\n    <h2>B</h2>\n  </header>\n</article>\n'],
+  'html/semantic-div': ['<div class="menu">\n  <a href="a.html">A</a>\n</div>\n', '<nav class="menu">\n  <a href="a.html">A</a>\n</nav>\n<div class="caixa">x</div>\n'],
   'html/inline-style': ['<p style="color: red">x</p>\n', '<p class="avis">x</p>\n'],
   // CSS: errors
   'css/unbalanced-braces': [css('h1 {\n  color: red;\n'), css(GOOD_CSS)],
@@ -246,4 +251,32 @@ test('imatges i atributs: detalls de les regles del capítol 5', () => {
   assert.deepEqual(rulesOf(img('scr="gos.svg" alt="Un gos"')), ['html/unknown-attribute']);
   // Abans del capítol 5, cap d'aquestes regles
   assert.deepEqual(rulesOf({ files: { 'index.html': '<img scr="x.png" width="9px">\n' }, chapter: 4 }), []);
+});
+
+test('estructura de la pàgina: detalls de les regles del capítol 6', () => {
+  const main = (body) => documentCase(doc(body));
+  const kinds = (input) => lintCase(input).filter((p) => p.rule === 'html/single-main').map((p) => p.data.kind);
+  // Falta <main>: només en mode document i si el <body> té contingut
+  assert.deepEqual(kinds(main('    <h1>Hola</h1>\n')), ['missing']);
+  assert.deepEqual(kinds('<h1>Hola</h1>\n'), []);
+  assert.deepEqual(kinds(main('')), []);
+  // <main> dins d'un <div> sí; dins d'un <header> o d'un <article>, no
+  assert.deepEqual(kinds(main('    <div>\n      <main>\n        <h1>A</h1>\n      </main>\n    </div>\n')), []);
+  assert.equal(first('<header>\n  <main>\n    <h1>A</h1>\n  </main>\n</header>\n', 'html/single-main').data.parent, 'header');
+  assert.equal(first('<article>\n  <h2>A</h2>\n  <div>\n    <main>x</main>\n  </div>\n</article>\n', 'html/single-main').data.parent, 'article');
+  // <head>: el primer del document, al seu lloc, és correcte; un segon, o un després del <body>, no
+  const heads = (src) => lintCase({ files: { 'index.html': src }, mode: 'document' }).filter((p) => p.rule === 'html/head-in-body').map((p) => p.line);
+  assert.deepEqual(heads(doc()), []);
+  assert.deepEqual(heads(doc('    <head>\n      <h1>A</h1>\n    </head>\n')), [8]);
+  assert.deepEqual(heads('<!DOCTYPE html>\n<html lang="ca">\n  <body>\n    <head>\n    </head>\n  </body>\n</html>\n'), [4]);
+  // El títol d'una part de dins no compta per a la de fora
+  const untitled = (src) => lintCase(src).filter((p) => p.rule === 'html/section-heading').map((p) => p.data.tag);
+  assert.deepEqual(untitled('<article>\n  <section>\n    <h2>A</h2>\n  </section>\n</article>\n'), ['article']);
+  assert.deepEqual(untitled('<section>\n  <hgroup>\n    <h2>A</h2>\n    <p>b</p>\n  </hgroup>\n</section>\n'), []);
+  // <div> amb noms de parts: classe (entre altres) o id, també amb accents
+  assert.deepEqual(first('<div class="caixa capçalera">x</div>\n', 'html/semantic-div').data, { attr: 'class', name: 'capçalera', element: 'header' });
+  assert.equal(first('<div id="Peu">x</div>\n', 'html/semantic-div').data.element, 'footer');
+  assert.ok(!rulesOf('<div class="contingut">x</div>\n<div class="constructor">x</div>\n').includes('html/semantic-div'));
+  // Abans del capítol 6, cap d'aquestes regles
+  assert.deepEqual(rulesOf({ files: { 'index.html': '<head></head>\n<section>x</section>\n<div class="menu">x</div>\n<main>a</main>\n<main>b</main>\n' }, chapter: 5 }), []);
 });
