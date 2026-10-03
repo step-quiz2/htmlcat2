@@ -13,7 +13,14 @@
 //   3. fa una petició a un servidor extern (privacitat dels alumnes);
 //   4. no munta tots els simuladors en arribar-hi (es munten en acostar-s'hi);
 //   5. té desplaçament horitzontal (no cap a l'amplada de la pantalla);
-//   6. té ids repetits.
+//   6. té ids repetits;
+//   7. té algun simulador on les imatges que el navegador no pot mostrar
+//      no coincideixen amb les que el panell ⚠ Problemes diu que no es
+//      troben (html/image-not-found es fa sobre el codi font: aquí es
+//      compara amb el que fa el navegador de debò).
+// Les previsualitzacions dels «errors típics» mostren expressament imatges
+// que no es troben (404 a recursos/) o d'Internet (la CSP les bloqueja):
+// aquestes peticions no compten als punts 1–3, i el punt 7 les verifica.
 //
 // Per a cada exercici (data-goal-id) dels capítols, en un mòbil
 // (checkExercise, docs/BLUEPRINT.md §8.3): el codi inicial NO el supera; la
@@ -94,17 +101,25 @@ for (const file of listPages(SITE)) {
   for (const viewport of VIEWPORTS) {
     const page = await browser.newPage({ viewport });
     const where = `${relative(SITE, file)} (${viewport.name})`;
+    const isExternal = (address) => !address.startsWith(origin) && !address.startsWith('data:');
     page.on('console', (msg) => {
-      if (msg.type() === 'error') problems.push(`${where}: error a la consola: ${msg.text()}`);
+      if (msg.type() !== 'error' || isPreviewImageMessage(msg)) return;
+      problems.push(`${where}: error a la consola: ${msg.text()}`);
     });
     page.on('pageerror', (err) => problems.push(`${where}: excepció: ${err.message}`));
-    page.on('requestfailed', (req) => problems.push(`${where}: ha fallat ${req.url()}`));
+    page.on('requestfailed', (req) => {
+      if (isPreviewImage(req) && req.failure()?.errorText === 'csp') return;   // bloquejada abans de sortir
+      problems.push(`${where}: ha fallat ${req.url()}`);
+    });
     page.on('request', (req) => {
-      if (!req.url().startsWith(origin) && !req.url().startsWith('data:')) {
-        problems.push(`${where}: petició externa a ${req.url()}`);
-      }
+      if (isExternal(req.url()) && !isPreviewImage(req)) problems.push(`${where}: petició externa a ${req.url()}`);
+    });
+    // Una imatge externa de la previsualització que no hagi bloquejat la CSP
+    page.on('requestfinished', (req) => {
+      if (isExternal(req.url()) && isPreviewImage(req)) problems.push(`${where}: petició externa a ${req.url()}`);
     });
     page.on('response', (res) => {
+      if (res.status() === 404 && isPreviewImage(res.request()) && res.url().startsWith(`${origin}/recursos/`)) return;
       if (res.status() >= 400 && res.url() !== url) problems.push(`${where}: ${res.status()} a ${res.url()}`);
     });
 
@@ -120,9 +135,49 @@ for (const file of listPages(SITE)) {
     if (overflow > 0) problems.push(`${where}: desplaçament horitzontal de ${overflow} px`);
     const repeated = await page.evaluate(duplicateIds);
     if (repeated.length) problems.push(`${where}: ids repetits: ${repeated.join(', ')}`);
+    for (const mismatch of await brokenImagesMismatches(page)) problems.push(`${where}: ${mismatch}`);
     await page.close();
     visits++;
   }
+}
+
+// ── Imatges de les previsualitzacions ──
+
+/** Petició d'una imatge des d'una previsualització (iframe srcdoc amb el codi de l'alumne). */
+function isPreviewImage(req) {
+  return req.resourceType() === 'image' && req.frame()?.url() === 'about:srcdoc';
+}
+
+// Els missatges que el navegador escriu a la consola per aquestes imatges:
+// una imatge de recursos/ que no existeix (404) o una d'Internet (CSP)
+function isPreviewImageMessage(msg) {
+  const text = msg.text();
+  if (text.startsWith('Failed to load resource') && (msg.location().url || '').startsWith(`${origin}/recursos/`)) return true;
+  return /^Refused to load the image '[^']*' because it violates the following Content Security Policy directive: "img-src /.test(text);
+}
+
+/**
+ * A cada simulador, les imatges (amb src) que el navegador no ha pogut
+ * mostrar han de ser tantes com les entrades html/image-not-found del
+ * panell ⚠ Problemes. I només n'hi pot haver als exemples no editables
+ * (els «errors típics») i als exercicis (el codi de «Troba l'error»): un
+ * exemple editable ha de funcionar. Retorna els problemes, en català.
+ */
+async function brokenImagesMismatches(page) {
+  await page.waitForFunction(() => [...document.querySelectorAll('.sim-preview__frame')]
+    .every((frame) => frame.contentDocument?.URL === 'about:srcdoc' && frame.contentDocument.readyState === 'complete'),
+  null, { timeout: 5000 }).catch(() => {});
+  return page.evaluate(() => [...document.querySelectorAll('.sim')].flatMap((host, i) => {
+    const doc = host.querySelector('.sim-preview__frame')?.contentDocument;
+    const broken = doc ? [...doc.images].filter((img) =>
+      (img.getAttribute('src') || '').trim() && img.complete && img.naturalWidth === 0).length : 0;
+    const reported = [...host.querySelectorAll('.sim-problem__rule')]
+      .filter((code) => code.textContent === 'html/image-not-found').length;
+    const found = [];
+    if (broken !== reported) found.push(`simulador ${i + 1}: ${broken} imatge(s) no es veuen i el panell ⚠ Problemes en diu ${reported}`);
+    if (broken && host.dataset.id && !host.dataset.goalId) found.push(`simulador ${i + 1} (${host.dataset.id}): l'exemple té ${broken} imatge(s) que no es veuen`);
+    return found;
+  }));
 }
 
 // ── Editor lliure: prova de punta a punta ──

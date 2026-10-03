@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capítol 5 — Imatges | HTMLCat</title>
+  <link rel="icon" href="../img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/course.css">
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link rel="stylesheet" href="../css/simulador.css">
+  <script type="module" src="../js/pages/course-page.js"></script>
+</head>
+<body data-pagina="capitol" data-num="5">
+
+<main class="curs-content">
+  <header class="chapter-header">
+    <h1>Imatges</h1>
+    <p class="chapter-lead">En acabar aquest capítol sabràs posar imatges a les teves pàgines, triar-ne la mida i, sobretot, descriure-les perquè tothom sàpiga què hi ha.</p>
+  </header>
+
+  <section class="chapter-section">
+    <h2>La teva primera imatge</h2>
+    <p>Una imatge s'escriu així:</p>
+    <div class="simulador" data-id="c05-primera-imatge">
+      <script type="text/plain" data-file="index.html">
+        <h1>El meu gat</h1>
+        <img src="gat.svg" alt="Un gat taronja que somriu">
+        <p>Es diu Mixa i té tres anys.</p>
+      </script>
+    </div>
+    <ul>
+      <li><code>&lt;img&gt;</code> (de l'anglès <em>image</em>) és un element <strong>buit</strong>, com <code>&lt;br&gt;</code>: no té contingut ni etiqueta de tancament. Tot el que cal saber de la imatge va als atributs.</li>
+      <li><code>src</code> (de <em>source</em>, «origen») diu quin és el <strong>fitxer</strong> de la imatge.</li>
+      <li><code>alt</code> (d'<em>alternative</em>) és el <strong>text alternatiu</strong>: explica amb paraules què es veu a la imatge.</li>
+    </ul>
+    <p class="nota">
+      A HTMLCat, les imatges són d'un paquet d'imatges del curs (més avall les veuràs totes). El resultat no carrega res
+      d'Internet: així ningú no pot saber què fas mentre aprens.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>El text alternatiu</h2>
+    <p>
+      Hi ha persones que no poden veure les imatges: les persones cegues fan servir un <em>lector de pantalla</em>, un programa
+      que llegeix la pàgina en veu alta, i quan troba una imatge en llegeix l'<code>alt</code>. I, a vegades, la imatge
+      no es carrega (una connexió lenta, un nom mal escrit): llavors el navegador mostra l'<code>alt</code> en el seu lloc.
+    </p>
+    <div class="simulador" data-id="c05-text-alternatiu">
+      <script type="text/plain" data-file="index.html">
+        <p>Aquesta és la Blaveta:</p>
+        <img src="animals/ocell.svg" alt="Un ocell blau sobre una branca">
+      </script>
+    </div>
+    <p>
+      Prova-ho: esborra una lletra d'<code>ocell.svg</code>. La imatge ja no es troba i el navegador mostra el text
+      alternatiu (el panell ⚠ Problemes també t'avisa que no troba la imatge).
+    </p>
+    <p>Un bon <code>alt</code>:</p>
+    <ul>
+      <li>Diu <strong>què es veu</strong>, en una frase curta, com si ho expliquessis per telèfon: «Un ocell blau sobre una branca».</li>
+      <li>No diu «imatge» ni «foto», ni és el nom del fitxer: el lector de pantalla ja avisa que és una imatge, i «ocell.svg» no explica res.</li>
+    </ul>
+    <p>
+      Si una imatge només decora i no aporta res (com un dibuix al costat d'un títol que ja diu el mateix), posa-hi
+      <code>alt=""</code>: buit, però escrit. Així el lector de pantalla se la salta.
+    </p>
+    <pre class="code-example" data-lang="html" tabindex="0">&lt;h2&gt;&lt;img src="animals/peix.svg" alt="" width="40" height="40"&gt; Els peixos&lt;/h2&gt;</pre>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Imatges dins de carpetes</h2>
+    <p>Les imatges del curs són en aquestes carpetes:</p>
+    <pre class="code-example" tabindex="0">recursos/
+├── gat.svg
+├── animals/
+│   ├── gos.svg
+│   ├── ocell.svg
+│   └── peix.svg
+└── paisatges/
+    └── muntanya.svg</pre>
+    <p>
+      Als simuladors, la teva pàgina és com si fos a la carpeta <code>recursos</code>, al costat de les imatges. El
+      <code>src</code> és un camí relatiu, com els enllaços del capítol 4: <code>gat.svg</code> és a la mateixa carpeta, i
+      <code>animals/gos.svg</code> és el fitxer <code>gos.svg</code> de dins de la carpeta <code>animals</code>.
+    </p>
+    <p>Aquestes són totes, amb el seu <code>src</code> i la seva mida en píxels (amplada × alçada):</p>
+    <div class="galeria">
+      <figure>
+        <img src="../recursos/gat.svg" alt="Un gat taronja" width="120" height="120">
+        <figcaption><code>gat.svg</code> 200 × 200</figcaption>
+      </figure>
+      <figure>
+        <img src="../recursos/animals/gos.svg" alt="Un gos marró que treu la llengua" width="120" height="120">
+        <figcaption><code>animals/gos.svg</code> 200 × 200</figcaption>
+      </figure>
+      <figure>
+        <img src="../recursos/animals/ocell.svg" alt="Un ocell blau sobre una branca" width="120" height="120">
+        <figcaption><code>animals/ocell.svg</code> 200 × 200</figcaption>
+      </figure>
+      <figure>
+        <img src="../recursos/animals/peix.svg" alt="Un peix vermell" width="120" height="120">
+        <figcaption><code>animals/peix.svg</code> 200 × 200</figcaption>
+      </figure>
+      <figure>
+        <img src="../recursos/paisatges/muntanya.svg" alt="Unes muntanyes nevades sota el sol" width="180" height="120">
+        <figcaption><code>paisatges/muntanya.svg</code> 300 × 200</figcaption>
+      </figure>
+    </div>
+    <p>El nom ha de ser <strong>exactament</strong> el del fitxer, lletra per lletra:</p>
+    <ul>
+      <li>Les majúscules compten: <code>Gos.svg</code> i <code>gos.svg</code> són dos fitxers diferents.</li>
+      <li>L'extensió, el final del nom, també hi va: <code>.svg</code>, <code>.png</code>, <code>.jpg</code>…</li>
+      <li>Per això, quan posis nom als teus fitxers, fes-ho en minúscules, sense espais ni accents, i amb guions: <code>gos-petit.png</code>.</li>
+    </ul>
+    <p class="nota">
+      Les fotos solen ser <code>.jpg</code> o <code>.webp</code>; els dibuixos, <code>.png</code> o <code>.svg</code>. Un
+      <code>.svg</code> es pot fer tan gran com vulguis sense que es vegin els píxels.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>La mida: width i height</h2>
+    <p>
+      Cada imatge té la seva mida, però la pots canviar amb <code>width</code> (amplada) i <code>height</code> (alçada),
+      en píxels:
+    </p>
+    <div class="simulador" data-id="c05-mida">
+      <script type="text/plain" data-file="index.html">
+        <img src="paisatges/muntanya.svg" alt="Unes muntanyes nevades sota el sol" width="180" height="120">
+        <img src="animals/ocell.svg" alt="Un ocell blau sobre una branca" width="80" height="80">
+      </script>
+    </div>
+    <ul>
+      <li>Només el número, sense unitat: <code>width="80"</code>, no <code>width="80px"</code>.</li>
+      <li>
+        Posa-hi les dues mides: així el navegador sap quant d'espai ocuparà la imatge abans de carregar-la, i la pàgina
+        no fa salts mentre es carrega.
+      </li>
+      <li>
+        Mantén la proporció de la imatge: la muntanya fa 300 × 200, i 180 × 120 és el mateix rectangle més petit. Si no,
+        una foto es deforma (aquests dibuixos no, però queden encongits al mig d'un espai buit).
+      </li>
+    </ul>
+    <p>Fixa't que les dues imatges queden una al costat de l'altra: una imatge va dins de la línia, com una paraula molt grossa.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Una imatge amb peu: figure i figcaption</h2>
+    <p>Com als llibres, una imatge pot tenir un peu que l'expliqui:</p>
+    <div class="simulador" data-id="c05-figura">
+      <script type="text/plain" data-file="index.html">
+        <figure>
+          <img src="animals/ocell.svg" alt="Un ocell blau sobre una branca" width="150" height="150">
+          <figcaption>La Blaveta, la mascota de l'escola.</figcaption>
+        </figure>
+      </script>
+    </div>
+    <ul>
+      <li><code>&lt;figure&gt;</code> agrupa la imatge i el seu peu: és un bloc que s'entén tot sol.</li>
+      <li><code>&lt;figcaption&gt;</code> és el peu, i va just després de la imatge (o just abans, si el vols a dalt).</li>
+      <li>L'<code>alt</code> i el peu no diuen el mateix: l'<code>alt</code> descriu el que es veu, per a qui no ho pot veure; el peu és per a tothom i hi afegeix el que la imatge no diu (qui és, on és, quan…).</li>
+    </ul>
+    <p>El navegador deixa un marge a l'esquerra i a la dreta de la figura; amb CSS (a la part B del curs) el podràs canviar.</p>
+    <aside class="codi-net">
+      <p class="codi-net__titol">🧹 Codi net: descriu les imatges per a tothom</p>
+      <ul>
+        <li>Cada imatge té el seu <code>alt</code>. Si la imatge informa, diu què es veu en una frase; si només decora, <code>alt=""</code>.</li>
+        <li>Res de «imatge», «foto» ni el nom del fitxer a l'<code>alt</code>.</li>
+        <li><code>width</code> i <code>height</code>, en píxels i sense unitat, amb la proporció de la imatge.</li>
+        <li>Noms de fitxer en minúscules, sense espais ni accents, amb guions.</li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Errors típics</h2>
+    <p>Aquests exemples tenen errors. Mira el resultat i després llegeix el panell ⚠ Problemes.</p>
+
+    <h3>Una imatge que no es troba</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <img src="ocell.svg" alt="Un ocell blau sobre una branca">
+        <img src="animals/Gos.svg" alt="Un gos marró que treu la llengua">
+      </script>
+    </div>
+    <p>
+      No es veu cap de les dues imatges, només el seu <code>alt</code>. A la primera li falta la carpeta
+      (<code>animals/ocell.svg</code>) i a la segona li sobra una majúscula (<code>animals/gos.svg</code>).
+    </p>
+
+    <h3>Una imatge sense alt</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <img src="gat.svg">
+      </script>
+    </div>
+    <p>Es veu bé, però qui no la pot veure no sabrà què hi ha, i si no es carregués només en quedaria la icona d'una imatge trencada. Cada imatge necessita el seu <code>alt</code>.</p>
+
+    <h3>Un atribut mal escrit</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <img scr="paisatges/muntanya.svg" alt="Unes muntanyes nevades sota el sol">
+      </script>
+    </div>
+    <p>
+      <code>scr</code> en lloc de <code>src</code>: el navegador no coneix l'atribut <code>scr</code>, no en fa cas i no
+      sap quina imatge ha de mostrar. Per sort, l'<code>alt</code> hi és.
+    </p>
+
+    <h3>Una imatge d'Internet</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <img src="https://example.com/fotos/gat.jpg" alt="Un gat dormint al sofà">
+      </script>
+    </div>
+    <p>
+      A HTMLCat no es veu: el resultat no carrega res d'Internet. En un web de debò sí que es veuria, però compte: les
+      imatges d'altres webs tenen autor i no sempre es poden fer servir, i si l'altra web la canvia o l'esborra, la teva
+      pàgina es queda sense. El millor és posar les imatges al teu web, al costat de les pàgines.
+    </p>
+
+    <h3>Una mida amb px</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <img src="animals/peix.svg" alt="Un peix vermell" width="100px" height="100px">
+      </script>
+    </div>
+    <p>Es veu bé, perquè el navegador llegeix el 100 i no fa cas del <code>px</code>. Però no és HTML correcte: escriu només el número, <code>width="100"</code>.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Exercici: l'àlbum d'animals</h2>
+    <p>Completa l'àlbum. Ha de tenir:</p>
+    <ul>
+      <li>almenys dues figures <code>&lt;figure&gt;</code>, cadascuna amb una imatge de la carpeta <code>animals</code> i amb el seu peu <code>&lt;figcaption&gt;</code>;</li>
+      <li>almenys un animal que no sigui el gos;</li>
+      <li>a cada imatge, un <code>alt</code> que digui què es veu, i <code>width</code> i <code>height</code>;</li>
+      <li>cap error ni cap avís al panell ⚠ Problemes.</li>
+    </ul>
+    <p>Quan acabis, prem <strong>✓ Comprova</strong>.</p>
+    <div class="simulador" data-id="c05-exercici" data-goal-id="cap-5-ex" data-height="560">
+      <script type="text/plain" data-file="index.html">
+        <h1>El meu àlbum d'animals</h1>
+        <figure>
+          <img src="animals/gos.svg" alt="Un gos marró que treu la llengua" width="150" height="150">
+          <figcaption>En Rufus, el gos de la meva àvia.</figcaption>
+        </figure>
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "count", "selector": "figure", "min": 2,
+            "msg": "Hi ha almenys dues figures <figure>." },
+          { "type": "count", "selector": "figure img[src^='animals/']", "min": 2,
+            "msg": "Almenys dues figures tenen una imatge de la carpeta animals." },
+          { "type": "exists", "selector": "figure img[src^='animals/']:not([src='animals/gos.svg'])",
+            "msg": "Almenys un animal no és el gos." },
+          { "type": "count", "selector": "figure > figcaption", "min": 2,
+            "msg": "Cada figura té el seu peu <figcaption>." },
+          { "type": "text", "selector": "figcaption", "matches": "\\S", "all": true,
+            "msg": "Cap peu no és buit." },
+          { "type": "attr", "selector": "img", "name": "alt", "nonEmpty": true, "all": true,
+            "msg": "Totes les imatges tenen un alt que diu què es veu." },
+          { "type": "attr", "selector": "img", "name": "width", "matches": "^\\d+$", "all": true,
+            "msg": "Totes les imatges tenen width, en píxels i sense unitat." },
+          { "type": "attr", "selector": "img", "name": "height", "matches": "^\\d+$", "all": true,
+            "msg": "Totes les imatges tenen height, en píxels i sense unitat." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error (com una imatge que no es troba)." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís (com un alt que no descriu la imatge)." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Troba l'error</h2>
+    <p>
+      La pàgina dels animals de l'escola té cinc problemes: dues imatges que no es troben, un atribut mal escrit, una
+      imatge sense <code>alt</code> i una mida amb unitat. El panell ⚠ Problemes t'ajudarà a trobar-los. L'<code>alt</code>
+      que falta l'has d'escriure tu: mira què es veu a la imatge. Quan acabis, prem <strong>✓ Comprova</strong>.
+    </p>
+    <div class="simulador" data-id="c05-troba-error" data-goal-id="cap-5-bug" data-height="560">
+      <script type="text/plain" data-file="index.html">
+        <h1>Els animals de l'escola</h1>
+        <figure>
+          <img src="animals/Peix.svg" alt="Un peix vermell" width="120" height="120">
+          <figcaption>En Nemo viu a l'aquari de la biblioteca.</figcaption>
+        </figure>
+        <figure>
+          <img scr="animals/ocell.svg" alt="Un ocell blau sobre una branca" width="120" height="120">
+          <figcaption>La Blaveta canta cada matí al pati.</figcaption>
+        </figure>
+        <figure>
+          <img src="gos.svg" width="120px" height="120">
+          <figcaption>En Rufus ve els divendres amb la seva mestressa.</figcaption>
+        </figure>
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "exists", "selector": "img[src='animals/peix.svg']",
+            "msg": "La imatge del peix es troba (animals/peix.svg, en minúscules)." },
+          { "type": "exists", "selector": "img[src='animals/ocell.svg']",
+            "msg": "La imatge de l'ocell té l'atribut src ben escrit." },
+          { "type": "exists", "selector": "img[src='animals/gos.svg']",
+            "msg": "La imatge del gos es troba (és dins de la carpeta animals)." },
+          { "type": "count", "selector": "figure > img + figcaption", "eq": 3,
+            "msg": "Continuen sent tres figures, amb la imatge i el peu." },
+          { "type": "attr", "selector": "img", "name": "alt", "nonEmpty": true, "all": true,
+            "msg": "Totes les imatges tenen un alt que diu què es veu." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Resum</h2>
+    <div class="resum">
+      <ul>
+        <li>Una imatge és <code>&lt;img src="fitxer" alt="què es veu" width="…" height="…"&gt;</code>, un element buit.</li>
+        <li>L'<code>alt</code> descriu la imatge per a qui no la pot veure i es mostra si no es carrega; si la imatge només decora, <code>alt=""</code>.</li>
+        <li>El <code>src</code> és un camí relatiu, amb les carpetes (<code>animals/gos.svg</code>) i el nom exacte: majúscules i extensió incloses.</li>
+        <li><code>width</code> i <code>height</code> són en píxels, sense unitat, i mantenen la proporció de la imatge.</li>
+        <li><code>&lt;figure&gt;</code> agrupa una imatge amb el seu peu, <code>&lt;figcaption&gt;</code>.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>

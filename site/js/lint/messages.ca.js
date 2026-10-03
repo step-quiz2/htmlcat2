@@ -57,7 +57,7 @@ const OBSOLETE_ATTRIBUTE_INSTEAD = {
 };
 
 const IMAGE_REASONS = {
-  case: () => 'Als noms dels fitxers, les majúscules compten: «Gos.svg» i «gos.svg» són fitxers diferents.',
+  case: ({ src, suggestion }) => `Als noms dels fitxers, les majúscules compten: «${src}» i «${suggestion}» són fitxers diferents.`,
   extension: () => 'Fixa\'t en l\'extensió, el final del nom (.svg, .png, .jpg): ha de ser la del fitxer.',
   folder: ({ suggestion }) => (suggestion.includes('/')
     ? `La imatge és dins de la carpeta ${suggestion.slice(0, suggestion.lastIndexOf('/'))}: el nom de la carpeta va davant del del fitxer, amb una barra /.`
@@ -276,7 +276,7 @@ export const MESSAGES = {
       external: 'Per protegir la teva privacitat, el resultat no carrega res d\'Internet (en un web de debò, sí que es veuria). Fes servir una de les imatges del curs, com src="animals/gos.svg".',
       computer: 'Una pàgina web no pot agafar fitxers de l\'ordinador de qui la visita: les imatges han d\'estar al web, al costat de la pàgina. A HTMLCat, fes servir les imatges del curs, com src="animals/gos.svg".',
       missing: suggestion
-        ? `Potser volies dir «${suggestion}»? ${IMAGE_REASONS[reason]({ suggestion })}`
+        ? `Potser volies dir «${suggestion}»? ${IMAGE_REASONS[reason]({ src, suggestion })}`
         : 'Revisa el nom del fitxer, la carpeta i l\'extensió. Al capítol 5 hi ha la llista de les imatges que pots fer servir.',
     }[kind],
   }),
