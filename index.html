@@ -1,0 +1,70 @@
+cat > index.html <<'EOF'
+<!DOCTYPE html>
+<html lang="ca">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HTMLCat — Simulador d'HTML i CSS</title>
+    <meta name="description" content="Escriu HTML i CSS i mira'n el resultat al moment, en català.">
+    <link rel="icon" href="site/img/logo.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="site/css/tokens.css">
+    <link rel="stylesheet" href="site/css/base.css">
+    <link rel="stylesheet" href="site/css/highlight.css">
+    <link rel="stylesheet" href="site/css/simulador.css">
+    <script type="module" src="site/js/pages/editor-page.js"></script>
+  </head>
+  <body>
+    <div class="pantalla">
+      <header class="barra">
+        <a class="logo logo--petit" href="index.html">
+          <img src="site/img/logo.svg" alt="">
+          HTMLCat
+        </a>
+        <nav aria-label="Seccions">
+          <a href="site/curs/capitol-1.html">Capítols</a>
+          ·
+          <a href="index.html" aria-current="page">Simulador</a>
+        </nav>
+      </header>
+
+      <main class="pantalla__contingut">
+        <h1 class="visually-hidden">Simulador d'HTML i CSS</h1>
+        <div class="simulador sim--pantalla" data-id="editor" data-mode="document">
+          <script type="text/plain" data-file="index.html">
+            <!DOCTYPE html>
+            <html lang="ca">
+              <head>
+                <meta charset="UTF-8">
+                <title>La meva pàgina</title>
+                <link rel="stylesheet" href="estils.css">
+              </head>
+              <body>
+                <h1>Hola, món!</h1>
+                <p>Canvia aquest text i mira el resultat.</p>
+                <img src="gat.svg" alt="Un gat taronja" width="120">
+              </body>
+            </html>
+          </script>
+          <script type="text/plain" data-file="estils.css">
+            h1 {
+              color: teal;
+            }
+
+            p {
+              font-size: 1.25rem;
+            }
+          </script>
+        </div>
+      </main>
+
+      <footer class="peu peu--compacte">
+        <p>
+          © 2026 David Arso Civil · INS Miquel Tarradell ·
+          <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ca">CC BY-NC-SA 4.0</a> ·
+          <a href="site/LICENSE.txt">MIT</a>
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>
+EOF
