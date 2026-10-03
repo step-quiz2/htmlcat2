@@ -4,8 +4,6 @@
 //
 // Font: HTML Living Standard (WHATWG). Només el que necessiten
 // el tokenitzador, l'arbre del codi font i el revisor de codi.
-// Els atributs per element s'afegiran amb la regla
-// html/unknown-attribute (fase 3).
 // ════════════════════════════════════════════════════════
 
 /** Elements buits: no tenen contingut ni etiqueta de tancament. */
@@ -73,3 +71,116 @@ export const KNOWN_ELEMENTS = new Set([
   // SVG i MathML incrustats (no s'ensenyen, però són vàlids)
   'svg', 'math',
 ]);
+
+// ── Atributs (regles html/unknown-attribute i html/obsolete-attribute) ──
+
+const words = (text) => new Set(text.split(/\s+/).filter(Boolean));
+
+/**
+ * Atributs que pot tenir qualsevol element. A més, també són vàlids els
+ * que comencen per data-, aria- i on (gestors d'esdeveniments), i els que
+ * porten dos punts (xml:lang, xlink:href…): vegeu isGlobalAttribute.
+ */
+export const GLOBAL_ATTRIBUTES = words(`
+  accesskey autocapitalize autocorrect autofocus class contenteditable dir
+  draggable enterkeyhint exportparts hidden id inert inputmode is itemid
+  itemprop itemref itemscope itemtype lang nonce part popover role slot
+  spellcheck style tabindex title translate virtualkeyboardpolicy
+  writingsuggestions xmlns
+`);
+
+/** @param {string} name nom de l'atribut, en minúscules */
+export const isGlobalAttribute = (name) =>
+  GLOBAL_ATTRIBUTES.has(name) || /^(data-|aria-|on)/.test(name) || name.includes(':');
+
+/** Atributs propis de cada element (a més dels globals). */
+export const ELEMENT_ATTRIBUTES = Object.fromEntries(Object.entries({
+  a: 'href target download ping rel hreflang type referrerpolicy',
+  area: 'alt coords shape href target download ping rel referrerpolicy',
+  audio: 'src crossorigin preload autoplay loop muted controls',
+  base: 'href target',
+  blockquote: 'cite',
+  button: 'command commandfor disabled form formaction formenctype formmethod formnovalidate formtarget name popovertarget popovertargetaction type value',
+  canvas: 'width height',
+  col: 'span',
+  colgroup: 'span',
+  data: 'value',
+  del: 'cite datetime',
+  details: 'open name',
+  dialog: 'open closedby',
+  embed: 'src type width height',
+  fieldset: 'disabled form name',
+  form: 'accept-charset action autocomplete enctype method name novalidate target rel',
+  iframe: 'src srcdoc name sandbox allow allowfullscreen width height referrerpolicy loading',
+  img: 'alt src srcset sizes crossorigin usemap ismap width height referrerpolicy decoding loading fetchpriority',
+  input: 'accept alpha alt autocomplete capture checked colorspace dirname disabled form formaction formenctype formmethod formnovalidate formtarget height list max maxlength min minlength multiple name pattern placeholder popovertarget popovertargetaction readonly required size src step switch type value width',
+  ins: 'cite datetime',
+  label: 'for',
+  li: 'value',
+  link: 'href crossorigin rel as media hreflang type sizes imagesrcset imagesizes referrerpolicy integrity blocking color disabled fetchpriority',
+  map: 'name',
+  meta: 'name http-equiv content charset media',
+  meter: 'value min max low high optimum',
+  object: 'data type name form width height',
+  ol: 'reversed start type',
+  optgroup: 'disabled label',
+  option: 'disabled label selected value',
+  output: 'for form name',
+  progress: 'value max',
+  q: 'cite',
+  script: 'src type nomodule async defer crossorigin integrity referrerpolicy blocking fetchpriority',
+  select: 'autocomplete disabled form multiple name required size',
+  slot: 'name',
+  source: 'type media src srcset sizes width height',
+  style: 'media blocking type',
+  td: 'colspan rowspan headers',
+  template: 'shadowrootmode shadowrootdelegatesfocus shadowrootclonable shadowrootserializable',
+  textarea: 'autocomplete cols dirname disabled form maxlength minlength name placeholder readonly required rows wrap',
+  th: 'colspan rowspan headers scope abbr',
+  time: 'datetime',
+  track: 'default kind label src srclang',
+  video: 'src crossorigin poster preload autoplay playsinline loop muted controls width height',
+}).map(([name, list]) => [name, words(list)]));
+
+/**
+ * Atributs antics (ja no formen part de l'HTML, però el navegador encara
+ * en fa cas d'alguns): l'aspecte es controla amb CSS.
+ */
+export const OBSOLETE_ATTRIBUTES = Object.fromEntries(Object.entries({
+  a: 'charset coords name rev shape',
+  area: 'nohref type hreflang',
+  body: 'alink background bgcolor link text vlink marginheight marginwidth leftmargin topmargin rightmargin bottommargin',
+  br: 'clear',
+  caption: 'align',
+  col: 'align char charoff valign width',
+  colgroup: 'align char charoff valign width',
+  div: 'align',
+  dl: 'compact',
+  embed: 'name align hspace vspace',
+  h1: 'align', h2: 'align', h3: 'align', h4: 'align', h5: 'align', h6: 'align',
+  head: 'profile',
+  hr: 'align color noshade size width',
+  html: 'manifest version',
+  iframe: 'align frameborder longdesc marginheight marginwidth scrolling',
+  img: 'align border hspace vspace longdesc name lowsrc',
+  input: 'align usemap',
+  label: 'form',
+  legend: 'align',
+  li: 'type',
+  link: 'charset rev target',
+  menu: 'compact',
+  meta: 'scheme',
+  object: 'align archive border classid code codebase codetype declare hspace standby typemustmatch usemap vspace',
+  ol: 'compact',
+  p: 'align',
+  pre: 'width',
+  script: 'charset event for language',
+  table: 'align bgcolor border cellpadding cellspacing frame rules summary width height',
+  tbody: 'align char charoff valign',
+  td: 'abbr align axis bgcolor char charoff height nowrap scope valign width',
+  tfoot: 'align char charoff valign',
+  th: 'align axis bgcolor char charoff height nowrap valign width',
+  thead: 'align char charoff valign',
+  tr: 'align bgcolor char charoff valign height',
+  ul: 'compact type',
+}).map(([name, list]) => [name, words(list)]));

@@ -57,7 +57,7 @@ site/                  ← l'única carpeta que es publica
   404.html             Pàgina d'error (Cloudflare la fa servir sola)
   _headers             Capçaleres de seguretat per a Cloudflare Pages
   LICENSE.txt          Còpia de LICENSE (el peu hi enllaça)
-  recursos/            Paquet d'imatges per als alumnes (ara: gat.svg) + CREDITS.md
+  recursos/            Paquet d'imatges per als alumnes (gat.svg, animals/, paisatges/) + CREDITS.md
   img/logo.svg         Logotip (també és la icona de la pestanya)
   css/tokens.css       Variables de disseny (colors, espais, tipografies, ressaltat) i tema fosc
   css/base.css         Reinici, tipografia i estructura (.pagina, .pantalla, .barra, .peu, .avis, .logo, .boto)
@@ -84,6 +84,7 @@ site/                  ← l'única carpeta que es publica
   js/editor/code-examples.js Ressalta els <pre class="code-example"> d'una pàgina
   js/preview/srcdoc.js       Mòdul pur: document de la previsualització (§2.4)
   js/preview/preview.js      Iframe de previsualització protegit (§2.4)
+  js/preview/recursos.js     Mòdul pur: la llista d'imatges de recursos/ (per al revisor de codi)
   js/sim/simulador.js        Component simulador: pestanyes, editors, resultat, desar (§2.4)
   js/sim/problems-panel.js   Panell ⚠ Problemes del simulador (§2.4)
   js/sim/checks-panel.js     Panell ✓ Comprovacions dels exercicis (§2.7)
@@ -286,6 +287,12 @@ Catàleg (E error, A avís). «Cap.» = capítol a partir del qual s'activa.
 | `html/vague-link-text` | 4 | A | Textos d'enllaç com «clica aquí», «aquí», «més informació» |
 | `html/missing-protocol` | 4 | A | `href="www.gats.cat"`: falta `https://` (el navegador ho llegeix com un fitxer) |
 | `html/missing-anchor` | 4 | A | `href="#x"` sense cap `id="x"` al codi (suggereix l'id més semblant) |
+| `html/img-alt` | 5 | E | `<img>` sense `alt` (`alt=""` és vàlid: imatge decorativa) |
+| `html/image-not-found` | 5 | E | `src` que no és cap imatge de `recursos/` (suggereix el nom bo: majúscules, carpeta, extensió o lletres), imatge d'Internet (la CSP la bloqueja), fitxer de l'ordinador (`C:\…`) o `<img>` sense `src` |
+| `html/unknown-attribute` | 5 | E | Atribut que l'element no té: `scr`, `hreff`, `href` a `<img>` (suggereix el nom correcte; atributs de cada element a `html-spec.js`; no mira l'SVG ni els elements desconeguts) |
+| `html/img-size` | 5 | E | `width`/`height` d'una imatge que no és un nombre de píxels: `200px`, `50%`, `5cm`, `gran` |
+| `html/vague-alt` | 5 | A | `alt="imatge"`, `alt="foto"` o el nom del fitxer (`alt="gos.svg"`) |
+| `html/obsolete-attribute` | 5 | A | Atributs antics d'aspecte que el navegador encara aplica: `align`, `border`, `bgcolor`… (diu què cal fer servir en lloc seu) |
 | `html/inline-style` | 9 | A | Atribut `style=""` |
 | `css/unbalanced-braces` | 9 | E | Falta `{` o `}`, o sobra una `}` |
 | `css/missing-semicolon` | 9 | E | Falta `;` entre dues declaracions |
@@ -299,9 +306,13 @@ Catàleg (E error, A avís). «Cap.» = capítol a partir del qual s'activa.
 | `css/one-declaration-per-line` | 9 | A | Dues declaracions a la mateixa línia |
 | `css/indentation` | 9 | A | Declaracions no indentades 2 espais, `}` mal alineada (no als `<style>`) |
 
-Les regles que necessiten el document ja pintat (imatge no trobada, selector que
-no selecciona res, contrast) i les dels capítols 5–14 s'afegiran amb cada capítol
-(BLUEPRINT apèndix C).
+Les regles que necessiten el document ja pintat (selector que no selecciona res,
+contrast) i les dels capítols 6–14 s'afegiran amb cada capítol (BLUEPRINT
+apèndix C). `html/image-not-found` no el necessita: totes les imatges que pot fer
+servir l'alumne són a `site/recursos/` (la previsualització les hi busca amb el
+`<base>`, §2.4) i `preview/recursos.js` en té la llista; el test estàtic comprova
+que la llista, els fitxers i `CREDITS.md` coincideixen. Una imatge nova s'afegeix
+als tres llocs.
 
 ### 2.7 Comprovacions dels exercicis
 
@@ -404,6 +415,7 @@ motiu; si se'n canvia alguna, s'anota aquí amb la data i el motiu.
 | 2026-10-03 | La comprovació `lint` fa servir el revisor estàtic (§2.6); `uses-css` també mira els `<style>` | Encara no hi ha regles que necessitin el document pintat |
 | 2026-10-03 | A l'arrel del repositori hi ha `index.html`: el simulador d'HTML i CSS, com a PyCat (substitueix D1 per a l'adreça `/`). Fa servir els CSS i el JS de `site/`, que continua sent on és el web | Ho ha decidit el propietari. Conseqüències acceptades: Cloudflare publica tot el repositori, de manera que els tests, les solucions dels exercicis (`tests/solutions/`) i la documentació són públics, i `site/_headers` i `site/404.html` no s'apliquen. El test estàtic revisa també aquest fitxer |
 | 2026-10-03 | Revisor, capítol 4: `html/missing-anchor` es fa sobre el codi font (el BLUEPRINT la preveia sobre la pàgina pintada); `html/vague-link-text` és un avís (el BLUEPRINT deia suggeriment); regla nova `html/missing-protocol` | Els id del codi són els que ha escrit l'alumne; els textos d'enllaç clars són l'hàbit de codi net del capítol (i l'exercici els exigeix); oblidar `https://` és un error molt habitual que el navegador no explica |
+| 2026-10-03 | Revisor, capítol 5: `html/image-not-found` es fa sobre el codi font amb la llista `preview/recursos.js` (el BLUEPRINT la preveia sobre la pàgina pintada, amb `naturalWidth`); regles noves `html/vague-alt`, `html/obsolete-attribute` (avisos) i `html/img-size` (error) | Les imatges de l'alumne només poden ser les de `site/recursos/`: el resultat és el mateix que mirar la pàgina pintada, però surt de seguida, val igual per a les comprovacions i es pot provar amb Node. Els atributs antics d'aspecte encara funcionen (`align="left"` fa flotar la imatge, comprovat a Chromium): són avisos. `width="200px"` el navegador l'arregla en silenci (llegeix el 200) i `width="5cm"` el converteix en 5 píxels: errors, com les altres reparacions |
 | 2026-10-02 | El repositori definitiu és `step-quiz2/htmlcat2` | Ho ha confirmat el propietari. L'historial de les fases 0–2 (PR #1–#4) és a l'antic repositori; el codi es va copiar aquí amb una pujada pel web, que va perdre `.github/`, `.editorconfig` i `.gitignore` (restaurats amb Git el mateix dia) |
 
 ### Decisions confirmades pel propietari el 2026-10-03
@@ -439,8 +451,8 @@ cd tests && npm ci && node course-browser.mjs   # navegador (Playwright + Chromi
 
 | Test | Què comprova |
 |---|---|
-| `unit/` | Cada mòdul pur de `site/js/` (170 tests): tokenitzador, arbre i errors d'estructura, analitzador de CSS, ressaltat (conserva el codi, escapa, una línia per entrada, rendiment), robustesa amb 500 codis aleatoris (també el revisor), edició (Retorn, Tab, Maj+Tab), `localStorage`, document de previsualització, textos de la interfície i revisor de codi: per a cada regla, un codi que la dispara i un que no (un test falla si una regla no en té), missatges sense buits, activació per capítol i mode, ordre, agrupació, rendiment, i que el codi d'exemple de l'editor lliure i de la portada no tingui cap problema; dades del curs i progrés; esquema de les comprovacions i les que no necessiten navegador (`uses-html`, `uses-css`, `lint`) |
-| `course-static.mjs` | Cada pàgina té `<!DOCTYPE html>`, `lang="ca"`, `charset` i `<title>`; cap `style=""` ni `on…=""`; cap tabulació; tots els enllaços relatius existeixen; sintaxi de cada `.js`; cap menció de CC BY-NC-ND; existeixen `.editorconfig`, `.gitignore` i `.github/workflows/ci.yml` (una pujada pel web no els inclou). Curs: dades (`course/data.js`) ↔ fitxers de `site/curs/`; `<body data-pagina data-num>` d'acord amb el fitxer; l'exercici principal de cada capítol hi és; tot simulador editable té `data-id`; `data-id` i `data-goal-id` únics; blocs de codi amb nom permès i sense `<script`; comprovacions vàlides (`checks/schema.js`); cada exercici té la seva solució a `tests/solutions/` |
+| `unit/` | Cada mòdul pur de `site/js/` (177 tests): tokenitzador, arbre i errors d'estructura, analitzador de CSS, ressaltat (conserva el codi, escapa, una línia per entrada, rendiment), robustesa amb 500 codis aleatoris (també el revisor), edició (Retorn, Tab, Maj+Tab), `localStorage`, document de previsualització, textos de la interfície i revisor de codi: per a cada regla, un codi que la dispara i un que no (un test falla si una regla no en té), missatges sense buits, activació per capítol i mode, ordre, agrupació, rendiment, i que el codi d'exemple de l'editor lliure i de la portada no tingui cap problema; dades del curs i progrés; esquema de les comprovacions i les que no necessiten navegador (`uses-html`, `uses-css`, `lint`) |
+| `course-static.mjs` | Cada pàgina té `<!DOCTYPE html>`, `lang="ca"`, `charset` i `<title>`; cap `style=""` ni `on…=""`; cap tabulació; tots els enllaços relatius existeixen; sintaxi de cada `.js`; cap menció de CC BY-NC-ND; existeixen `.editorconfig`, `.gitignore` i `.github/workflows/ci.yml` (una pujada pel web no els inclou). Curs: dades (`course/data.js`) ↔ fitxers de `site/curs/`; `<body data-pagina data-num>` d'acord amb el fitxer; l'exercici principal de cada capítol hi és; tot simulador editable té `data-id`; `data-id` i `data-goal-id` únics; blocs de codi amb nom permès i sense `<script`; comprovacions vàlides (`checks/schema.js`); cada exercici té la seva solució a `tests/solutions/`. Imatges: la llista de `preview/recursos.js`, els fitxers de `site/recursos/` i les files de `CREDITS.md` coincideixen |
 | `course-browser.mjs` | Cada pàgina, a 360 i 1280 px: cap error a la consola, cap petició fallida, cap petició a servidors externs, tots els simuladors es munten en arribar-hi, cap desplaçament horitzontal, cap id repetit. Cada exercici dels capítols, en un mòbil: el codi inicial no el supera, la solució sí (i sense errors al panell ⚠ Problemes), el menú hi posa ✓ i es manté després de recarregar. Dos exemples no editables a la mateixa pàgina no repeteixen els ids de les pestanyes. A més, prova l'editor lliure de punta a punta: escriure, indentació automàtica, resultat en directe, Ctrl+Z, `sandbox` i CSP correctes (també amb text abans de `<html>`), cap script ni imatge externa, enllaços interceptats, CSS aplicat i codi desat després de recarregar. I el panell ⚠ Problemes: «Cap problema» amb el codi inicial, un `<p>` sense tancar surt amb la seva línia i es marca, el clic i el teclat porten el cursor a la línia (i canvien de pestanya), i una propietat CSS mal escrita es detecta amb el `CSS.supports` del navegador |
 
 La GitHub Action `.github/workflows/ci.yml` executa els tres a cada push i a

@@ -866,6 +866,8 @@ export function createPreview(frame, { onLoad, onLinkClick, onSubmit }) {
 `since` = chapter of §7. Severity: E error, W warning, I info. Phase: S static, R rendered.
 
 > **Note (2026-10-02):** the static rules up to chapter 9 are built; the real catalogue (with new ids and two `since` changes) is in `docs/STATE.md` §2.6, which wins over this table.
+>
+> **Note (2026-10-03):** `html/missing-anchor` (ch. 4) and `html/image-not-found` (ch. 5) were built as static rules: the ids are in the source, and every image a student can use lives in `site/recursos/` (listed in `site/js/preview/recursos.js`, kept in sync by a test). Chapter 5 also added `html/vague-alt`, `html/obsolete-attribute` and `html/img-size`.
 
 | Id | Since | Sev | Phase | Detects |
 |---|---|---|---|---|

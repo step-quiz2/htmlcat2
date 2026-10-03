@@ -36,6 +36,35 @@ const DEPRECATED_INSTEAD = {
   blink: 'Els textos que parpellegen molesten i no són accessibles: treu-lo.',
 };
 
+const OBSOLETE_ATTRIBUTE_INSTEAD = {
+  align: 'Per alinear, fes servir CSS: text-align per al text, float per a una imatge.',
+  bgcolor: 'Per al color de fons, fes servir CSS (background-color).',
+  background: 'Per a una imatge de fons, fes servir CSS (background-image).',
+  border: 'Per a la vora, fes servir CSS (border).',
+  color: 'Per al color, fes servir CSS (color).',
+  text: 'Per al color del text, fes servir CSS (color).',
+  valign: 'Per a l\'alineació vertical, fes servir CSS (vertical-align).',
+  width: 'Per a la mida, fes servir CSS (width).',
+  height: 'Per a la mida, fes servir CSS (height).',
+  hspace: 'Per separar la imatge del que té al costat, fes servir CSS (margin).',
+  vspace: 'Per separar la imatge del que té a sobre i a sota, fes servir CSS (margin).',
+  cellpadding: 'Per a l\'espai de dins de les cel·les, fes servir CSS (padding).',
+  cellspacing: 'Per a l\'espai entre cel·les, fes servir CSS (border-spacing).',
+  nowrap: 'Perquè el text no salti de línia, fes servir CSS (white-space: nowrap).',
+  name: 'Per marcar un lloc on porti un enllaç, fes servir id.',
+  type: 'Per canviar el pic o el número de la llista, fes servir CSS (list-style-type).',
+  compact: 'Per a una llista més atapeïda, fes servir CSS (margin, padding).',
+};
+
+const IMAGE_REASONS = {
+  case: () => 'Als noms dels fitxers, les majúscules compten: «Gos.svg» i «gos.svg» són fitxers diferents.',
+  extension: () => 'Fixa\'t en l\'extensió, el final del nom (.svg, .png, .jpg): ha de ser la del fitxer.',
+  folder: ({ suggestion }) => (suggestion.includes('/')
+    ? `La imatge és dins de la carpeta ${suggestion.slice(0, suggestion.lastIndexOf('/'))}: el nom de la carpeta va davant del del fitxer, amb una barra /.`
+    : 'Aquesta imatge no és dins de cap carpeta: escriu només el nom del fitxer.'),
+  typo: () => 'El nom ha de ser exactament el del fitxer, lletra per lletra.',
+};
+
 const VALUE_HINTS = {
   'catalan-colour': ({ fix }) => `Els noms dels colors s'escriuen en anglès: ${fix}.`,
   comma: ({ fix }) => `Els decimals s'escriuen amb punt, no amb coma: ${fix}.`,
@@ -197,6 +226,59 @@ export const MESSAGES = {
     hint: suggestion
       ? `Potser volies dir #${suggestion}? Un enllaç a #… porta a l'element que té aquest id.`
       : `Posa id="${id}" a l'element on ha de portar l'enllaç, o corregeix el nom.`,
+  }),
+  // ── HTML: imatges i atributs ──
+  'html/img-alt': () => ({
+    text: 'A aquesta imatge li falta l\'atribut alt.',
+    hint: 'Escriu a alt="…" què mostra la imatge: és el que llegeixen els lectors de pantalla i el que es veu si la imatge no es carrega. Si és només decorativa, posa-hi alt="".',
+  }),
+  'html/vague-alt': ({ alt, kind }) => ({
+    text: kind === 'file'
+      ? `L'alt «${alt}» és el nom del fitxer: no diu què es veu a la imatge.`
+      : `L'alt «${alt}» no diu què es veu a la imatge.`,
+    hint: 'Descriu-la com ho faries per telèfon, per exemple «Un gos marró que treu la llengua». Si és només decorativa, deixa-l\'hi buit: alt="".',
+  }),
+  'html/unknown-attribute': ({ attr, tag: name, suggestion, obsolete }) => ({
+    text: `L'atribut ${attr} no existeix a ${tag(name)}.`,
+    hint: suggestion
+      ? `Potser volies escriure ${suggestion}? El navegador no fa cas dels atributs que no coneix.`
+      : obsolete
+        ? `És un atribut antic d'aspecte, i ${tag(name)} no el té. L'aspecte (colors, alineació, vores…) es controla amb CSS.`
+        : 'Revisa com s\'escriu: el navegador no fa cas dels atributs que no coneix.',
+  }),
+  'html/obsolete-attribute': ({ attr, tag: name }) => ({
+    text: `L'atribut ${attr} de ${tag(name)} és antic: ja no forma part de l'HTML.`,
+    hint: OBSOLETE_ATTRIBUTE_INSTEAD[attr] || 'Esborra\'l. Si era per a l\'aspecte, fes servir CSS.',
+  }),
+  'html/img-size': ({ attr, value, kind, fix }) => ({
+    text: {
+      px: `${attr} s'escriu sense unitat: ${attr}="${fix}".`,
+      percent: `${attr}="${value}": a l'HTML, la mida d'una imatge és un nombre de píxels.`,
+      unit: `«${value}» no és una mida vàlida: ${attr} ha de ser un nombre enter de píxels, sense unitat.`,
+      invalid: `«${value}» no és una mida: ${attr} ha de ser un nombre de píxels, com ${attr}="200".`,
+    }[kind],
+    hint: {
+      px: 'Els atributs width i height sempre són en píxels i només porten el número. El navegador entén «px», però no és HTML correcte.',
+      percent: `Els percentatges són cosa del CSS (${attr}: ${value}), que aprendràs més endavant. El navegador encara l'entén, però és HTML antic.`,
+      unit: `El navegador només en llegeix el número del principi, i en píxels: «5cm» es converteix en 5 píxels. Escriu només el número de píxels: ${attr}="200".`,
+      invalid: 'El navegador no entén el valor i no en fa cas.',
+    }[kind],
+  }),
+  'html/image-not-found': ({ kind, src, suggestion, reason }) => ({
+    text: {
+      'no-src': 'Aquesta imatge no té src: no se sap quina imatge s\'ha de mostrar.',
+      external: 'Les imatges d\'Internet no es mostren a HTMLCat.',
+      computer: `«${src}» és un fitxer del teu ordinador: la pàgina no hi pot accedir.`,
+      missing: `No s'ha trobat la imatge «${src}».`,
+    }[kind],
+    hint: {
+      'no-src': 'Escriu a src="…" el nom del fitxer de la imatge, per exemple src="animals/gos.svg".',
+      external: 'Per protegir la teva privacitat, el resultat no carrega res d\'Internet (en un web de debò, sí que es veuria). Fes servir una de les imatges del curs, com src="animals/gos.svg".',
+      computer: 'Una pàgina web no pot agafar fitxers de l\'ordinador de qui la visita: les imatges han d\'estar al web, al costat de la pàgina. A HTMLCat, fes servir les imatges del curs, com src="animals/gos.svg".',
+      missing: suggestion
+        ? `Potser volies dir «${suggestion}»? ${IMAGE_REASONS[reason]({ suggestion })}`
+        : 'Revisa el nom del fitxer, la carpeta i l\'extensió. Al capítol 5 hi ha la llista de les imatges que pots fer servir.',
+    }[kind],
   }),
   'html/inline-style': ({ tag: name }) => ({
     text: `L'atribut style de ${tag(name)} barreja l'estil amb el contingut.`,
