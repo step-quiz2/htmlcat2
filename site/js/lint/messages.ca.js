@@ -374,6 +374,16 @@ export const MESSAGES = {
       ? 'Sense name, el navegador no sap que aquests botons d\'opció van junts: es poden marcar tots alhora, i la resposta no s\'envia. Posa el mateix name a tots els botons d\'una pregunta.'
       : 'Sense name, quan s\'envia el formulari la dada d\'aquest camp no s\'envia: el name és el nom amb què arriba la dada.',
   }),
+  // ── HTML: classes ──
+  'html/class-syntax': ({ kind, value, fix }) => ({
+    text: kind === 'dot'
+      ? `A l'HTML, les classes s'escriuen sense punt: class="${fix}".`
+      : `Les classes se separen amb espais, sense comes: class="${fix}".`,
+    hint: kind === 'dot'
+      ? `El punt només va al selector del CSS (.${fix.split(' ')[0]}). Amb class="${value}", la classe es diu «${value.split(/\s+/)[0]}» i el selector no la troba.`
+      : 'Amb la coma, la classe es diu, per exemple, «avis,» (amb la coma inclosa) i el selector .avis no la troba.',
+  }),
+
   // ── HTML: fulls d'estil ──
   'html/stylesheet-link': ({ kind, href, suggestion, files = [], file }) => ({
     text: {
@@ -452,6 +462,33 @@ export const MESSAGES = {
     text: `L'element <${name}> no existeix: aquesta regla no s'aplica a res.`,
     hint: (suggestion ? `Potser volies escriure ${suggestion}? ` : '') +
       'Un selector sense punt ni # davant és el nom d\'un element de l\'HTML (p, h1, body…). Si és el nom d\'una classe, porta un punt davant: .nom.',
+  }),
+
+  'css/selector-matches-nothing': ({ kind, name, suggestion }) => ({
+    text: kind === 'class'
+      ? `Cap element de l'HTML no té la classe «${name}»: aquest selector no selecciona res.`
+      : `Cap element de l'HTML no té id="${name}": aquest selector no selecciona res.`,
+    hint: suggestion
+      ? `Potser volies dir ${kind === 'class' ? '.' : '#'}${suggestion}? El nom ha de ser exactament igual al CSS i a l'HTML: les majúscules i els accents compten.`
+      : (kind === 'class'
+        ? `Posa class="${name}" als elements que vulguis canviar, o revisa com s'escriu.`
+        : `Posa id="${name}" a l'element que vulguis canviar, o revisa com s'escriu.`),
+  }),
+  'css/id-selector': ({ name }) => ({
+    text: `El selector #${name} fa servir un id per donar estil.`,
+    hint: 'Per donar estil, fes servir classes (.nom): es poden repetir, i un id guanya sempre a les classes i fa difícil canviar els estils. Els id són per als enllaços a una part de la pàgina i per a les etiquetes dels formularis.',
+  }),
+  'css/important': () => ({
+    text: '!important fa que aquesta declaració guanyi sempre, passi el que passi.',
+    hint: 'És una trampa que fa difícil canviar els estils més endavant. Si una regla no s\'aplica, busca quina altra regla guanya (la més específica, o l\'última) i arregla-ho amb el selector.',
+  }),
+  'css/duplicate-declaration': ({ property, firstLine }) => ({
+    text: `${property} ja surt a la línia ${firstLine}, dins de la mateixa regla.`,
+    hint: 'Només compta l\'última: el navegador no fa cas de la primera. Esborra la que sobra.',
+  }),
+  'css/presentational-class': ({ name }) => ({
+    text: `La classe «${name}» diu com es veu l'element, no què és.`,
+    hint: 'Posa noms que expliquin què és: .avis, .preu, .destacat. Si demà els avisos han de ser blaus, una classe .vermell faria mentir el codi.',
   }),
 
   // ── CSS: codi net ──

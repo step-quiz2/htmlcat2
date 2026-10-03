@@ -1,0 +1,18 @@
+/* Estils de la botiga */
+
+.producte {
+  background-color: whitesmoke;
+}
+
+.preu {
+  color: darkgreen;
+  font-size: 24px;
+}
+
+.oferta {
+  color: darkred;
+}
+
+h2 {
+  color: teal;
+}

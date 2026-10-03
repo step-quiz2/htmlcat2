@@ -1,0 +1,17 @@
+/* Estils del tauler d'avisos */
+
+body {
+  background-color: whitesmoke;
+}
+
+nav a {
+  color: darkslateblue;
+}
+
+.avis {
+  background-color: lightyellow;
+}
+
+.urgent {
+  color: darkred;
+}

@@ -7,6 +7,9 @@ import { lintCase, rulesOf, css, doc, documentCase } from './lint-helpers.mjs';
 
 const GOOD_CSS = 'h1 {\n  color: red;\n  font-size: 2em;\n}\n';
 
+/** Un fragment d'HTML i el seu CSS (les regles de selectors miren les classes i els id de l'HTML). */
+const page = (html, styles) => ({ files: { 'index.html': html, 'estils.css': styles } });
+
 /** Un document amb un fitxer de CSS al costat (mode document). */
 const withCss = (html) => ({ files: { 'index.html': html, 'estils.css': GOOD_CSS }, mode: 'document' });
 
@@ -101,6 +104,8 @@ const CASES = {
   'html/control-name': ['<form>\n  <label for="nom">Nom</label>\n  <input type="text" id="nom">\n</form>\n', FORM],
   // HTML: fulls d'estil
   'html/stylesheet-link': [withCss(doc()), withCss(doc().replace('  </head>', '    <link rel="stylesheet" href="estils.css">\n  </head>'))],
+  // HTML: classes
+  'html/class-syntax': ['<p class=".avis">x</p>\n', '<p class="avis destacat">x</p>\n'],
   'html/inline-style': ['<p style="color: red">x</p>\n', '<p class="avis">x</p>\n'],
   // CSS: errors
   'css/unbalanced-braces': [css('h1 {\n  color: red;\n'), css(GOOD_CSS)],
@@ -113,6 +118,11 @@ const CASES = {
   'css/invalid-value': [css('h1 {\n  color: vermell;\n}\n'), css(GOOD_CSS)],
   'css/wrong-comment': [css('// Títols\n' + GOOD_CSS), css('/* Títols: http://x.cat */\n' + GOOD_CSS)],
   'css/unknown-element-selector': [css('paragraf {\n  color: red;\n}\n'), css('p,\nh1 > em,\na:hover,\n.avis,\nmeu-element {\n  color: red;\n}\n')],
+  'css/selector-matches-nothing': [page('<p class="avis">x</p>\n', '.avís {\n  color: red;\n}\n'), page('<p class="avis">x</p>\n', '.avis {\n  color: red;\n}\n')],
+  'css/id-selector': [css('#menu {\n  color: red;\n}\n'), css('.menu {\n  color: red;\n}\n')],
+  'css/important': [css('h1 {\n  color: red !important;\n}\n'), css(GOOD_CSS)],
+  'css/duplicate-declaration': [css('h1 {\n  color: red;\n  color: blue;\n}\n'), css('h1 {\n  color: red;\n}\n\nh2 {\n  color: red;\n}\n')],
+  'css/presentational-class': [css('.vermell {\n  color: red;\n}\n'), css('.avis {\n  color: red;\n}\n')],
   'css/last-semicolon': [css('h1 {\n  color: red\n}\n'), css(GOOD_CSS)],
   'css/one-declaration-per-line': [css('h1 {\n  color: red; font-size: 2em;\n}\n'), css('h1 { color: red; }\n')],
   'css/indentation': [css('h1 {\ncolor: red;\n}\n'), css(GOOD_CSS)],
@@ -430,4 +440,32 @@ test('CSS: detalls de les regles del capítol 9', () => {
   assert.ok(!rulesOf({ files: { 'index.html': '<p>x</p>\n', 'estils.css': GOOD_CSS } }).includes('html/stylesheet-link'));
   // Abans del capítol 9, cap d'aquestes regles
   assert.deepEqual(rulesOf({ files: { 'estils.css': '// x\nparagraf {\n  color: red;\n}\n' }, chapter: 8 }), []);
+});
+
+test('selectors i cascada: detalls de les regles del capítol 10', () => {
+  // class amb punt o amb comes: la correcció que proposa
+  assert.deepEqual(first('<p class=".avis gran">x</p>\n', 'html/class-syntax').data, { kind: 'dot', value: '.avis gran', fix: 'avis gran' });
+  assert.deepEqual(first('<p class="avis, gran">x</p>\n', 'html/class-syntax').data, { kind: 'comma', value: 'avis, gran', fix: 'avis gran' });
+  // Selectors que no seleccionen res: classes i id que cap element no té (amb suggeriment)
+  const nothing = (html, styles) => lintCase(page(html, styles)).filter((p) => p.rule === 'css/selector-matches-nothing').map((p) => [p.data.kind, p.data.name, p.data.suggestion]);
+  assert.deepEqual(nothing('<h1 id="titol">T</h1>\n', '#titul {\n  color: red;\n}\n'), [['id', 'titul', 'titol']]);
+  assert.deepEqual(nothing('<p class="Avis">x</p>\n', '.avis {\n  color: red;\n}\n'), [['class', 'avis', 'Avis']]);
+  // ...però no dins de :not(), [...] ni cadenes, ni si la classe ja té el seu error a l'HTML
+  assert.deepEqual(nothing('<p class="a">x</p>\n', 'p:not(.b),\na[href$=".pdf"] {\n  color: red;\n}\n'), []);
+  assert.deepEqual(nothing('<p class=".avis">x</p>\n<p class="gran,">y</p>\n', '.avis,\n.gran {\n  color: red;\n}\n'), []);
+  // Sense HTML (només un fitxer de CSS), no es pot saber: no es diu res
+  assert.ok(!rulesOf(css('.avis {\n  color: red;\n}\n')).includes('css/selector-matches-nothing'));
+  // També al CSS de dins d'un <style>
+  assert.deepEqual(rulesOf('<style>\n  .avis { color: red; }\n</style>\n<p class="avis">x</p>\n'), []);
+  assert.ok(rulesOf('<style>\n  .avís { color: red; }\n</style>\n<p class="avis">x</p>\n').includes('css/selector-matches-nothing'));
+  // Declaració repetida: es diu a la segona, i no si la primera porta !important (ja guanya ella)
+  assert.equal(first(css('h1 {\n  color: red;\n  font-size: 2em;\n  color: blue;\n}\n'), 'css/duplicate-declaration').data.firstLine, 2);
+  assert.deepEqual(rulesOf(css('h1 {\n  color: red !important;\n  color: blue;\n}\n')), ['css/important']);
+  // Noms de classe que diuen com es veu: paraules soltes o dins d'un nom compost, amb accents o sense
+  const presentational = (name) => rulesOf(css(`.${name} {\n  color: red;\n}\n`)).includes('css/presentational-class');
+  assert.deepEqual(['boto-vermell', 'text-gran', 'Centrat', 'daurada', 'red'].map(presentational), [true, true, true, true, true]);
+  assert.deepEqual(['avis', 'preu', 'menu-principal', 'destacat', 'granja'].map(presentational), [false, false, false, false, false]);
+  assert.equal(first(css('.vermell {\n  color: red;\n}\n'), 'css/presentational-class').severity, 'info');
+  // Abans del capítol 10, cap d'aquestes regles
+  assert.deepEqual(rulesOf({ files: { 'index.html': '<p class=".x">a</p>\n', 'estils.css': '#y {\n  color: red !important;\n  color: blue;\n}\n' }, chapter: 9 }), []);
 });

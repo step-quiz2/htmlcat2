@@ -973,6 +973,26 @@ const controlName = {
   },
 };
 
+// ── Classes (capítol 10) ──
+
+const classSyntax = {
+  id: 'html/class-syntax',
+  lang: 'html',
+  since: 10,
+  severity: 'error',
+  check(ctx, report) {
+    for (const el of htmlElements(ctx.root)) {
+      const attr = attrOf(el.startTag, 'class');
+      const value = attr?.value || '';
+      const tokens = value.split(/\s+/).filter(Boolean);
+      const dot = tokens.some((name) => /^[.#]/.test(name));
+      if (!dot && !value.includes(',')) continue;
+      const fix = value.replace(/,/g, ' ').split(/\s+/).map((name) => name.replace(/^[.#]+/, '')).filter(Boolean).join(' ');
+      report(attr, { kind: dot ? 'dot' : 'comma', value: value.trim(), fix });
+    }
+  },
+};
+
 // ── Fulls d'estil (capítol 9) ──
 
 /** Adreces que no són fitxers del simulador (el document de la previsualització no les substitueix). */
@@ -1081,5 +1101,6 @@ export const HTML_RULES = [
   controlLabel,
   controlName,
   stylesheetLink,
+  classSyntax,
   inlineStyle,
 ];

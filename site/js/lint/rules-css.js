@@ -6,13 +6,15 @@
 // s'apliquen als fitxers .css i al contingut dels <style> de l'HTML,
 // excepte les marcades amb embedded: false.
 //
-// Context: { src, sheet, supports, embedded, lineOf(pos) }
+// Context: { src, sheet, supports, embedded, page, lineOf(pos) }
 //   sheet     resultat de parseCss(src) (lang/css-parser.js)
 //   supports  (propietat, valor) → boolean: al navegador és CSS.supports
 //             (el navegador mateix diu què és vàlid); als tests, una
 //             imitació. Si no n'hi ha, les regles que el necessiten no
 //             fan res.
 //   embedded  true si el CSS és dins d'un <style>
+//   page      { classes, ids, misspelt } de l'HTML del simulador, o null si
+//             no n'hi ha (lint/lint.js)
 //
 // API pública:
 //   CSS_RULES
@@ -186,6 +188,127 @@ const unknownElementSelector = {
   },
 };
 
+// ── Selectors i cascada (capítol 10) ──
+
+/** Les classes (.nom) i els id (#nom) d'un selector, amb la seva posició; no mira dins de [...], (...) ni cadenes. */
+function* namedSelectors(selector) {
+  const blank = (text) => ' '.repeat(text.length);
+  const text = selector.text.replace(/"[^"]*"|'[^']*'/g, blank).replace(/\[[^\]]*\]|\([^)]*\)/g, blank);
+  for (const match of text.matchAll(/([.#])(-?[_a-zA-Z\u00a0-\uffff][\w\u00a0-\uffff-]*)/g)) {
+    const start = selector.start + match.index;
+    yield { kind: match[1] === '.' ? 'class' : 'id', name: match[2], start, end: start + match[0].length };
+  }
+}
+
+function* selectorsOf(sheet) {
+  for (const rule of styleRules(sheet.rules)) {
+    for (const selector of rule.selectors) {
+      if (!WRONG_COMMENT.test(selector.text)) yield selector;
+    }
+  }
+}
+
+// Es fa sobre el codi font (el BLUEPRINT la preveia sobre la pàgina pintada):
+// si un selector demana una classe o un id que cap element no té, no
+// selecciona res. Els selectors d'elements que no existeixen els mira
+// css/unknown-element-selector.
+const selectorMatchesNothing = {
+  id: 'css/selector-matches-nothing',
+  lang: 'css',
+  since: 10,
+  severity: 'warning',
+  check(ctx, report) {
+    if (!ctx.page) return;
+    const { classes, ids, misspelt } = ctx.page;
+    for (const selector of selectorsOf(ctx.sheet)) {
+      for (const named of namedSelectors(selector)) {
+        const known = named.kind === 'class' ? classes : ids;
+        if (known.has(named.name) || (named.kind === 'class' && misspelt.has(named.name))) continue;
+        report(named, { kind: named.kind, name: named.name, suggestion: closest(named.name, known) });
+      }
+    }
+  },
+};
+
+const idSelector = {
+  id: 'css/id-selector',
+  lang: 'css',
+  since: 10,
+  severity: 'warning',
+  check(ctx, report) {
+    for (const selector of selectorsOf(ctx.sheet)) {
+      for (const named of namedSelectors(selector)) {
+        if (named.kind === 'id') report(named, { name: named.name });
+      }
+    }
+  },
+};
+
+const important = {
+  id: 'css/important',
+  lang: 'css',
+  since: 10,
+  severity: 'warning',
+  check(ctx, report) {
+    for (const decl of styleDeclarations(ctx.sheet)) {
+      if (!decl.important) continue;
+      const at = ctx.src.lastIndexOf('!', decl.end);
+      report(at >= decl.start ? { start: at, end: decl.end } : decl.property, { property: propertyName(decl) });
+    }
+  },
+};
+
+const duplicateDeclaration = {
+  id: 'css/duplicate-declaration',
+  lang: 'css',
+  since: 10,
+  severity: 'warning',
+  check(ctx, report) {
+    for (const rule of containers(ctx.sheet.rules)) {
+      const seen = new Map();   // propietat → la primera declaració
+      for (const decl of rule.declarations) {
+        const property = propertyName(decl);
+        if (!property || !decl.value || WRONG_COMMENT.test(property)) continue;
+        const first = seen.get(property);
+        if (!first) seen.set(property, decl);
+        // (si la primera porta !important, guanya ella: ja ho diu css/important)
+        else if (!first.important || decl.important) report(decl.property, { property, firstLine: ctx.lineOf(first.property.start) });
+      }
+    }
+  },
+};
+
+/** Paraules que diuen com es veu un element, no què és (en minúscules, sense accents). */
+const PRESENTATIONAL_WORDS = new Set([
+  // colors en català i en anglès
+  'vermell', 'vermella', 'blau', 'blava', 'verd', 'verda', 'groc', 'groga', 'taronja', 'lila', 'morat',
+  'morada', 'rosa', 'negre', 'negra', 'blanc', 'blanca', 'gris', 'grisa', 'marro', 'daurat', 'daurada',
+  'red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'black', 'white', 'gray', 'grey',
+  'brown', 'gold', 'teal', 'navy', 'maroon', 'violet', 'cyan', 'magenta', 'lime', 'olive', 'silver',
+  // mides, gruixos i posicions
+  'gran', 'petit', 'petita', 'gros', 'grossa', 'negreta', 'cursiva', 'subratllat', 'subratllada',
+  'centrat', 'centrada', 'esquerra', 'dreta', 'big', 'small', 'large', 'bold', 'italic', 'underline',
+  'center', 'centre', 'left', 'right',
+]);
+
+const plain = (text) => text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+const presentationalClass = {
+  id: 'css/presentational-class',
+  lang: 'css',
+  since: 10,
+  severity: 'info',
+  check(ctx, report) {
+    for (const selector of selectorsOf(ctx.sheet)) {
+      for (const named of namedSelectors(selector)) {
+        if (named.kind === 'class' && plain(named.name).split(/[-_]/).some((word) => PRESENTATIONAL_WORDS.has(word))) {
+          report(named, { name: named.name });
+        }
+      }
+    }
+  },
+};
+
 // ── Codi net ──
 
 const lastSemicolon = {
@@ -264,6 +387,11 @@ export const CSS_RULES = [
   invalidValue,
   wrongComment,
   unknownElementSelector,
+  selectorMatchesNothing,
+  idSelector,
+  important,
+  duplicateDeclaration,
+  presentationalClass,
   lastSemicolon,
   oneDeclarationPerLine,
   indentation,

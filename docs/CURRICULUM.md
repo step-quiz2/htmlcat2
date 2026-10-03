@@ -28,7 +28,7 @@
 | # | Títol | Conceptes nous | Hàbit de codi net | Estat |
 |---|---|---|---|---|
 | 9 | Hola, CSS! | Sintaxi de les regles, `link rel="stylesheet"`, `color`, `background-color`, `font-size`, comentaris | Separa el contingut de la presentació | ✅ `cap-9-ex`, `cap-9-bug` |
-| 10 | Selectors i cascada | Selectors d'element, de classe, d'id, descendents, agrupats; cascada, especificitat, herència | Noms de classe pel significat (`.avis`, no `.vermell`) | ⏳ |
+| 10 | Selectors i cascada | Selectors d'element, de classe, d'id, descendents, agrupats; cascada, especificitat, herència | Noms de classe pel significat (`.avis`, no `.vermell`) | ✅ `cap-10-ex`, `cap-10-bug` |
 | 11 | Colors, text i unitats | hex/rgb/hsl, `px`/`em`/`rem`/`%`, famílies de lletra, `line-height`, `text-align`, variables CSS | No et repeteixis: variables | ⏳ |
 | 12 | El model de caixa | `margin`, `border`, `padding`, `width`, `box-sizing`, `display` | Una escala d'espais coherent | ⏳ |
 | 13 | Flexbox | `display: flex`, `flex-direction`, `justify-content`, `align-items`, `gap`, `flex-wrap` | Maqueta amb intenció, no amb trucs | ⏳ |
