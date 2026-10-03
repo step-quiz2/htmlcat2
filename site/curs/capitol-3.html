@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capítol 3 — Llistes | HTMLCat</title>
+  <link rel="icon" href="../img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/course.css">
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link rel="stylesheet" href="../css/simulador.css">
+  <script type="module" src="../js/pages/course-page.js"></script>
+</head>
+<body data-pagina="capitol" data-num="3">
+
+<main class="curs-content">
+  <header class="chapter-header">
+    <h1>Llistes</h1>
+    <p class="chapter-lead">En acabar aquest capítol sabràs fer llistes amb pics i llistes numerades, posar una llista dins d'una altra i indentar-les perquè el codi mostri com estan organitzades.</p>
+  </header>
+
+  <section class="chapter-section">
+    <h2>Llistes amb pics</h2>
+    <p>Una llista de la compra, els noms d'un equip, les coses que has de portar… es fan així:</p>
+    <div class="simulador" data-id="c03-llista-ul">
+      <script type="text/plain" data-file="index.html">
+        <h1>La llista de la compra</h1>
+        <ul>
+          <li>Pomes</li>
+          <li>Pa</li>
+          <li>Llet</li>
+        </ul>
+      </script>
+    </div>
+    <ul>
+      <li><code>&lt;ul&gt;</code> (de l'anglès <em>unordered list</em>) és una <strong>llista no ordenada</strong>: l'ordre no importa, i cada element porta un pic al davant.</li>
+      <li><code>&lt;li&gt;</code> (<em>list item</em>) és cada <strong>element</strong> de la llista. Tots van dins del <code>&lt;ul&gt;</code>, un per línia i 2 espais més a la dreta.</li>
+    </ul>
+    <p>Afegeix-hi «Ous» i «Formatge».</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Llistes numerades</h2>
+    <p>Quan l'ordre sí que importa (els passos d'una recepta, una classificació…), fes servir <code>&lt;ol&gt;</code>:</p>
+    <div class="simulador" data-id="c03-llista-ol">
+      <script type="text/plain" data-file="index.html">
+        <h2>Com fer pa amb tomàquet</h2>
+        <ol>
+          <li>Talla una llesca de pa.</li>
+          <li>Frega-hi mig tomàquet.</li>
+          <li>Tira-hi un raig d'oli i una mica de sal.</li>
+        </ol>
+      </script>
+    </div>
+    <p>
+      <code>&lt;ol&gt;</code> (<em>ordered list</em>) és una <strong>llista ordenada</strong>. Els números no els escrius tu:
+      els posa el navegador. Prova d'afegir un pas al mig, «Torra el pa», i mira com es tornen a numerar tots.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Què pot anar dins d'una llista</h2>
+    <ul>
+      <li>Dins de <code>&lt;ul&gt;</code> i <code>&lt;ol&gt;</code> només hi pot haver elements <code>&lt;li&gt;</code>: ni text solt, ni títols, ni paràgrafs.</li>
+      <li>Dins d'un <code>&lt;li&gt;</code> hi pot anar gairebé de tot: text, <code>&lt;strong&gt;</code>, <code>&lt;em&gt;</code>… i fins i tot una altra llista.</li>
+    </ul>
+    <p>Si vols posar un títol o una explicació a la llista, escriu-los <strong>abans</strong> del <code>&lt;ul&gt;</code>, en un títol o un paràgraf.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Llistes dins de llistes</h2>
+    <p>Una llista pot tenir subllistes. La clau és on va la subllista: <strong>dins del <code>&lt;li&gt;</code></strong>, després del seu text i abans del <code>&lt;/li&gt;</code>.</p>
+    <div class="simulador" data-id="c03-llistes-niades" data-height="520">
+      <script type="text/plain" data-file="index.html">
+        <ul>
+          <li>Fruita
+            <ul>
+              <li>Pomes</li>
+              <li>Peres</li>
+            </ul>
+          </li>
+          <li>Verdura
+            <ul>
+              <li>Enciam</li>
+              <li>Pastanagues</li>
+            </ul>
+          </li>
+        </ul>
+      </script>
+    </div>
+    <p>
+      Fixa't en el <code>&lt;li&gt;</code> de «Fruita»: no es tanca a la mateixa línia, sinó després de la seva subllista.
+      Per això el <code>&lt;/li&gt;</code> queda alineat amb el seu <code>&lt;li&gt;</code>, i la subllista, 2 espais més a la dreta.
+      El navegador marca cada nivell amb un pic diferent.
+    </p>
+    <p>Es poden barrejar els dos tipus: una llista numerada amb subllistes de pics, o al revés.</p>
+    <aside class="codi-net">
+      <p class="codi-net__titol">🧹 Codi net: niuament = indentació</p>
+      <ul>
+        <li>Cada <code>&lt;li&gt;</code> en una línia, 2 espais més a la dreta que el seu <code>&lt;ul&gt;</code> o <code>&lt;ol&gt;</code>.</li>
+        <li>Una subllista va 2 espais més a la dreta que el <code>&lt;li&gt;</code> que la conté, i el <code>&lt;/li&gt;</code> s'alinea amb el seu <code>&lt;li&gt;</code>.</li>
+        <li>Si llegeixes només els espais de l'esquerra, has de veure l'estructura de la llista.</li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Errors típics</h2>
+    <p>Aquests exemples tenen errors. Mira el resultat i després llegeix el panell ⚠ Problemes.</p>
+
+    <h3>La subllista, fora del &lt;li&gt;</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <ul>
+          <li>Fruita</li>
+          <ul>
+            <li>Pomes</li>
+          </ul>
+        </ul>
+      </script>
+    </div>
+    <p>
+      Es veu gairebé igual, però la subllista ha quedat sola, entre dos elements, en lloc de ser part de «Fruita».
+      Mou el <code>&lt;/li&gt;</code> de «Fruita» després del <code>&lt;/ul&gt;</code> de la subllista.
+    </p>
+
+    <h3>Elements de llista sense llista</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <li>Pomes</li>
+        <li>Peres</li>
+      </script>
+    </div>
+    <p>
+      On són els pics? Els <code>&lt;li&gt;</code> han d'anar dins d'un <code>&lt;ul&gt;</code> o d'un <code>&lt;ol&gt;</code>:
+      sense llista, el navegador no els deixa espai a l'esquerra i els pics queden fora de la pàgina, on no es veuen.
+    </p>
+
+    <h3>T'oblides de tancar els &lt;li&gt;</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <ul>
+          <li>Pomes
+          <li>Peres
+          <li>Llet
+        </ul>
+      </script>
+    </div>
+    <p>
+      Es veu perfecte: el navegador sap que un <code>&lt;li&gt;</code> nou tanca l'anterior. Però a HTMLCat tanquem sempre
+      el que obrim: el codi és més clar i, en una llista niada, t'estalvia molts embolics.
+    </p>
+
+    <h3>Text solt dins de la llista</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <ul>
+          Coses que he de comprar:
+          <li>Pomes</li>
+          <li>Pa</li>
+        </ul>
+      </script>
+    </div>
+    <p>El text no té pic perquè no és cap element de la llista. Escriu-lo abans del <code>&lt;ul&gt;</code>, en un paràgraf.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Exercici: els teus preferits</h2>
+    <p>Completa la pàgina dels teus preferits. Ha de tenir:</p>
+    <ul>
+      <li>una llista amb pics amb almenys dues categories (música, menjar, llocs…), i dins de cada categoria una subllista amb almenys dos elements;</li>
+      <li>després, un títol <code>&lt;h2&gt;</code> i una llista numerada amb el teu <strong>top 3</strong> de qualsevol cosa: exactament tres elements;</li>
+      <li>cap error ni cap avís al panell ⚠ Problemes.</li>
+    </ul>
+    <p>Quan acabis, prem <strong>✓ Comprova</strong>.</p>
+    <div class="simulador" data-id="c03-exercici" data-goal-id="cap-3-ex" data-height="560">
+      <script type="text/plain" data-file="index.html">
+        <h1>Els meus preferits</h1>
+        <ul>
+          <li>Música</li>
+          <li>Menjar</li>
+        </ul>
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "count", "selector": "body > ul > li", "min": 2,
+            "msg": "La llista amb pics (<ul>) té almenys dues categories." },
+          { "type": "count", "selector": "body > ul > li > ul", "min": 2,
+            "msg": "Almenys dues categories tenen una subllista a dins del seu <li>." },
+          { "type": "count", "selector": "body > ul > li > ul > li:nth-child(2)", "min": 2,
+            "msg": "Aquestes subllistes tenen almenys dos elements cadascuna." },
+          { "type": "count", "selector": "h2", "min": 1,
+            "msg": "Hi ha un títol <h2> per al top 3." },
+          { "type": "count", "selector": "body > ol > li", "eq": 3,
+            "msg": "Hi ha una llista numerada (<ol>) amb exactament tres elements." },
+          { "type": "text", "selector": "li", "matches": "\\S", "all": true,
+            "msg": "Cap element de llista no és buit." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís: la indentació reflecteix el niuament." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Troba l'error</h2>
+    <p>
+      Aquesta llista té problemes: arregla'ls tots sense canviar els textos. El text «Abans de sortir:» ha d'anar en un
+      paràgraf abans de la llista, i l'aigua i l'entrepà, dins del pas «Fer la motxilla». Quan acabis, prem
+      <strong>✓ Comprova</strong>.
+    </p>
+    <div class="simulador" data-id="c03-troba-error" data-goal-id="cap-3-bug" data-height="560">
+      <script type="text/plain" data-file="index.html">
+        <h1>Preparar l'excursió</h1>
+        <ol>
+          Abans de sortir:
+          <li>Fer la motxilla
+          <ul>
+            <li>Aigua</li>
+            <li>Entrepà</li>
+          </ul>
+          <li>Carregar el mòbil</li>
+        </ol>
+        <li>Sortir a les 8</li>
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "text", "selector": "body > p", "includes": "Abans de sortir",
+            "msg": "«Abans de sortir:» és en un paràgraf, fora de la llista." },
+          { "type": "count", "selector": "body > ol > li", "eq": 3,
+            "msg": "La llista numerada té els tres passos: fer la motxilla, carregar el mòbil i sortir a les 8." },
+          { "type": "count", "selector": "ol > li:first-child > ul > li", "eq": 2,
+            "msg": "L'aigua i l'entrepà són una subllista dins del pas «Fer la motxilla»." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Resum</h2>
+    <div class="resum">
+      <ul>
+        <li><code>&lt;ul&gt;</code> fa una llista amb pics (l'ordre no importa) i <code>&lt;ol&gt;</code>, una llista numerada (l'ordre importa). Els números els posa el navegador.</li>
+        <li>Cada element de la llista és un <code>&lt;li&gt;</code>, i dins de <code>&lt;ul&gt;</code> i <code>&lt;ol&gt;</code> només hi pot haver <code>&lt;li&gt;</code>.</li>
+        <li>Una subllista va dins del <code>&lt;li&gt;</code>, després del seu text i abans del <code>&lt;/li&gt;</code>.</li>
+        <li>La indentació mostra els nivells: cada nivell, 2 espais més a la dreta, i cada <code>&lt;/li&gt;</code> alineat amb el seu <code>&lt;li&gt;</code>.</li>
+        <li>Tanca sempre els <code>&lt;li&gt;</code>, encara que el navegador ho faci per tu.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>
