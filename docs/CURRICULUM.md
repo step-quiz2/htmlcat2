@@ -21,7 +21,7 @@
 | 5 | Imatges | `img src alt width height`, carpetes, `figure`/`figcaption` | Descriu les imatges per a tothom | ✅ `cap-5-ex`, `cap-5-bug` |
 | 6 | Estructura de la pàgina | `header`, `nav`, `main`, `section`, `article`, `aside`, `footer`, `div` | L'estructura, abans de l'estil | ✅ `cap-6-ex`, `cap-6-bug` |
 | 7 | Taules | `table`, `caption`, `thead`, `tbody`, `tr`, `th scope`, `td` | Taules per a dades, no per maquetar | ✅ `cap-7-ex`, `cap-7-bug` |
-| 8 | Formularis | `form`, `label for`, tipus d'`input`, `select`, `textarea`, `button` | Cada camp té la seva etiqueta | ⏳ |
+| 8 | Formularis | `form`, `label for`, tipus d'`input`, `select`, `textarea`, `button` | Cada camp té la seva etiqueta | ✅ `cap-8-ex`, `cap-8-bug` |
 
 ### Part B — CSS
 

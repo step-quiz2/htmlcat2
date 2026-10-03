@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ca">
+  <head>
+    <meta charset="UTF-8">
+    <title>Sortida de final de curs</title>
+  </head>
+  <body>
+    <main>
+      <h1>Sortida de final de curs</h1>
+      <p>Apunta't a la sortida al parc d'aventures del 20 de juny.</p>
+      <form>
+        <p>
+          <label for="nom">Nom</label>
+          <input type="text" id="nom" name="nom" required>
+        </p>
+        <p>
+          <label for="correu">Correu electrònic</label>
+          <input type="email" id="correu" name="correu" required>
+        </p>
+        <p>
+          <label for="curs">Curs</label>
+          <select id="curs" name="curs">
+            <option value="1eso">1r d'ESO</option>
+            <option value="2eso">2n d'ESO</option>
+            <option value="3eso">3r d'ESO</option>
+            <option value="4eso">4t d'ESO</option>
+          </select>
+        </p>
+        <p>
+          <input type="checkbox" id="autoritzacio" name="autoritzacio">
+          <label for="autoritzacio">Tinc l'autorització de la família</label>
+        </p>
+        <button type="submit">Apunta'm a la sortida</button>
+      </form>
+    </main>
+  </body>
+</html>

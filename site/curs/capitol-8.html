@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capítol 8 — Formularis | HTMLCat</title>
+  <link rel="icon" href="../img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/course.css">
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link rel="stylesheet" href="../css/simulador.css">
+  <script type="module" src="../js/pages/course-page.js"></script>
+</head>
+<body data-pagina="capitol" data-num="8">
+
+<main class="curs-content">
+  <header class="chapter-header">
+    <h1>Formularis</h1>
+    <p class="chapter-lead">En acabar aquest capítol sabràs fer formularis perquè la gent t'enviï dades (un nom, un correu, una resposta…), amb camps que tothom pugui entendre i omplir.</p>
+  </header>
+
+  <section class="chapter-section">
+    <h2>El teu primer formulari</h2>
+    <p>Un formulari té camps per omplir i un botó per enviar-los:</p>
+    <div class="simulador" data-id="c08-primer-formulari" data-forms>
+      <script type="text/plain" data-file="index.html">
+        <form>
+          <label for="nom">Nom</label>
+          <input type="text" id="nom" name="nom">
+          <button type="submit">Envia</button>
+        </form>
+      </script>
+    </div>
+    <p>Escriu el teu nom al resultat i prem <strong>Envia</strong>: a sota hi sortirà què enviaria el formulari.</p>
+    <ul>
+      <li><code>&lt;form&gt;</code> agrupa els camps que s'envien junts.</li>
+      <li><code>&lt;input&gt;</code> és un <strong>camp</strong>. És un element buit, com <code>&lt;img&gt;</code>; l'atribut <code>type</code> diu de quin tipus és (<code>text</code>: un text curt).</li>
+      <li><code>name</code> és el <strong>nom de la dada</strong> quan s'envia: <code>nom = «Anna»</code>.</li>
+      <li><code>&lt;label&gt;</code> és l'<strong>etiqueta</strong> del camp, el text que diu què s'hi ha d'escriure. El seu <code>for</code> és igual que l'<code>id</code> del camp.</li>
+      <li><code>&lt;button type="submit"&gt;</code> és el <strong>botó d'enviar</strong>.</li>
+    </ul>
+    <p class="nota">
+      En un web de debò, les dades s'envien a un programa d'un servidor, que es diu amb l'atribut <code>action</code>:
+      <code>&lt;form action="https://…"&gt;</code>. Aquests programes s'escriuen amb altres llenguatges, com Python o
+      JavaScript. HTMLCat no envia res enlloc: et mostra què s'enviaria.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Cada camp, la seva etiqueta</h2>
+    <p>Hi ha dues maneres de lligar una etiqueta amb el seu camp:</p>
+    <div class="simulador" data-id="c08-etiquetes" data-forms>
+      <script type="text/plain" data-file="index.html">
+        <form>
+          <p>
+            <label for="cognoms">Cognoms</label>
+            <input type="text" id="cognoms" name="cognoms">
+          </p>
+          <p>
+            <label>Població <input type="text" name="poblacio" placeholder="Per exemple, Vic"></label>
+          </p>
+          <button type="submit">Envia</button>
+        </form>
+      </script>
+    </div>
+    <ul>
+      <li>Amb <code>for</code>: el <code>for</code> de l'etiqueta és igual que l'<code>id</code> del camp (i cada <code>id</code>, únic a la pàgina, com al capítol 4).</li>
+      <li>Amb el camp a dins de l'etiqueta: llavors no cal ni <code>for</code> ni <code>id</code>.</li>
+    </ul>
+    <p>
+      Clica la paraula «Cognoms» del resultat: el cursor salta al camp. Les etiquetes ajuden tothom: es poden clicar (molt
+      útil en un mòbil) i els lectors de pantalla les llegeixen quan arriben al camp, de manera que se sap què s'hi ha
+      d'escriure.
+    </p>
+    <p>
+      El text gris de dins del camp de la població és un <code>placeholder</code>. No és una etiqueta: desapareix quan
+      comences a escriure. Fes-lo servir només per donar un exemple.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Tipus de camps</h2>
+    <p>L'atribut <code>type</code> de l'<code>&lt;input&gt;</code> diu quina mena de dada s'hi escriu:</p>
+    <div class="simulador" data-id="c08-tipus" data-height="560" data-forms>
+      <script type="text/plain" data-file="index.html">
+        <form>
+          <p>
+            <label for="correu">Correu electrònic</label>
+            <input type="email" id="correu" name="correu">
+          </p>
+          <p>
+            <label for="contrasenya">Contrasenya</label>
+            <input type="password" id="contrasenya" name="contrasenya">
+          </p>
+          <p>
+            <label for="edat">Edat</label>
+            <input type="number" id="edat" name="edat" min="12" max="18">
+          </p>
+          <p>
+            <label for="dia">Dia de la sortida</label>
+            <input type="date" id="dia" name="dia">
+          </p>
+          <p>
+            <input type="checkbox" id="autoritzacio" name="autoritzacio">
+            <label for="autoritzacio">Tinc l'autorització de la família</label>
+          </p>
+          <button type="submit">Envia</button>
+        </form>
+      </script>
+    </div>
+    <ul>
+      <li><code>email</code>: un correu electrònic. En enviar, el navegador comprova que sembli un correu (amb @), i el mòbil mostra un teclat amb @.</li>
+      <li><code>password</code>: una contrasenya; no es veu el que escrius.</li>
+      <li><code>number</code>: un número; <code>min</code> i <code>max</code> diuen el mínim i el màxim. Al mòbil, surt el teclat numèric.</li>
+      <li><code>date</code>: una data, amb un calendari per triar-la.</li>
+      <li><code>checkbox</code>: una casella per marcar o no. L'etiqueta sol anar després de la casella.</li>
+    </ul>
+    <p>Prova d'escriure un correu sense @, o una edat de 25 anys, i prem <strong>Envia</strong>: el navegador no ho deixa enviar.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Una pregunta, diverses respostes</h2>
+    <p>Quan només es pot triar una resposta, es fan servir botons d'opció (<code>type="radio"</code>):</p>
+    <div class="simulador" data-id="c08-opcions" data-height="560" data-forms>
+      <script type="text/plain" data-file="index.html">
+        <form>
+          <fieldset>
+            <legend>Quina és la teva estació preferida?</legend>
+            <p>
+              <input type="radio" id="primavera" name="estacio" value="primavera">
+              <label for="primavera">Primavera</label>
+            </p>
+            <p>
+              <input type="radio" id="estiu" name="estacio" value="estiu">
+              <label for="estiu">Estiu</label>
+            </p>
+            <p>
+              <input type="radio" id="tardor" name="estacio" value="tardor">
+              <label for="tardor">Tardor</label>
+            </p>
+            <p>
+              <input type="radio" id="hivern" name="estacio" value="hivern">
+              <label for="hivern">Hivern</label>
+            </p>
+          </fieldset>
+          <button type="submit">Vota</button>
+        </form>
+      </script>
+    </div>
+    <ul>
+      <li>Tots els botons d'una mateixa pregunta tenen el <strong>mateix <code>name</code></strong>: així el navegador sap que van junts i només deixa marcar-ne un.</li>
+      <li>Cada botó té el seu <code>value</code>, que és el que s'envia: <code>estacio = «tardor»</code>.</li>
+      <li><code>&lt;fieldset&gt;</code> agrupa les respostes d'una pregunta, i <code>&lt;legend&gt;</code> és la pregunta. Els lectors de pantalla la llegeixen amb cada resposta.</li>
+    </ul>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Llistes desplegables i textos llargs</h2>
+    <div class="simulador" data-id="c08-llistes" data-height="520" data-forms>
+      <script type="text/plain" data-file="index.html">
+        <form>
+          <p>
+            <label for="curs">Curs</label>
+            <select id="curs" name="curs">
+              <option value="1eso">1r d'ESO</option>
+              <option value="2eso">2n d'ESO</option>
+              <option value="3eso" selected>3r d'ESO</option>
+              <option value="4eso">4t d'ESO</option>
+            </select>
+          </p>
+          <p>
+            <label for="missatge">Missatge</label>
+            <textarea id="missatge" name="missatge" rows="4" cols="30"></textarea>
+          </p>
+          <button type="submit">Envia</button>
+        </form>
+      </script>
+    </div>
+    <ul>
+      <li><code>&lt;select&gt;</code> és una llista desplegable, i cada <code>&lt;option&gt;</code> n'és una opció. El <code>value</code> és el que s'envia; el text, el que es veu. <code>selected</code> diu quina opció surt triada d'entrada.</li>
+      <li><code>&lt;textarea&gt;</code> és un camp per a un text llarg, de diverses línies. <strong>No</strong> és un element buit: es tanca amb <code>&lt;/textarea&gt;</code>, i el que hi ha entre les dues etiquetes és el text inicial (normalment, res). <code>rows</code> i <code>cols</code> diuen quantes línies i quantes lletres d'amplada té.</li>
+    </ul>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Camps obligatoris</h2>
+    <p>Amb l'atribut <code>required</code>, un camp és obligatori:</p>
+    <div class="simulador" data-id="c08-obligatori" data-forms>
+      <script type="text/plain" data-file="index.html">
+        <form>
+          <p>
+            <label for="usuari">Nom d'usuari</label>
+            <input type="text" id="usuari" name="usuari" required>
+          </p>
+          <p>
+            <label for="correu">Correu electrònic</label>
+            <input type="email" id="correu" name="correu" required>
+          </p>
+          <button type="submit">Registra'm</button>
+        </form>
+      </script>
+    </div>
+    <p>
+      Prem <strong>Registra'm</strong> sense escriure res: el navegador no envia el formulari i t'avisa del camp que falta.
+      Aquesta comprovació és una ajuda per a qui omple el formulari; el programa del servidor ho ha de tornar a
+      comprovar.
+    </p>
+    <aside class="codi-net">
+      <p class="codi-net__titol">🧹 Codi net: cada camp té la seva etiqueta</p>
+      <ul>
+        <li>Cada camp té el seu <code>&lt;label&gt;</code>: amb <code>for</code> igual que l'<code>id</code> del camp, o amb el camp a dins.</li>
+        <li>El <code>placeholder</code> és un exemple, no una etiqueta.</li>
+        <li>Cada camp té <code>name</code>; els botons d'opció d'una pregunta, el mateix <code>name</code> i un <code>value</code> cadascun.</li>
+        <li>Tria el <code>type</code> que toca (<code>email</code>, <code>number</code>, <code>date</code>…): el navegador comprova les dades i el mòbil mostra el teclat adequat.</li>
+        <li>Els botons diuen què fan: «Envia la inscripció» s'entén millor que «Envia».</li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Errors típics</h2>
+    <p>Aquests exemples tenen errors. Prova'ls al resultat i després llegeix el panell ⚠ Problemes.</p>
+
+    <h3>Un placeholder en lloc d'etiqueta</h3>
+    <div class="simulador" data-readonly data-forms>
+      <script type="text/plain" data-file="index.html">
+        <form>
+          <input type="text" name="nom" placeholder="Nom">
+          <button type="submit">Envia</button>
+        </form>
+      </script>
+    </div>
+    <p>Comença a escriure al camp: «Nom» desapareix, i ja no saps què hi havia. A més, molts lectors de pantalla no llegeixen el placeholder.</p>
+
+    <h3>Un for que no coincideix</h3>
+    <div class="simulador" data-readonly data-forms>
+      <script type="text/plain" data-file="index.html">
+        <form>
+          <label for="correu">Correu electrònic</label>
+          <input type="email" id="email" name="correu">
+          <button type="submit">Envia</button>
+        </form>
+      </script>
+    </div>
+    <p>Clica «Correu electrònic»: no passa res. El <code>for</code> diu <code>correu</code> i l'<code>id</code>, <code>email</code>: l'etiqueta no és de cap camp.</p>
+
+    <h3>Un camp sense name</h3>
+    <div class="simulador" data-readonly data-forms>
+      <script type="text/plain" data-file="index.html">
+        <form>
+          <label for="nom">Nom</label>
+          <input type="text" id="nom">
+          <button type="submit">Envia</button>
+        </form>
+      </script>
+    </div>
+    <p>Escriu un nom i prem <strong>Envia</strong>: el formulari no enviaria res. Sense <code>name</code>, la dada es perd.</p>
+
+    <h3>Botons d'opció sense name</h3>
+    <div class="simulador" data-readonly data-height="440" data-forms>
+      <script type="text/plain" data-file="index.html">
+        <form>
+          <fieldset>
+            <legend>Vols venir a la sortida?</legend>
+            <input type="radio" id="si" value="si">
+            <label for="si">Sí</label>
+            <input type="radio" id="no" value="no">
+            <label for="no">No</label>
+          </fieldset>
+          <button type="submit">Respon</button>
+        </form>
+      </script>
+    </div>
+    <p>Marca «Sí» i després «No»: queden marcats tots dos! Sense un <code>name</code> comú, el navegador no sap que són respostes a la mateixa pregunta.</p>
+
+    <h3>type="mail"</h3>
+    <div class="simulador" data-readonly data-forms>
+      <script type="text/plain" data-file="index.html">
+        <form>
+          <label for="correu">Correu electrònic</label>
+          <input type="mail" id="correu" name="correu">
+          <button type="submit">Envia</button>
+        </form>
+      </script>
+    </div>
+    <p>
+      Escriu «hola» i prem <strong>Envia</strong>: s'enviaria sense cap queixa. El navegador no coneix el tipus
+      <code>mail</code> i n'ha fet un camp de text normal, que no comprova res. El tipus és <code>email</code>.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Exercici: la sortida de final de curs</h2>
+    <p>Completa el formulari per apuntar-se a la sortida. Ha de tenir:</p>
+    <ul>
+      <li>un camp de text per al nom i un de correu electrònic (<code>type="email"</code>), tots dos obligatoris;</li>
+      <li>una llista desplegable <code>&lt;select&gt;</code> per triar el curs, amb almenys tres opcions;</li>
+      <li>una casella per a «Tinc l'autorització de la família»;</li>
+      <li>un botó <code>&lt;button type="submit"&gt;</code> que digui què fa;</li>
+      <li>cada camp, amb la seva etiqueta i el seu <code>name</code>;</li>
+      <li>cap error ni cap avís al panell ⚠ Problemes.</li>
+    </ul>
+    <p>Prova'l al resultat, i quan acabis, prem <strong>✓ Comprova</strong>.</p>
+    <div class="simulador" data-id="c08-exercici" data-goal-id="cap-8-ex" data-mode="document" data-height="600" data-forms>
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>Sortida de final de curs</title>
+          </head>
+          <body>
+            <main>
+              <h1>Sortida de final de curs</h1>
+              <p>Apunta't a la sortida al parc d'aventures del 20 de juny.</p>
+              <form>
+
+              </form>
+            </main>
+          </body>
+        </html>
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "exists", "selector": "main form",
+            "msg": "El formulari és dins del <main>." },
+          { "type": "exists", "selector": "form input[type='text'][required], form input:not([type])[required]",
+            "msg": "Hi ha un camp de text obligatori (required) per al nom." },
+          { "type": "exists", "selector": "form input[type='email'][required]",
+            "msg": "Hi ha un camp de correu electrònic (type=\"email\") obligatori." },
+          { "type": "count", "selector": "form select option", "min": 3,
+            "msg": "Hi ha una llista <select> amb almenys tres opcions per triar el curs." },
+          { "type": "exists", "selector": "form input[type='checkbox']",
+            "msg": "Hi ha una casella (type=\"checkbox\") per a l'autorització." },
+          { "type": "text", "selector": "form button[type='submit']", "matches": "\\S",
+            "msg": "Hi ha un botó <button type=\"submit\"> amb text." },
+          { "type": "attr", "selector": "form input, form select, form textarea", "name": "name", "nonEmpty": true, "all": true,
+            "msg": "Cada camp té name." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error (com un camp sense etiqueta)." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Troba l'error</h2>
+    <p>
+      El formulari del club de lectura té quatre errors. Arregla'ls amb l'ajuda del panell ⚠ Problemes. El text de
+      l'etiqueta del llibre, tria'l tu (per exemple, «Llibre preferit»). Quan acabis, prem <strong>✓ Comprova</strong>.
+    </p>
+    <div class="simulador" data-id="c08-troba-error" data-goal-id="cap-8-bug" data-mode="document" data-height="600" data-forms>
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>Club de lectura</title>
+          </head>
+          <body>
+            <main>
+              <h1>Club de lectura</h1>
+              <p>Apunta't al club de lectura de la biblioteca.</p>
+              <form>
+                <p>
+                  <label for="nom">Nom</label>
+                  <input type="text" id="nom">
+                </p>
+                <p>
+                  <label for="correu">Correu electrònic</label>
+                  <input type="mail" id="email" name="correu">
+                </p>
+                <p>
+                  <input type="text" name="llibre" placeholder="El teu llibre preferit">
+                </p>
+                <button type="submit">Apunta'm</button>
+              </form>
+            </main>
+          </body>
+        </html>
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "attr", "selector": "form input", "name": "name", "nonEmpty": true, "all": true,
+            "msg": "Cada camp té name." },
+          { "type": "exists", "selector": "form input[type='email']",
+            "msg": "El camp del correu és de tipus email." },
+          { "type": "count", "selector": "form label", "min": 3,
+            "msg": "Cada camp té la seva etiqueta <label>." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Resum</h2>
+    <div class="resum">
+      <ul>
+        <li>Un formulari és <code>&lt;form&gt;</code>, amb camps (<code>&lt;input&gt;</code>, <code>&lt;select&gt;</code>, <code>&lt;textarea&gt;</code>) i un botó <code>&lt;button type="submit"&gt;</code>.</li>
+        <li>Cada camp té una etiqueta <code>&lt;label&gt;</code> (amb <code>for</code> igual que l'<code>id</code> del camp) i un <code>name</code>, el nom amb què s'envia la dada.</li>
+        <li>El <code>type</code> de l'<code>&lt;input&gt;</code> diu quin camp és: <code>text</code>, <code>email</code>, <code>password</code>, <code>number</code>, <code>date</code>, <code>checkbox</code>, <code>radio</code>…</li>
+        <li>Els botons d'opció d'una pregunta comparteixen <code>name</code> i tenen cadascun el seu <code>value</code>; <code>&lt;fieldset&gt;</code> i <code>&lt;legend&gt;</code> els agrupen amb la pregunta.</li>
+        <li><code>required</code> fa que un camp sigui obligatori; el <code>placeholder</code> només és un exemple.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>
