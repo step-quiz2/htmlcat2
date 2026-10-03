@@ -19,7 +19,7 @@
 | 3 | Llistes | `ul`, `ol`, `li`, llistes niades | Niuament = indentació | ✅ `cap-3-ex`, `cap-3-bug` |
 | 4 | Enllaços | `a href`, rutes absolutes i relatives, àncores `#id`, `id` | Textos d'enllaç que diuen on porten | ✅ `cap-4-ex`, `cap-4-bug` |
 | 5 | Imatges | `img src alt width height`, carpetes, `figure`/`figcaption` | Descriu les imatges per a tothom | ✅ `cap-5-ex`, `cap-5-bug` |
-| 6 | Estructura de la pàgina | `header`, `nav`, `main`, `section`, `article`, `aside`, `footer`, `div` | L'estructura, abans de l'estil | ⏳ |
+| 6 | Estructura de la pàgina | `header`, `nav`, `main`, `section`, `article`, `aside`, `footer`, `div` | L'estructura, abans de l'estil | ✅ `cap-6-ex`, `cap-6-bug` |
 | 7 | Taules | `table`, `caption`, `thead`, `tbody`, `tr`, `th scope`, `td` | Taules per a dades, no per maquetar | ⏳ |
 | 8 | Formularis | `form`, `label for`, tipus d'`input`, `select`, `textarea`, `button` | Cada camp té la seva etiqueta | ⏳ |
 

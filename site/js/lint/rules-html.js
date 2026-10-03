@@ -638,6 +638,95 @@ const imageNotFound = {
   },
 };
 
+// ── Estructura de la pàgina (capítol 6) ──
+
+/** On pot anar <main> (WHATWG: «hierarchically correct main element»). */
+const MAIN_PARENTS = new Set(['html', 'body', 'div', 'form']);
+
+const singleMain = {
+  id: 'html/single-main',
+  lang: 'html',
+  since: 6,
+  severity: 'warning',
+  check(ctx, report) {
+    const mains = htmlElements(ctx.root).filter((el) => el.name === 'main');
+    for (const main of mains) {
+      let parent = main.parent;
+      while (parent.type === 'element' && (MAIN_PARENTS.has(parent.name) || parent.name.includes('-'))) parent = parent.parent;
+      if (parent.type === 'element') report(nameRange(main.startTag), { kind: 'inside', parent: parent.name });
+    }
+    for (const main of mains.slice(1)) report(nameRange(main.startTag), { kind: 'several', count: mains.length });
+    // Que falti només es diu quan l'alumne escriu el document sencer
+    if (!mains.length && ctx.mode === 'document') {
+      const body = htmlElements(ctx.root).find((el) => el.name === 'body');
+      if (body && body.children.some(isElement)) report(nameRange(body.startTag), { kind: 'missing' });
+    }
+  },
+};
+
+// Un <head> dins del cos de la pàgina: el navegador l'ignora (el seu contingut
+// queda al <body>). Sovint l'alumne volia <header>.
+const headInBody = {
+  id: 'html/head-in-body',
+  lang: 'html',
+  since: 6,
+  severity: 'error',
+  check(ctx, report) {
+    const body = firstStartTag(ctx.tokens, 'body');
+    const heads = ctx.tokens.filter((t) => t.type === 'startTag' && t.name === 'head');
+    heads.forEach((head, i) => {
+      const inPlace = ctx.mode === 'document' && i === 0 && (!body || head.start < body.start);
+      if (!inPlace) report(nameRange(head), {});
+    });
+  },
+};
+
+const SECTIONING = new Set(['section', 'article']);
+const NESTED_PARTS = new Set(['section', 'article', 'aside', 'nav']);
+
+const sectionHeading = {
+  id: 'html/section-heading',
+  lang: 'html',
+  since: 6,
+  severity: 'warning',
+  check(ctx, report) {
+    for (const el of htmlElements(ctx.root)) {
+      if (!SECTIONING.has(el.name)) continue;
+      // El títol d'una part de dins (una altra <section>…) no compta
+      const hasHeading = [...walk(el, (child) => NESTED_PARTS.has(child.name))]
+        .some((node) => isElement(node) && HEADING.test(node.name));
+      if (!hasHeading) report(nameRange(el.startTag), { tag: el.name });
+    }
+  },
+};
+
+/** Noms de classe o d'id que diuen que el <div> és una part amb element propi. */
+const SEMANTIC_NAMES = {
+  header: 'header', capcalera: 'header', 'capçalera': 'header',
+  nav: 'nav', navegacio: 'nav', 'navegació': 'nav', menu: 'nav', 'menú': 'nav', 'menu-principal': 'nav',
+  main: 'main', principal: 'main', 'contingut-principal': 'main',
+  footer: 'footer', peu: 'footer', 'peu-de-pagina': 'footer', 'peu-pagina': 'footer',
+  aside: 'aside', sidebar: 'aside', lateral: 'aside', 'barra-lateral': 'aside',
+  article: 'article', section: 'section', seccio: 'section', 'secció': 'section',
+};
+
+const semanticDiv = {
+  id: 'html/semantic-div',
+  lang: 'html',
+  since: 6,
+  severity: 'warning',
+  check(ctx, report) {
+    for (const el of htmlElements(ctx.root)) {
+      if (el.name !== 'div') continue;
+      const classes = (attrOf(el.startTag, 'class')?.value || '').toLowerCase().split(/\s+/);
+      const id = (attrOf(el.startTag, 'id')?.value || '').trim().toLowerCase();
+      const found = [...classes.map((name) => ({ attr: 'class', name })), { attr: 'id', name: id }]
+        .find(({ name }) => Object.hasOwn(SEMANTIC_NAMES, name));
+      if (found) report(nameRange(el.startTag), { ...found, element: SEMANTIC_NAMES[found.name] });
+    }
+  },
+};
+
 const inlineStyle = {
   id: 'html/inline-style',
   lang: 'html',
@@ -688,5 +777,9 @@ export const HTML_RULES = [
   obsoleteAttribute,
   imgSize,
   imageNotFound,
+  singleMain,
+  headInBody,
+  sectionHeading,
+  semanticDiv,
   inlineStyle,
 ];
