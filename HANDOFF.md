@@ -1,6 +1,6 @@
 # HANDOFF — start here (for a Claude session with no prior context)
 
-Last updated: 2026-10-03, after chapter 6 (phase 5, content).
+Last updated: 2026-10-03, after chapter 7 (phase 5, content).
 Keep it short and current: when you finish a phase, rewrite the "Where we are" and
 "Next task" sections.
 
@@ -36,10 +36,12 @@ copied here by a GitHub web upload, which dropped every dot-file (see §6).
 - Phase 4 ✅ course shell (`site/js/course/`: data, progress, shell; STATE §2.8), checks DSL v1
   (`site/js/checks/`, "✓ Comprova", hidden 800×600 check frame; STATE §2.7) and chapter 1
   (`site/curs/capitol-1.html`, exercises `cap-1-ex` and `cap-1-bug`, solutions in `tests/solutions/`).
-- Phase 5 (content, one chapter per PR): chapters 1–6 done (`site/curs/capitol-N.html`,
+- Phase 5 (content, one chapter per PR): chapters 1–7 done (`site/curs/capitol-N.html`,
   exercises `cap-N-ex` and `cap-N-bug`); chapter 4 added six link rules, chapter 5 six
   image/attribute rules (per-element attributes in `lang/html-spec.js`), chapter 6 four
-  page-structure rules (STATE §2.6). From chapter 6 on, exercises are full documents
+  page-structure rules, chapter 7 five table rules (`html/th-scope` is the first `info`
+  rule; enumerated attribute values live in `ENUMERATED_ATTRIBUTES`, STATE §2.6). Chapter 7
+  simulators carry a read-only `estils.css` so table borders show (CSS is taught in part B). From chapter 6 on, exercises are full documents
   (`data-mode="document"`, D3), and `html/single-main` warns when a document has no `<main>`:
   every example document from chapter 6 on must have one (the free editor's starter code too).
   `html/image-not-found` is static: student images can only come from `site/recursos/`,
@@ -47,10 +49,11 @@ copied here by a GitHub web upload, which dropped every dot-file (see §6).
   `site/recursos/CREDITS.md` in sync; add a new image to all three). The browser test checks
   that, in every simulator, the images the browser cannot show match the panel's
   `html/image-not-found` entries.
-  Next: chapter 7, «Taules» (`table`, `caption`, `thead`, `tbody`, `tr`, `th scope`, `td`;
-  habit: tables for data, not for layout). BLUEPRINT Appendix C plans `html/table-structure` (E)
-  and `html/th-scope` (I), since 7. The browser builds `<tbody>` by itself: count rows in the
-  source with `uses-html`, or use selectors that work with and without `<tbody>`.
+  Next: chapter 8, «Formularis» (`form`, `label for`, `input` types, `select`, `textarea`,
+  `button`; habit: every field has its label). BLUEPRINT Appendix C plans `html/control-label`
+  (E, since 8). Simulators with forms need `data-forms` (sandbox `allow-forms`; submissions are
+  intercepted and shown below the preview, STATE §2.4). Add the `input type` values to
+  `ENUMERATED_ATTRIBUTES` so `type="txt"` gets a suggestion.
 - Decisions D3, D4, D6–D12: the owner accepted all recommended options (STATE §3).
 - 177 unit tests + static checks + browser checks (editor, panel and every exercise end-to-end), all green.
 - Still pending from phase 0 (owner's job): confirm Cloudflare Pages deploys

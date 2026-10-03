@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capítol 7 — Taules | HTMLCat</title>
+  <link rel="icon" href="../img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/course.css">
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link rel="stylesheet" href="../css/simulador.css">
+  <script type="module" src="../js/pages/course-page.js"></script>
+</head>
+<body data-pagina="capitol" data-num="7">
+
+<main class="curs-content">
+  <header class="chapter-header">
+    <h1>Taules</h1>
+    <p class="chapter-lead">En acabar aquest capítol sabràs presentar dades en files i columnes amb una taula, amb capçaleres que tothom pugui entendre.</p>
+  </header>
+
+  <section class="chapter-section">
+    <h2>La teva primera taula</h2>
+    <p>Una taula organitza dades en files i columnes, com un full de càlcul. S'escriu fila a fila:</p>
+    <div class="simulador" data-id="c07-primera-taula" data-height="480">
+      <script type="text/plain" data-file="index.html">
+        <table>
+          <tr>
+            <th>Nom</th>
+            <th>Edat</th>
+            <th>Caràcter</th>
+          </tr>
+          <tr>
+            <td>Mixa</td>
+            <td>3 anys</td>
+            <td>Juganera</td>
+          </tr>
+          <tr>
+            <td>Pelut</td>
+            <td>7 anys</td>
+            <td>Dormilega</td>
+          </tr>
+        </table>
+      </script>
+      <script type="text/plain" data-file="estils.css" data-readonly>
+        /* Vores perquè es vegin les cel·les (el CSS, a la part B del curs) */
+        table {
+          border-collapse: collapse;
+        }
+
+        th,
+        td {
+          border: 1px solid gray;
+          padding: 4px 8px;
+        }
+      </script>
+    </div>
+    <ul>
+      <li><code>&lt;table&gt;</code> agrupa tota la taula.</li>
+      <li><code>&lt;tr&gt;</code> (de l'anglès <em>table row</em>) és una <strong>fila</strong>.</li>
+      <li><code>&lt;td&gt;</code> (<em>table data</em>) és una <strong>cel·la</strong> amb una dada.</li>
+      <li><code>&lt;th&gt;</code> (<em>table header</em>) és una <strong>cel·la de capçalera</strong>: diu què hi ha a la seva columna. El navegador l'escriu en negreta i centrada.</li>
+    </ul>
+    <p>
+      Les columnes no s'escriuen: es formen soles, amb la primera cel·la de cada fila, la segona… Per això totes les
+      files han de tenir el mateix nombre de cel·les.
+    </p>
+    <p class="nota">
+      Sense CSS, una taula no té vores. Aquí n'hi hem posat amb una mica de CSS (la pestanya <code>estils.css</code>,
+      que no cal tocar): ho aprendràs a la part B del curs.
+    </p>
+    <p>Fixa't que el panell ⚠ Problemes et fa un suggeriment. Ara veuràs què vol dir.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Capçaleres de columna i de fila: scope</h2>
+    <p>Una capçalera pot ser d'una columna (a dalt) o d'una fila (a l'esquerra). L'atribut <code>scope</code> («abast») ho diu:</p>
+    <div class="simulador" data-id="c07-scope" data-height="480">
+      <script type="text/plain" data-file="index.html">
+        <table>
+          <tr>
+            <td></td>
+            <th scope="col">Entre setmana</th>
+            <th scope="col">Cap de setmana</th>
+          </tr>
+          <tr>
+            <th scope="row">Infantil</th>
+            <td>5 €</td>
+            <td>6 €</td>
+          </tr>
+          <tr>
+            <th scope="row">Adult</th>
+            <td>7 €</td>
+            <td>9 €</td>
+          </tr>
+        </table>
+      </script>
+      <script type="text/plain" data-file="estils.css" data-readonly>
+        /* Vores perquè es vegin les cel·les (el CSS, a la part B del curs) */
+        table {
+          border-collapse: collapse;
+        }
+
+        th,
+        td {
+          border: 1px solid gray;
+          padding: 4px 8px;
+        }
+      </script>
+    </div>
+    <ul>
+      <li><code>scope="col"</code>: és la capçalera de la seva <strong>columna</strong> (de tot el que hi ha a sota).</li>
+      <li><code>scope="row"</code>: és la capçalera de la seva <strong>fila</strong> (de tot el que hi ha a la dreta).</li>
+      <li>La cel·la de dalt a l'esquerra no té res, però hi ha de ser: és una <code>&lt;td&gt;&lt;/td&gt;</code> buida.</li>
+    </ul>
+    <p>
+      Amb les capçaleres ben marcades, un lector de pantalla pot dir «Infantil, Cap de setmana: 6 €» quan arriba a
+      aquesta cel·la. Sense, només diria «6 €», i no sabries de què.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Títol i parts: caption, thead i tbody</h2>
+    <p>Una taula completa té un títol i separa les capçaleres de les dades:</p>
+    <div class="simulador" data-id="c07-parts" data-height="560">
+      <script type="text/plain" data-file="index.html">
+        <table>
+          <caption>Els gats del refugi</caption>
+          <thead>
+            <tr>
+              <th scope="col">Nom</th>
+              <th scope="col">Edat</th>
+              <th scope="col">Caràcter</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Mixa</th>
+              <td>3 anys</td>
+              <td>Juganera</td>
+            </tr>
+            <tr>
+              <th scope="row">Pelut</th>
+              <td>7 anys</td>
+              <td>Dormilega</td>
+            </tr>
+          </tbody>
+        </table>
+      </script>
+      <script type="text/plain" data-file="estils.css" data-readonly>
+        /* Vores perquè es vegin les cel·les (el CSS, a la part B del curs) */
+        table {
+          border-collapse: collapse;
+        }
+
+        th,
+        td {
+          border: 1px solid gray;
+          padding: 4px 8px;
+        }
+      </script>
+    </div>
+    <ul>
+      <li><code>&lt;caption&gt;</code> és el <strong>títol</strong> de la taula, i va just després de <code>&lt;table&gt;</code>. Els lectors de pantalla el llegeixen abans de començar, i així se sap de què va la taula.</li>
+      <li><code>&lt;thead&gt;</code> agrupa les files de <strong>capçalera</strong>.</li>
+      <li><code>&lt;tbody&gt;</code> agrupa les files de <strong>dades</strong>, el cos de la taula. Si no l'escrius, el navegador l'hi posa igualment, però escrivint-lo el codi és més clar.</li>
+      <li>El nom de cada gat és la capçalera de la seva fila: per això és una <code>&lt;th scope="row"&gt;</code>.</li>
+    </ul>
+    <p>També hi ha <code>&lt;tfoot&gt;</code>, per a una fila final de totals, però no el necessitaràs gaire.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Taules per a dades, no per maquetar</h2>
+    <p>
+      Una taula és per a dades que tenen sentit en files i columnes: cada cel·la és el valor d'una fila i d'una columna
+      (l'edat d'en Pelut). Fa anys, moltes webs feien servir taules per col·locar coses a la pàgina: el menú a
+      l'esquerra, el text al mig… Així, els lectors de pantalla anunciaven taules on no n'hi havia cap, i les pàgines no
+      s'adaptaven als mòbils. Per col·locar coses a la pàgina es fa servir CSS, que aprendràs a la part B.
+    </p>
+    <p>Una pista: si a la teva taula no hi ha cap capçalera que tingui sentit, segurament no és una taula de dades (el panell t'ho dirà).</p>
+    <aside class="codi-net">
+      <p class="codi-net__titol">🧹 Codi net: taules per a dades, no per maquetar</p>
+      <ul>
+        <li>Una taula, només per a dades en files i columnes; per col·locar coses a la pàgina, CSS.</li>
+        <li>Cada taula té un <code>&lt;caption&gt;</code> que diu de què va.</li>
+        <li>Les capçaleres són <code>&lt;th&gt;</code>, amb <code>scope="col"</code> o <code>scope="row"</code>.</li>
+        <li>Totes les files tenen el mateix nombre de cel·les; si una no té res, <code>&lt;td&gt;&lt;/td&gt;</code>.</li>
+        <li>La indentació mostra l'estructura: <code>table</code>, a dins <code>thead</code> i <code>tbody</code>, a dins <code>tr</code>, i a dins <code>th</code> i <code>td</code>.</li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Errors típics</h2>
+    <p>Aquests exemples tenen errors. Mira el resultat i després llegeix el panell ⚠ Problemes.</p>
+
+    <h3>Una cel·la que falta</h3>
+    <div class="simulador" data-readonly data-height="400">
+      <script type="text/plain" data-file="index.html">
+        <table>
+          <tr>
+            <th scope="col">Nom</th>
+            <th scope="col">Edat</th>
+            <th scope="col">Caràcter</th>
+          </tr>
+          <tr>
+            <td>Mixa</td>
+            <td>Juganera</td>
+          </tr>
+        </table>
+      </script>
+      <script type="text/plain" data-file="estils.css" data-readonly>
+        /* Vores perquè es vegin les cel·les (el CSS, a la part B del curs) */
+        table {
+          border-collapse: collapse;
+        }
+
+        th,
+        td {
+          border: 1px solid gray;
+          padding: 4px 8px;
+        }
+      </script>
+    </div>
+    <p>
+      Falta l'edat de la Mixa, i «Juganera» ha quedat a la columna de l'edat: les columnes es formen per ordre. A més, la
+      fila queda més curta i la taula, desquadrada.
+    </p>
+
+    <h3>Text fora de les cel·les</h3>
+    <div class="simulador" data-readonly data-height="400">
+      <script type="text/plain" data-file="index.html">
+        <table>
+          <tr>
+            <th scope="col">Nom</th>
+            <th scope="col">Edat</th>
+          </tr>
+          Actualitzat el 3 d'octubre
+          <tr>
+            <td>Mixa</td>
+            <td>3 anys</td>
+          </tr>
+        </table>
+      </script>
+      <script type="text/plain" data-file="estils.css" data-readonly>
+        /* Vores perquè es vegin les cel·les (el CSS, a la part B del curs) */
+        table {
+          border-collapse: collapse;
+        }
+
+        th,
+        td {
+          border: 1px solid gray;
+          padding: 4px 8px;
+        }
+      </script>
+    </div>
+    <p>
+      El text surt a sobre de la taula! No era dins de cap cel·la, i el navegador l'ha tret de la taula i l'ha posat just
+      abans. Si és el títol, va a <code>&lt;caption&gt;</code>; si no, en un paràgraf fora de la taula.
+    </p>
+
+    <h3>Una taula sense capçaleres</h3>
+    <div class="simulador" data-readonly data-height="400">
+      <script type="text/plain" data-file="index.html">
+        <table>
+          <tr>
+            <td>Nom</td>
+            <td>Edat</td>
+          </tr>
+          <tr>
+            <td>Mixa</td>
+            <td>3 anys</td>
+          </tr>
+        </table>
+      </script>
+      <script type="text/plain" data-file="estils.css" data-readonly>
+        /* Vores perquè es vegin les cel·les (el CSS, a la part B del curs) */
+        table {
+          border-collapse: collapse;
+        }
+
+        th,
+        td {
+          border: 1px solid gray;
+          padding: 4px 8px;
+        }
+      </script>
+    </div>
+    <p>«Nom» i «Edat» són capçaleres, però no ho semblen: ni el navegador no les destaca ni els lectors de pantalla no ho saben. Les capçaleres són <code>&lt;th&gt;</code>.</p>
+
+    <h3>scope="column"</h3>
+    <div class="simulador" data-readonly data-height="400">
+      <script type="text/plain" data-file="index.html">
+        <table>
+          <tr>
+            <th scope="column">Nom</th>
+            <th scope="column">Edat</th>
+          </tr>
+          <tr>
+            <td>Mixa</td>
+            <td>3 anys</td>
+          </tr>
+        </table>
+      </script>
+      <script type="text/plain" data-file="estils.css" data-readonly>
+        /* Vores perquè es vegin les cel·les (el CSS, a la part B del curs) */
+        table {
+          border-collapse: collapse;
+        }
+
+        th,
+        td {
+          border: 1px solid gray;
+          padding: 4px 8px;
+        }
+      </script>
+    </div>
+    <p>Es veu bé, però el navegador no entén «column» i no en fa cas. Els valors són <code>col</code> (columna) i <code>row</code> (fila).</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Exercici: el menú del menjador</h2>
+    <p>Afegeix al <code>&lt;main&gt;</code> una taula amb el menú d'aquesta setmana:</p>
+    <ul>
+      <li>Dilluns: macarrons amb tomàquet, i truita de patates.</li>
+      <li>Dimarts: crema de carbassa, i pollastre a la planxa.</li>
+      <li>Dimecres: llenties, i lluç arrebossat.</li>
+    </ul>
+    <p>La taula ha de tenir:</p>
+    <ul>
+      <li>un títol <code>&lt;caption&gt;</code>;</li>
+      <li>a <code>&lt;thead&gt;</code>, una fila amb les capçaleres de columna (<code>&lt;th scope="col"&gt;</code>) Dia, Primer plat i Segon plat;</li>
+      <li>a <code>&lt;tbody&gt;</code>, una fila per a cada dia, que comenci amb el nom del dia com a capçalera de fila (<code>&lt;th scope="row"&gt;</code>), i amb els dos plats en cel·les <code>&lt;td&gt;</code>;</li>
+      <li>cap error ni cap avís al panell ⚠ Problemes.</li>
+    </ul>
+    <p class="nota">La línia <code>&lt;link&gt;</code> del <code>&lt;head&gt;</code> connecta la pàgina amb el CSS de la pestanya <code>estils.css</code> (les vores). Ho entendràs al capítol 9.</p>
+    <p>Quan acabis, prem <strong>✓ Comprova</strong>.</p>
+    <div class="simulador" data-id="c07-exercici" data-goal-id="cap-7-ex" data-mode="document" data-height="600">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>El menú del menjador</title>
+            <link rel="stylesheet" href="estils.css">
+          </head>
+          <body>
+            <main>
+              <h1>El menú del menjador</h1>
+              <p>Aquesta setmana, a l'institut, mengem això:</p>
+            </main>
+          </body>
+        </html>
+      </script>
+      <script type="text/plain" data-file="estils.css" data-readonly>
+        /* Vores perquè es vegin les cel·les (el CSS, a la part B del curs) */
+        table {
+          border-collapse: collapse;
+        }
+
+        th,
+        td {
+          border: 1px solid gray;
+          padding: 4px 8px;
+        }
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "exists", "selector": "main table",
+            "msg": "Hi ha una taula dins del <main>." },
+          { "type": "text", "selector": "table > caption", "matches": "\\S",
+            "msg": "La taula té un títol <caption>." },
+          { "type": "count", "selector": "thead th[scope='col']", "min": 3,
+            "msg": "A <thead> hi ha almenys tres capçaleres de columna (<th scope=\"col\">)." },
+          { "type": "uses-html", "tag": "tbody",
+            "msg": "Les files dels dies són dins d'un <tbody> que has escrit tu." },
+          { "type": "count", "selector": "tbody tr", "min": 3,
+            "msg": "Al <tbody> hi ha una fila per a cada dia (almenys tres)." },
+          { "type": "count", "selector": "tbody tr > th:first-child[scope='row']", "min": 3,
+            "msg": "Cada fila comença amb el nom del dia, com a capçalera de fila (<th scope=\"row\">)." },
+          { "type": "count", "selector": "tbody td", "min": 6,
+            "msg": "Cada dia té els seus dos plats en cel·les <td>." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís (com una fila amb una cel·la de menys)." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Troba l'error</h2>
+    <p>
+      La classificació de la lliga té tres problemes. Arregla'ls amb l'ajuda del panell ⚠ Problemes: Les Panteres han
+      perdut 2 partits, i el text «Actualitzada el dilluns» ha d'anar en un paràgraf, sota la taula. Quan acabis, prem
+      <strong>✓ Comprova</strong>.
+    </p>
+    <div class="simulador" data-id="c07-troba-error" data-goal-id="cap-7-bug" data-mode="document" data-height="600">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>Lliga de bàsquet</title>
+            <link rel="stylesheet" href="estils.css">
+          </head>
+          <body>
+            <main>
+              <h1>Lliga de bàsquet</h1>
+              <table>
+                <caption>Classificació després de la jornada 5</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Equip</th>
+                    <th scope="column">Victòries</th>
+                    <th scope="col">Derrotes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Els Llamps</th>
+                    <td>5</td>
+                    <td>0</td>
+                  </tr>
+                  Actualitzada el dilluns
+                  <tr>
+                    <th scope="row">Les Panteres</th>
+                    <td>3</td>
+                  </tr>
+                </tbody>
+              </table>
+            </main>
+          </body>
+        </html>
+      </script>
+      <script type="text/plain" data-file="estils.css" data-readonly>
+        /* Vores perquè es vegin les cel·les (el CSS, a la part B del curs) */
+        table {
+          border-collapse: collapse;
+        }
+
+        th,
+        td {
+          border: 1px solid gray;
+          padding: 4px 8px;
+        }
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "count", "selector": "thead th[scope='col']", "eq": 3,
+            "msg": "Les tres capçaleres de columna tenen scope=\"col\"." },
+          { "type": "text", "selector": "main > p", "includes": "Actualitzada el dilluns",
+            "msg": "El text «Actualitzada el dilluns» és en un paràgraf, fora de la taula." },
+          { "type": "count", "selector": "tbody tr", "eq": 2,
+            "msg": "La taula continua tenint dues files d'equips." },
+          { "type": "text", "selector": "tbody tr:nth-child(2) > :last-child", "equals": "2",
+            "msg": "Les Panteres tenen 2 derrotes." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Resum</h2>
+    <div class="resum">
+      <ul>
+        <li>Una taula és <code>&lt;table&gt;</code>, amb files <code>&lt;tr&gt;</code> i, a dins, cel·les de dades <code>&lt;td&gt;</code> o de capçalera <code>&lt;th&gt;</code>.</li>
+        <li>Les columnes es formen per ordre: totes les files, amb el mateix nombre de cel·les.</li>
+        <li><code>&lt;th scope="col"&gt;</code> per a les capçaleres de columna i <code>&lt;th scope="row"&gt;</code> per a les de fila.</li>
+        <li><code>&lt;caption&gt;</code> és el títol de la taula; <code>&lt;thead&gt;</code> i <code>&lt;tbody&gt;</code> separen les capçaleres de les dades.</li>
+        <li>Dins d'una taula, tot va dins de les cel·les (o del <code>&lt;caption&gt;</code>).</li>
+        <li>Les taules són per a dades; per col·locar coses a la pàgina, CSS.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>
