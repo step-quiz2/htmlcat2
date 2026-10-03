@@ -1,7 +1,7 @@
 /* ════════════════════════════════════════════════════════
    course.css — Pàgines del curs: estructura (barra, menú de
    capítols, anterior / següent) i components del text
-   (.nota, .codi-net, .resum…). Depèn de tokens.css i base.css.
+   (.nota, .codi-net, .resum, .galeria…). Depèn de tokens.css i base.css.
 
    L'estructura la crea js/course/shell.js; el contingut de
    cada pàgina és dins de <main class="curs-content">.
@@ -208,6 +208,35 @@
 .codi-net ul {
   margin: var(--space-1) 0;
   padding-left: var(--space-4);
+}
+
+/* Galeria d'imatges (el paquet d'imatges del capítol 5) */
+.galeria {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-3) 0;
+}
+
+.galeria figure {
+  margin: 0;
+}
+
+.galeria img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.galeria figcaption {
+  margin-top: var(--space-1);
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+}
+
+.galeria figcaption code {
+  display: block;
+  color: var(--color-text);
 }
 
 /* ── Anterior / següent ── */

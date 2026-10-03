@@ -20,7 +20,11 @@
 //   HTML_RULES
 // ════════════════════════════════════════════════════════
 
-import { KNOWN_ELEMENTS, DEPRECATED_ELEMENTS } from '../lang/html-spec.js';
+import {
+  KNOWN_ELEMENTS, DEPRECATED_ELEMENTS, GLOBAL_ATTRIBUTES, ELEMENT_ATTRIBUTES,
+  OBSOLETE_ATTRIBUTES, isGlobalAttribute,
+} from '../lang/html-spec.js';
+import { RECURSOS } from '../preview/recursos.js';
 import { closest } from './suggest.js';
 import { indentChecker } from './lines.js';
 
@@ -448,6 +452,192 @@ const missingAnchor = {
   },
 };
 
+// ── Imatges i atributs (capítol 5) ──
+
+const images = (root) => htmlElements(root).filter((el) => el.name === 'img');
+
+/** Textos alternatius que no diuen què hi ha a la imatge (en minúscules, sense puntuació final). */
+const VAGUE_ALT_TEXTS = new Set([
+  'imatge', 'una imatge', 'la imatge', 'foto', 'una foto', 'fotografia', 'una fotografia',
+  'dibuix', 'un dibuix', 'il·lustració', 'icona', 'image', 'img', 'photo', 'picture', 'pic', 'icon',
+]);
+
+const IMAGE_FILE = /\.(svg|png|jpe?g|gif|webp|avif)$/i;
+
+const imgAlt = {
+  id: 'html/img-alt',
+  lang: 'html',
+  since: 5,
+  severity: 'error',
+  check(ctx, report) {
+    for (const img of images(ctx.root)) {
+      if (!attrOf(img.startTag, 'alt')) report(nameRange(img.startTag), {});
+    }
+  },
+};
+
+const vagueAlt = {
+  id: 'html/vague-alt',
+  lang: 'html',
+  since: 5,
+  severity: 'warning',
+  check(ctx, report) {
+    for (const img of images(ctx.root)) {
+      const alt = attrOf(img.startTag, 'alt');
+      const text = (alt?.value || '').replace(/\s+/g, ' ').trim();
+      if (!text) continue;   // alt="": imatge decorativa
+      const key = text.toLowerCase().replace(/[.,:;!?…]+$/, '');
+      if (IMAGE_FILE.test(text)) report(alt, { alt: text, kind: 'file' });
+      else if (VAGUE_ALT_TEXTS.has(key)) report(alt, { alt: text, kind: 'generic' });
+    }
+  },
+};
+
+/** Confusions habituals: { element: { atribut escrit: el que tocava } }. */
+const ATTRIBUTE_MIXUPS = {
+  img: { href: 'src', link: 'src', url: 'src', source: 'src', text: 'alt' },
+  a: { src: 'href', link: 'href', url: 'href' },
+};
+
+// Noms d'atributs antics d'algun element (align, bgcolor…): en un altre element,
+// el navegador els ignora del tot
+const OBSOLETE_ANYWHERE = new Set(Object.values(OBSOLETE_ATTRIBUTES).flatMap((names) => [...names]));
+
+/**
+ * Atributs dels elements HTML coneguts. No es miren els d'<svg> i <math>
+ * (tenen els seus propis atributs) ni els dels elements desconeguts o antics
+ * (ja tenen la seva regla).
+ */
+function* checkedAttributes(root) {
+  for (const el of htmlElements(root)) {
+    if (!KNOWN_ELEMENTS.has(el.name) || FOREIGN.has(el.name)) continue;
+    for (const attr of el.startTag.attrs) yield { el, attr };
+  }
+}
+
+const isObsoleteAttribute = (element, name) => Boolean(OBSOLETE_ATTRIBUTES[element]?.has(name));
+
+const isKnownAttribute = (element, name) =>
+  isGlobalAttribute(name) || Boolean(ELEMENT_ATTRIBUTES[element]?.has(name)) || isObsoleteAttribute(element, name);
+
+const unknownAttribute = {
+  id: 'html/unknown-attribute',
+  lang: 'html',
+  since: 5,
+  severity: 'error',
+  check(ctx, report) {
+    for (const { el, attr } of checkedAttributes(ctx.root)) {
+      const { name } = attr;
+      if (isKnownAttribute(el.name, name)) continue;
+      const own = ELEMENT_ATTRIBUTES[el.name] || [];
+      const suggestion = ATTRIBUTE_MIXUPS[el.name]?.[name] || closest(name, [...own, ...GLOBAL_ATTRIBUTES]);
+      report(nameRange(attr), { attr: name, tag: el.name, suggestion, obsolete: OBSOLETE_ANYWHERE.has(name) });
+    }
+  },
+};
+
+const obsoleteAttribute = {
+  id: 'html/obsolete-attribute',
+  lang: 'html',
+  since: 5,
+  severity: 'warning',
+  check(ctx, report) {
+    for (const { el, attr } of checkedAttributes(ctx.root)) {
+      if (isObsoleteAttribute(el.name, attr.name)) report(nameRange(attr), { attr: attr.name, tag: el.name });
+    }
+  },
+};
+
+const imgSize = {
+  id: 'html/img-size',
+  lang: 'html',
+  since: 5,
+  severity: 'error',
+  check(ctx, report) {
+    for (const img of images(ctx.root)) {
+      for (const name of ['width', 'height']) {
+        const attr = attrOf(img.startTag, name);
+        if (!attr) continue;
+        const value = (attr.value || '').trim();
+        if (/^\d+$/.test(value)) continue;
+        // Com ho llegeix el navegador (comprovat a Chromium): «100px» → 100,
+        // «50%» → la meitat de l'amplada, «5cm» → 5 píxels, «gran» → res
+        const px = /^(\d+)\s*px$/i.exec(value);
+        const kind = px ? 'px' : /^\d+(\.\d+)?\s*%$/.test(value) ? 'percent' : /^\d/.test(value) ? 'unit' : 'invalid';
+        report(attr, { attr: name, value, kind, fix: px ? px[1] : null });
+      }
+    }
+  },
+};
+
+// Adreça on la previsualització busca les imatges (<base href> de
+// preview/srcdoc.js). El web es publica des de l'arrel del repositori, de
+// manera que «../recursos/gat.svg» i «/site/recursos/gat.svg» també hi porten.
+const RECURSOS_URL = 'https://htmlcat.invalid/site/recursos/';
+const RECURSOS_PATH = new URL(RECURSOS_URL).pathname;
+
+/**
+ * Busca la imatge com ho faria el navegador. Retorna null si es troba, o
+ * per què no es troba: { kind: 'external' | 'computer' | 'missing',
+ * suggestion?, reason? }.
+ */
+function findImage(src) {
+  if (/^(data|blob):/i.test(src)) return null;
+  if (/^(https?:)?\/\//i.test(src)) return { kind: 'external' };     // la CSP les bloqueja
+  if (/^(file:|[a-z]:[\\/])/i.test(src)) return { kind: 'computer' };
+  let url = null;
+  try { url = new URL(src, RECURSOS_URL); } catch { /* adreça mal escrita: no es troba */ }
+  if (url && url.origin === new URL(RECURSOS_URL).origin && url.pathname.startsWith(RECURSOS_PATH)) {
+    let name = url.pathname.slice(RECURSOS_PATH.length);
+    try { name = decodeURIComponent(name); } catch { /* es compara tal com és */ }
+    if (RECURSOS.includes(name)) return null;
+  }
+  return { kind: 'missing', ...suggestImage(src) };
+}
+
+/** «Potser volies dir…?»: el fitxer amb el mateix nom (sense mirar majúscules), extensió, carpeta… */
+function suggestImage(src) {
+  const written = src.split(/[?#]/)[0].replace(/^(\.\/)+/, '').toLowerCase();
+  const stem = (path) => path.replace(/\.[^./]*$/, '');
+  const base = (path) => path.slice(path.lastIndexOf('/') + 1);
+  const tests = [
+    ['case', (name) => name === written],
+    ['extension', (name) => stem(name) === stem(written)],
+    ['folder', (name) => base(name) === base(written)],
+    ['folder', (name) => stem(base(name)) === stem(base(written))],
+  ];
+  for (const [reason, test] of tests) {
+    const found = RECURSOS.find((name) => test(name.toLowerCase()));
+    if (found) return { suggestion: found, reason };
+  }
+  const near = closest(written, RECURSOS);
+  return near ? { suggestion: near, reason: 'typo' } : {};
+}
+
+// Es fa sobre el codi font, amb la llista d'imatges que hi ha (el BLUEPRINT
+// la preveia sobre la pàgina pintada): totes les imatges de l'alumne són a
+// site/recursos/ i un test comprova que la llista coincideix amb els fitxers
+const imageNotFound = {
+  id: 'html/image-not-found',
+  lang: 'html',
+  since: 5,
+  severity: 'error',
+  check(ctx, report) {
+    for (const img of images(ctx.root)) {
+      const src = attrOf(img.startTag, 'src');
+      const value = (src?.value || '').trim();
+      if (!value) {
+        // <img scr="…">: ja ho explica html/unknown-attribute («potser volies escriure src?»)
+        const misspelt = img.startTag.attrs.some((attr) => !isKnownAttribute('img', attr.name));
+        if (!misspelt) report(src || nameRange(img.startTag), { kind: 'no-src' });
+        continue;
+      }
+      const problem = findImage(value);
+      if (problem) report(src, { src: value, ...problem });
+    }
+  },
+};
+
 const inlineStyle = {
   id: 'html/inline-style',
   lang: 'html',
@@ -492,5 +682,11 @@ export const HTML_RULES = [
   missingProtocol,
   duplicateId,
   missingAnchor,
+  imgAlt,
+  vagueAlt,
+  unknownAttribute,
+  obsoleteAttribute,
+  imgSize,
+  imageNotFound,
   inlineStyle,
 ];

@@ -31,7 +31,10 @@
 //      «<script»; les comprovacions (data-checks) són JSON ben escrit
 //      (checks/schema.js);
 //  11. cada exercici (data-goal-id) té la seva solució a
-//      tests/solutions/<goal-id>/, amb fitxers que el simulador té.
+//      tests/solutions/<goal-id>/, amb fitxers que el simulador té;
+//  12. la llista d'imatges lliures (site/js/preview/recursos.js) i les
+//      imatges de site/recursos/ coincideixen, i cada imatge té la seva
+//      fila a site/recursos/CREDITS.md.
 // ════════════════════════════════════════════════════════
 
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
@@ -42,6 +45,7 @@ import { buildSourceTree } from '../site/js/lang/html-model.js';
 import { CAPITOLS, REPTES, findPage } from '../site/js/course/data.js';
 import { validateChecks } from '../site/js/checks/schema.js';
 import { RULES } from '../site/js/lint/lint.js';
+import { RECURSOS } from '../site/js/preview/recursos.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = join(ROOT, 'site');
@@ -215,6 +219,17 @@ for (const file of siteFiles.filter((f) => extname(f) === '.html')) {
     }
   }
 }
+
+// ── Imatges lliures: llista ↔ fitxers ↔ crèdits ──
+const RECURSOS_DIR = join(SITE, 'recursos');
+const IMAGE_EXTENSIONS = new Set(['.svg', '.png', '.jpg', '.jpeg', '.webp', '.gif', '.avif']);
+const images = listFiles(RECURSOS_DIR).filter((f) => IMAGE_EXTENSIONS.has(extname(f).toLowerCase()))
+  .map((f) => relative(RECURSOS_DIR, f).split('\\').join('/')).sort();
+const listed = [...RECURSOS].sort();
+const credits = readFileSync(join(RECURSOS_DIR, 'CREDITS.md'), 'utf8');
+for (const name of images.filter((n) => !listed.includes(n))) report(join(RECURSOS_DIR, name), 'no és a site/js/preview/recursos.js (afegeix-la a RECURSOS)');
+for (const name of listed.filter((n) => !images.includes(n))) report(join(RECURSOS_DIR, name), 'és a site/js/preview/recursos.js però el fitxer no existeix');
+for (const name of images.filter((n) => !credits.includes('`' + n + '`'))) report(join(RECURSOS_DIR, name), 'falta la seva fila a site/recursos/CREDITS.md');
 
 // ── index.html de l'arrel (el simulador, com a PyCat: docs/STATE.md §3) ──
 const rootIndex = join(ROOT, 'index.html');

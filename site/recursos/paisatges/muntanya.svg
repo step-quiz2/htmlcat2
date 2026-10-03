@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200" width="300" height="200" role="img" aria-label="Unes muntanyes nevades sota el sol">
+  <defs>
+    <clipPath id="vora">
+      <rect width="300" height="200" rx="24"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#vora)">
+    <rect width="300" height="200" fill="#e0f2fe"/>
+    <circle cx="238" cy="52" r="24" fill="#facc15"/>
+    <path d="M0 176 92 56l64 84 36-40 108 76v24H0z" fill="#64748b"/>
+    <path d="M92 56l13 17-8-3-7 8-8-7-8 9z" fill="#fff"/>
+    <path d="M192 100l9 8-6-2-6 4-5-3z" fill="#fff"/>
+    <path d="M0 200v-30q75-24 150-8t150-6v44z" fill="#16a34a"/>
+  </g>
+</svg>

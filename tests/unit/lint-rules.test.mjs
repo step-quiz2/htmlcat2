@@ -43,6 +43,13 @@ const CASES = {
   'html/missing-protocol': ['<p><a href="www.gats.cat">Gats</a></p>\n', '<p><a href="https://www.gats.cat">Gats</a> i <a href="fotos/gat.html">el gat</a></p>\n'],
   'html/duplicate-id': ['<h2 id="fotos">Fotos</h2>\n<h2 id="fotos">Més fotos</h2>\n', '<h2 id="fotos">Fotos</h2>\n<h2 id="videos">Vídeos</h2>\n'],
   'html/missing-anchor': ['<p><a href="#contacte">Contacte</a></p>\n<h2 id="contacta">Contacte</h2>\n', '<p><a href="#contacte">Contacte</a> · <a href="#">Amunt</a></p>\n<h2 id="contacte">Contacte</h2>\n'],
+  // HTML: imatges i atributs
+  'html/img-alt': ['<img src="gat.svg">\n', '<img src="gat.svg" alt="Un gat taronja">\n<img src="gat.svg" alt="">\n'],
+  'html/vague-alt': ['<img src="gat.svg" alt="Imatge">\n', '<img src="gat.svg" alt="Un gat que somriu">\n'],
+  'html/unknown-attribute': ['<img scr="gat.svg" alt="Un gat">\n', '<img src="gat.svg" alt="Un gat" class="foto" data-x="1" aria-hidden="true" title="Hola">\n<svg viewBox="0 0 1 1"></svg>\n'],
+  'html/obsolete-attribute': ['<img src="gat.svg" alt="Un gat" border="1">\n', '<img src="gat.svg" alt="Un gat" width="100">\n'],
+  'html/img-size': ['<img src="gat.svg" alt="Un gat" width="100px">\n', '<img src="gat.svg" alt="Un gat" width="100" height="100">\n'],
+  'html/image-not-found': ['<img src="gos.svg" alt="Un gos">\n', '<img src="animals/gos.svg" alt="Un gos">\n<img src="../recursos/gat.svg" alt="Un gat">\n'],
   'html/inline-style': ['<p style="color: red">x</p>\n', '<p class="avis">x</p>\n'],
   // CSS: errors
   'css/unbalanced-braces': [css('h1 {\n  color: red;\n'), css(GOOD_CSS)],
@@ -190,4 +197,53 @@ test('enllaços: detalls de les regles del capítol 4', () => {
   assert.deepEqual(rulesOf('<p><a></a></p>\n'), ['html/missing-href']);
   // Abans del capítol 4, cap d'aquestes regles
   assert.deepEqual(rulesOf({ files: { 'index.html': '<p><a>clica aquí</a></p>\n' }, chapter: 3 }), []);
+});
+
+test('imatges i atributs: detalls de les regles del capítol 5', () => {
+  const img = (attrs) => `<img ${attrs}>\n`;
+  // alt="" (decorativa) i alt sense valor no són «sense alt» ni «alt vague»
+  for (const attrs of ['src="gat.svg" alt=""', 'src="gat.svg" alt']) assert.deepEqual(rulesOf(img(attrs)), [], attrs);
+  // L'alt amb el nom del fitxer
+  assert.equal(first(img('src="gat.svg" alt="gat.svg"'), 'html/vague-alt').data.kind, 'file');
+  // Atributs: suggeriment, confusions habituals i atributs antics en un altre element
+  assert.equal(first('<p clas="a">x</p>\n', 'html/unknown-attribute').data.suggestion, 'class');
+  assert.equal(first(img('href="gat.svg" alt="Un gat"'), 'html/unknown-attribute').data.suggestion, 'src');
+  assert.equal(first('<a src="x.html">x</a>\n', 'html/unknown-attribute').data.suggestion, 'href');
+  const align = first('<span align="center">x</span>\n', 'html/unknown-attribute');
+  assert.equal(align.data.obsolete, true);
+  assert.match(align.hint, /CSS/);
+  assert.deepEqual(rulesOf('<p align="center">x</p>\n'), ['html/obsolete-attribute']);
+  // No es miren els atributs dels elements desconeguts, ni els de l'SVG
+  assert.deepEqual(rulesOf('<meu-element foo="1">x</meu-element>\n<svg viewBox="0 0 1 1" fill="red"></svg>\n'), []);
+  assert.deepEqual(rulesOf('<p onclick="x()" xml:lang="ca" data-color="vermell" role="note">x</p>\n'), []);
+  // Mides: px, %, altres unitats i valors que no són números
+  const size = (value) => first(img(`src="gat.svg" alt="Un gat" width="${value}"`), 'html/img-size')?.data;
+  assert.deepEqual([size('100px').kind, size('100px').fix], ['px', '100']);
+  assert.equal(size('50%').kind, 'percent');
+  assert.equal(size('5cm').kind, 'unit');
+  assert.equal(size('80.5').kind, 'unit');
+  assert.equal(size('gran').kind, 'invalid');
+  assert.equal(size(' 100 '), undefined);
+  // Imatge no trobada: on és el problema i què es suggereix
+  const notFound = (src) => first(img(`src="${src}" alt="Un gos"`), 'html/image-not-found')?.data;
+  assert.deepEqual(notFound('animals/Gos.svg'), { src: 'animals/Gos.svg', kind: 'missing', suggestion: 'animals/gos.svg', reason: 'case' });
+  assert.equal(notFound('gos.svg').reason, 'folder');
+  assert.equal(notFound('animals/gat.svg').suggestion, 'gat.svg');
+  assert.equal(notFound('animals/gos.png').reason, 'extension');
+  assert.equal(notFound('animals/gso.svg').reason, 'typo');
+  assert.equal(notFound('fotos/cotxe.jpg').suggestion, undefined);
+  assert.equal(notFound('https://gats.cat/gat.png').kind, 'external');
+  assert.equal(notFound('//gats.cat/gat.png').kind, 'external');
+  assert.equal(notFound('C:\\Users\\anna\\gos.jpg').kind, 'computer');
+  assert.equal(notFound('file:///home/anna/gos.jpg').kind, 'computer');
+  // Camins que el navegador sí que troba (comprovat a Chromium)
+  for (const src of ['./animals/gos.svg', 'animals/gos.svg?v=2', '../recursos/animals/gos.svg', '/site/recursos/animals/gos.svg', 'data:image/png;base64,iVBORw0KGgo=']) {
+    assert.equal(notFound(src), undefined, src);
+  }
+  // Sense src: es diu, però no si ja hi ha un atribut mal escrit (scr)
+  assert.equal(first(img('alt="Un gos"'), 'html/image-not-found').data.kind, 'no-src');
+  assert.equal(first(img('src=" " alt="Un gos"'), 'html/image-not-found').data.kind, 'no-src');
+  assert.deepEqual(rulesOf(img('scr="gos.svg" alt="Un gos"')), ['html/unknown-attribute']);
+  // Abans del capítol 5, cap d'aquestes regles
+  assert.deepEqual(rulesOf({ files: { 'index.html': '<img scr="x.png" width="9px">\n' }, chapter: 4 }), []);
 });
