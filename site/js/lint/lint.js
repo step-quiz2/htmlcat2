@@ -53,6 +53,15 @@ export function lintStatic({ files, mode = 'fragment', chapter = Infinity, env =
   const cssRules = rules.filter((rule) => rule.lang === 'css');
   const problems = [];
 
+  // L'HTML s'analitza un sol cop: les regles de CSS també necessiten saber
+  // quines classes i quins id hi ha a la pàgina
+  const parsed = new Map();
+  for (const file of Object.keys(files).filter((name) => !name.endsWith('.css'))) {
+    const tokens = tokenizeHtml(files[file]);
+    parsed.set(file, { tokens, ...buildSourceTree(files[file], tokens) });
+  }
+  const page = parsed.size ? pageNames([...parsed.values()]) : null;
+
   Object.keys(files).forEach((file, fileIndex) => {
     const src = files[file];
     const at = makeLineIndex(src);
@@ -66,7 +75,7 @@ export function lintStatic({ files, mode = 'fragment', chapter = Infinity, env =
     };
     const lintCss = (css, offset, embedded) => {
       const lineOf = makeLineIndex(css);
-      const ctx = { src: css, sheet: parseCss(css), supports: env.supports || null, embedded, lineOf: (pos) => lineOf(pos).line };
+      const ctx = { src: css, sheet: parseCss(css), supports: env.supports || null, embedded, page, lineOf: (pos) => lineOf(pos).line };
       for (const rule of cssRules) {
         if (!(embedded && rule.embedded === false)) rule.check(ctx, reporter(rule, offset));
       }
@@ -76,8 +85,7 @@ export function lintStatic({ files, mode = 'fragment', chapter = Infinity, env =
       lintCss(src, 0, false);
       return;
     }
-    const tokens = tokenizeHtml(src);
-    const { root, problems: structure } = buildSourceTree(src, tokens);
+    const { tokens, root, problems: structure } = parsed.get(file);
     const ctx = { src, tokens, root, structure, mode, fileNames: Object.keys(files), lineOf: (pos) => at(pos).line };
     for (const rule of htmlRules) rule.check(ctx, reporter(rule, 0));
 
@@ -90,6 +98,35 @@ export function lintStatic({ files, mode = 'fragment', chapter = Infinity, env =
   return problems.sort((a, b) =>
     SEVERITIES.indexOf(a.severity) - SEVERITIES.indexOf(b.severity) ||
     a.fileIndex - b.fileIndex || a.start - b.start);
+}
+
+/**
+ * Les classes i els id que apareixen a l'HTML (tal com són), i les classes
+ * escrites amb puntuació (class=".avis", class="avis, gran") sense la
+ * puntuació: d'aquestes ja n'avisa html/class-syntax.
+ *
+ * @returns {{ classes: Set<string>, ids: Set<string>, misspelt: Set<string> }}
+ */
+function pageNames(documents) {
+  const classes = new Set();
+  const ids = new Set();
+  const misspelt = new Set();
+  for (const { tokens } of documents) {
+    for (const token of tokens) {
+      if (token.type !== 'startTag') continue;
+      for (const attr of token.attrs) {
+        const value = attr.value || '';
+        if (attr.name === 'id' && value.trim()) ids.add(value.trim());
+        if (attr.name !== 'class') continue;
+        for (const name of value.split(/\s+/).filter(Boolean)) {
+          classes.add(name);
+          const bare = name.replace(/^[.#]+|,/g, '');
+          if (bare !== name && bare) misspelt.add(bare);
+        }
+      }
+    }
+  }
+  return { classes, ids, misspelt };
 }
 
 /**
