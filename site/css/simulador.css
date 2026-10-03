@@ -8,6 +8,13 @@
    i marges; si no, el cursor no coincideix amb el text.
    ════════════════════════════════════════════════════════ */
 
+/* Abans de muntar-se (es munta quan s'acosta a la pantalla): l'espai que ocuparà */
+.simulador:not(.sim) {
+  height: var(--sim-height, 26rem);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+}
+
 .sim {
   --sim-line: 1.5rem;          /* interlineat de l'editor (24 px) */
   --sim-pad: 0.75rem;          /* marge interior de l'editor */
@@ -66,6 +73,18 @@
 .sim-button:hover,
 .sim-tab:hover {
   border-color: var(--color-accent);
+}
+
+.sim-button--check {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+  font-weight: 700;
+}
+
+.sim-button:disabled {
+  cursor: progress;
+  opacity: 0.7;
 }
 
 /* ── Zona principal: codi i resultat ── */
@@ -132,15 +151,47 @@
   }
 }
 
-/* ── Panell ⚠ Problemes ── */
+/* ── Panells: ⚠ Problemes i ✓ Comprovacions ── */
 
-.sim-problems-box {
+.sim-panels {
   flex: none;
   max-height: min(12rem, 40%);
   overflow-y: auto;
   border-top: 1px solid var(--color-border);
   background: var(--color-surface);
   font-size: 0.875rem;
+}
+
+.sim-panels__tabs {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.sim-panel-tab {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sim-panel-tab[aria-selected="true"] {
+  border-color: var(--color-border);
+  background: var(--color-bg);
+}
+
+.sim-panels__panel[hidden] {
+  display: none;
 }
 
 .sim-problems__header {
@@ -241,6 +292,74 @@
 .sim-problems__hidden {
   padding: var(--space-1) var(--space-2);
   border-top: 1px solid var(--color-border);
+}
+
+.sim-checks__status,
+.sim-checks__note {
+  margin: 0;
+  padding: var(--space-1) var(--space-2);
+}
+
+.sim-checks__status--pass {
+  color: var(--color-ok);
+  font-weight: 700;
+}
+
+.sim-checks__status--fail {
+  font-weight: 700;
+}
+
+.sim-checks__note {
+  color: var(--color-warning);
+}
+
+.sim-checks__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sim-check {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
+.sim-check__icon {
+  flex: none;
+  width: 1.25em;
+  font-weight: 700;
+  text-align: center;
+}
+
+.sim-check--pass .sim-check__icon {
+  color: var(--color-ok);
+}
+
+.sim-check--fail .sim-check__icon {
+  color: var(--color-error);
+}
+
+.sim-check__text {
+  overflow-wrap: anywhere;
+}
+
+.sim-check__detail {
+  color: var(--color-muted);
+}
+
+/* Iframe ocult on s'avaluen les comprovacions (mida fixa: el resultat no
+   depèn de la finestra de l'alumne) */
+.sim-check-frame {
+  position: fixed;
+  top: 0;
+  left: -10000px;
+  width: 800px;
+  height: 600px;
+  border: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* ── Missatges breus (enllaços, formularis…) ── */

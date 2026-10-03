@@ -1,0 +1,228 @@
+/* ════════════════════════════════════════════════════════
+   course.css — Pàgines del curs: estructura (barra, menú de
+   capítols, anterior / següent) i components del text
+   (.nota, .codi-net, .resum…). Depèn de tokens.css i base.css.
+
+   L'estructura la crea js/course/shell.js; el contingut de
+   cada pàgina és dins de <main class="curs-content">.
+   ════════════════════════════════════════════════════════ */
+
+.course {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── Barra superior ── */
+
+.course-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 3.25rem;
+  padding: var(--space-1) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.course-bar__menu {
+  margin-left: auto;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.course-bar__link {
+  font-size: 0.9375rem;
+}
+
+/* ── Menú de capítols (plegat al mòbil) ── */
+
+.course__body {
+  flex: 1;
+}
+
+.course-menu {
+  display: none;
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.course-menu--open {
+  display: block;
+}
+
+.course-menu__part {
+  margin: 0 0 var(--space-1);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.course-menu__list {
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.course-menu__link {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font-size: 0.9375rem;
+  text-decoration: none;
+}
+
+.course-menu__link:hover {
+  background: var(--color-bg);
+}
+
+.course-menu__link[aria-current="page"] {
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+}
+
+.course-menu__label {
+  flex: none;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.course-menu__title {
+  flex: 1;
+}
+
+.course-menu__done {
+  display: none;
+  font-weight: 700;
+}
+
+.course-menu__item--done .course-menu__done {
+  display: inline;
+}
+
+@media (min-width: 64rem) {
+  .course-bar__menu {
+    display: none;
+  }
+
+  .course-bar__link {
+    margin-left: auto;
+  }
+
+  .course__body {
+    display: grid;
+    grid-template-columns: 16rem minmax(0, 1fr);
+  }
+
+  .course-menu {
+    position: sticky;
+    top: 3.25rem;
+    display: block;
+    align-self: start;
+    height: calc(100vh - 3.25rem);
+    overflow-y: auto;
+    border-right: 1px solid var(--color-border);
+    border-bottom: 0;
+  }
+}
+
+/* ── Contingut ── */
+
+.curs-content {
+  width: 100%;
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-3) var(--space-5);
+}
+
+/* El text, amb una amplada de línia còmoda; els simuladors, més amples */
+.chapter-header > *,
+.chapter-section > :not(.simulador) {
+  max-width: var(--measure);
+}
+
+.chapter-header h1 {
+  margin: 0 0 var(--space-2);
+  line-height: 1.2;
+}
+
+.chapter-lead {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 1.1875rem;
+}
+
+.chapter-section {
+  margin-top: var(--space-5);
+}
+
+.chapter-section h2 {
+  margin-bottom: var(--space-2);
+  line-height: 1.25;
+}
+
+.curs-content .simulador {
+  margin: var(--space-3) 0;
+}
+
+.nota,
+.codi-net,
+.resum {
+  margin: var(--space-3) 0;
+  padding: var(--space-2) var(--space-3);
+  border-left: 4px solid var(--color-info);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.codi-net {
+  border-left-color: var(--color-ok);
+}
+
+.resum {
+  border-left-color: var(--color-accent);
+}
+
+.codi-net__titol,
+.resum__titol {
+  margin: var(--space-1) 0;
+  font-weight: 700;
+}
+
+.resum ul,
+.codi-net ul {
+  margin: var(--space-1) 0;
+  padding-left: var(--space-4);
+}
+
+/* ── Anterior / següent ── */
+
+.course-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.course-nav__next {
+  margin-left: auto;
+  text-align: right;
+}

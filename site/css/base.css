@@ -31,6 +31,16 @@ code {
   font-family: var(--font-code);
 }
 
+/* Text només per als lectors de pantalla */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .pagina {
   display: flex;
   flex-direction: column;
@@ -123,6 +133,17 @@ code {
   font-size: 0.75rem;
 }
 
+.index-capitols {
+  padding-left: 0;
+  list-style: none;
+}
+
+.botons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
 .boto {
   display: inline-block;
   padding: var(--space-2) var(--space-3);
@@ -131,4 +152,10 @@ code {
   color: var(--color-accent-text);
   font-weight: 700;
   text-decoration: none;
+}
+
+.boto--secundari {
+  border: 2px solid var(--color-accent);
+  background: transparent;
+  color: var(--color-accent);
 }

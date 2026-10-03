@@ -59,6 +59,7 @@ site/                  ← l'única carpeta que es publica
   css/base.css         Reinici, tipografia i estructura (.pagina, .pantalla, .barra, .peu, .avis, .logo, .boto)
   css/highlight.css    Colors del ressaltat (.hl-*) i blocs pre.code-example
   css/simulador.css    Simulador i editor (classes sim-*)
+  css/course.css       Pàgines del curs: barra, menú de capítols, anterior/següent, .nota, .codi-net, .resum (§2.8)
   js/util/text.js            Mòdul pur: normalizeNewlines, dedent, lineColAt, makeLineIndex
   js/util/storage.js         localStorage amb prefix htmlcat:v1: i sense errors (§2.5)
   js/i18n/ca.js              Tots els textos de la interfície: t(clau, paràmetres)
@@ -76,10 +77,20 @@ site/                  ← l'única carpeta que es publica
   js/editor/highlight.js     Mòdul pur: ressaltat d'HTML i CSS (§2.3)
   js/editor/editing.js       Mòdul pur: què fan Retorn, Tab i Maj+Tab
   js/editor/editor.js        Editor: textarea sobre un <pre> ressaltat, números de línia, marques
+  js/editor/code-examples.js Ressalta els <pre class="code-example"> d'una pàgina
   js/preview/srcdoc.js       Mòdul pur: document de la previsualització (§2.4)
   js/preview/preview.js      Iframe de previsualització protegit (§2.4)
   js/sim/simulador.js        Component simulador: pestanyes, editors, resultat, desar (§2.4)
   js/sim/problems-panel.js   Panell ⚠ Problemes del simulador (§2.4)
+  js/sim/checks-panel.js     Panell ✓ Comprovacions dels exercicis (§2.7)
+  js/sim/check-frame.js      Iframe ocult de 800 × 600 on s'avaluen les comprovacions (§2.7)
+  js/sim/tabs.js             Pestanyes accessibles (fitxers i panells del simulador)
+  js/checks/schema.js        Mòdul pur: valida les comprovacions d'un exercici (§2.7)
+  js/checks/checks.js        Avalua les comprovacions sobre el DOM i el codi font (§2.7)
+  js/course/data.js          Mòdul pur: capítols i reptes; ordre del curs (§2.8)
+  js/course/progress.js      Exercicis superats, al navegador (§2.5)
+  js/course/shell.js         Barra, menú de capítols amb ✓, anterior/següent i peu (§2.8)
+  js/pages/course-page.js    Punt d'entrada dels capítols i reptes (muntatge mandrós)
   js/pages/landing-page.js   Punt d'entrada de la portada (ressalta els exemples)
   js/pages/editor-page.js    Punt d'entrada de l'editor lliure
 
@@ -158,9 +169,10 @@ i CSS ≈ 3,3 ms (anàlisi + ressaltat).
 | `data-mode` | `fragment` (per defecte: l'alumne escriu el contingut del `<body>`) o `document` (document sencer) |
 | `data-readonly` | Al simulador: exemple no editable. A un bloc `data-file`: només aquell fitxer |
 | `data-forms` | Permet enviar formularis (es mostren les dades, no s'envien) |
+| `data-height` | Alçada del simulador en px (per defecte 26rem); va a la variable `--sim-height` |
+| `data-goal-id` | Exercici validat: botó «✓ Comprova» i panell ✓ Comprovacions. Necessita un `<script type="application/json" data-checks>` a dins (§2.7). Convenció: `cap-N-ex`, `cap-N-bug`, `repte-N` |
 
-Encara no implementats (fase 4 i següents): `data-goal-id`, `data-checks`,
-`data-height`, `data-panel`, pantalla completa i autocompletat.
+Encara no implementats: `data-panel`, pantalla completa i autocompletat.
 
 **Panell ⚠ Problemes** (`sim/problems-panel.js`): sota l'editor i el resultat,
 mostra el que troba el revisor de codi (§2.6) 400 ms després que l'alumne
@@ -172,7 +184,8 @@ avisos es marquen a l'editor (vermell, ambre). Només la línia d'estat curta
 («2 errors, 1 avís») és `aria-live`. `mountSimulator(el, { chapter })`: el
 revisor només aplica les regles fins a aquest capítol; sense (editor lliure),
 totes. Colors de gravetat: `--color-error`, `--color-warning`, `--color-info`
-a `tokens.css` (contrast ≥ 5,8:1 en els dos temes).
+(i `--color-ok`) a `tokens.css` (contrast ≥ 5,8:1 en els dos temes). Als
+exercicis, el panell té dues pestanyes: ⚠ Problemes i ✓ Comprovacions.
 
 **Previsualització** (`preview/preview.js` + `preview/srcdoc.js`): dues
 proteccions independents, que el test de navegador comprova per separat:
@@ -206,6 +219,7 @@ Safari de l'iPhone no faci zoom.
 |---|---|
 | `htmlcat:v1:code:<data-id>` | `{ files: { 'index.html': …, 'estils.css': … }, savedAt }` |
 | `htmlcat:v1:code:editor` | El mateix, per a l'editor lliure |
+| `htmlcat:v1:progress` | `{ goals: { '<goal-id>': <moment de la primera vegada que es va superar> } }` |
 
 Si el navegador no deixa desar, el simulador ho avisa una vegada.
 
@@ -278,6 +292,78 @@ Les regles que necessiten el document ja pintat (enllaç a un `#id` que no
 existeix, imatge no trobada, selector que no selecciona res, contrast) i les dels
 capítols 4–14 s'afegiran amb cada capítol (BLUEPRINT apèndix C).
 
+### 2.7 Comprovacions dels exercicis
+
+Un exercici és un simulador amb `data-goal-id` i les seves comprovacions:
+
+```html
+<div class="simulador" data-id="c01-exercici" data-goal-id="cap-1-ex" data-mode="document">
+  <script type="text/plain" data-file="index.html"> …codi inicial… </script>
+  <script type="application/json" data-checks>
+    [{ "type": "count", "selector": "body > p", "min": 2,
+       "msg": "Dins del <body> hi ha almenys dos paràgrafs <p>." }]
+  </script>
+</div>
+```
+
+En prémer «✓ Comprova», el codi d'aquell moment es pinta en un iframe ocult
+de 800 × 600 (`sim/check-frame.js`, mateixes proteccions que la
+previsualització) i s'avaluen **totes** les comprovacions
+(`checks/checks.js`). El panell ✓ Comprovacions les mostra totes amb ✓ o ✗,
+amb el requisit (`msg`, en català) i, si falla, una precisió («(N'hi ha 1.)»).
+Si se superen totes, l'exercici queda desat com a superat (§2.5) i el menú hi
+posa ✓. Si l'alumne canvia el codi després, el panell avisa que cal tornar a
+comprovar.
+
+| `type` | Camps | Què mira |
+|---|---|---|
+| `exists` | `selector` | Que hi hagi algun element |
+| `count` | `selector` i `eq`, o `min` i/o `max` | Quants elements hi ha |
+| `text` | `selector` i un de `equals` / `includes` / `matches`; `all`, `ci` | El text (amb els espais normalitzats) del primer element, o de tots amb `all`; `ci`: sense distingir majúscules |
+| `attr` | `selector`, `name` i un de `present` / `nonEmpty` / `equals` / `includes` / `matches`; `all`, `ci` | Un atribut del primer element (o de tots) |
+| `style` | `selector`, `prop`, `equals`; `all` | L'estil calculat, comparat amb el d'un element de prova amb el valor demanat (el navegador normalitza tots dos: `teal` = `rgb(0, 128, 128)`) |
+| `uses-html` | `tag` i/o `attr` | Que aparegui al **codi font** (no al DOM, que té elements afegits pel navegador) |
+| `uses-css` | `prop`; `selector` (exacte) o `matches`; `value` | Que hi hagi la declaració als fitxers CSS o als `<style>` |
+| `lint` | `maxErrors` (per defecte 0), `maxWarnings`, `rules` | Els problemes del revisor de codi (§2.6) al nivell del capítol; `rules` en filtra uns quants |
+
+Les comprovacions es fan sobre el DOM que construeix el navegador, que inclou
+el `<meta>` de la CSP i el `<base>` injectats al `<head>` (§2.4): no compteu
+elements de `head > meta` sense filtrar. `checks/schema.js` valida el JSON (un
+camp desconegut, com `selecter`, és un error); el test estàtic el passa a totes
+les pàgines. Encara no hi ha els tipus `layout` i `viewport` (fase 5).
+
+### 2.8 Pàgines del curs
+
+Cada capítol (`site/curs/capitol-N.html`) o repte (`repte-N.html`) només conté
+el seu `<main class="curs-content">` i es presenta així (BLUEPRINT §5.1):
+
+```html
+<body data-pagina="capitol" data-num="1">
+<main class="curs-content">
+  <header class="chapter-header"> <h1>…</h1> <p class="chapter-lead">…</p> </header>
+  <section class="chapter-section"> <h2>…</h2> … </section>
+</main>
+</body>
+```
+
+amb els CSS `tokens`, `base`, `course`, `highlight`, `simulador` i
+`<script type="module" src="../js/pages/course-page.js">`. `course/shell.js`
+hi afegeix, a partir de `course/data.js` i de `body[data-pagina][data-num]`
+(mai de l'adreça), la barra superior, el menú de capítols (✓ als superats;
+plegable al mòbil, sempre visible des de 64rem), els enllaços «anterior /
+següent» i el peu. `pages/course-page.js` ressalta els `pre.code-example` i
+munta cada simulador quan s'acosta a la pantalla (`IntersectionObserver`,
+200 px abans) amb `chapter` = el capítol de la pàgina (per a un repte, el seu
+`afterChapter`): el revisor només aplica el que ja s'ha ensenyat.
+
+Components del text: `.nota` (requadre informatiu), `.codi-net` (amb
+`.codi-net__titol`: l'hàbit de codi net del capítol), `.resum`, i els de
+`base.css` (`.avis`, `.boto`). Cap `style=""`.
+
+`course/data.js` és la font única de l'estructura: `CAPITOLS` i `REPTES` només
+contenen pàgines que existeixen (ho comprova el test estàtic), i la portada hi
+genera la llista de capítols.
+
 ---
 
 ## 3. Decisions preses
@@ -303,6 +389,8 @@ motiu; si se'n canvia alguna, s'anota aquí amb la data i el motiu.
 | 2026-10-02 | Revisor de codi: `html/p-closed-by-block` i `html/unknown-element` des del capítol 1 (el BLUEPRINT deia 2) | Al capítol 1 ja s'ensenyen `<p>` i `<h1>` (un títol dins d'un paràgraf és un error típic) i els noms d'etiqueta mal escrits són habituals des del primer dia |
 | 2026-10-02 | Revisor de codi: regles noves que el BLUEPRINT no tenia (`html/mismatched-end-tag`, `unterminated-tag`, `unterminated-attribute-value`, `unclosed-comment`; `css/missing-colon`, `empty-value`, `unclosed-comment`, `unclosed-string`, `last-semicolon`) | Els analitzadors ja detectaven aquests errors; `css/last-semicolon` (avís) ensenya a posar `;` sempre, que evita l'error `css/missing-semicolon` |
 | 2026-10-02 | Panell ⚠ Problemes: els errors es mostren tots; els avisos repetits s'agrupen | Cada error és diferent i important; els avisos d'estil (sobretot d'indentació) podrien omplir la llista |
+| 2026-10-03 | Als exercicis, el panell té pestanyes (⚠ Problemes / ✓ Comprovacions); «✓ Comprova» obre la segona | Les dues llistes no hi caben alhora en un mòbil |
+| 2026-10-03 | La comprovació `lint` fa servir el revisor estàtic (§2.6); `uses-css` també mira els `<style>` | Encara no hi ha regles que necessitin el document pintat |
 | 2026-10-02 | El repositori definitiu és `step-quiz2/htmlcat2` | Ho ha confirmat el propietari. L'historial de les fases 0–2 (PR #1–#4) és a l'antic repositori; el codi es va copiar aquí amb una pujada pel web, que va perdre `.github/`, `.editorconfig` i `.gitignore` (restaurats amb Git el mateix dia) |
 
 ### Decisions confirmades pel propietari el 2026-10-03
