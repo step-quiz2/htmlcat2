@@ -19,8 +19,9 @@ test('mode fragment: esquelet, CSP, base i CSS', () => {
   assert.ok(html.includes('<body>\n<h1>Hola</h1>\n</body>'));
 });
 
-test('la CSP bloqueja scripts i peticions externes', () => {
+test('la CSP bloqueja scripts, peticions externes i enviaments de formularis', () => {
   assert.match(DEFAULT_CSP, /default-src 'none'/);
+  assert.match(DEFAULT_CSP, /form-action 'none'/);   // form-action no depèn de default-src
   assert.doesNotMatch(DEFAULT_CSP, /script-src/);
   assert.doesNotMatch(DEFAULT_CSP, /\*|https?:/);
 });

@@ -11,7 +11,8 @@
 //     <link rel="stylesheet" href="estils.css"> que apunta a un fitxer
 //     virtual es substitueix pel seu contingut dins d'un <style>.
 // En tots dos casos s'injecta al principi del <head>:
-//   · <meta http-equiv="Content-Security-Policy"> (cap petició externa)
+//   · <meta http-equiv="Content-Security-Policy"> (cap petició externa ni
+//     cap enviament de formulari)
 //   · <base href="…/recursos/"> (les imatges de l'alumne es busquen al
 //     paquet d'imatges, sigui quina sigui la pàgina on és el simulador)
 // En mode 'document' s'injecten just després del doctype, no després del
@@ -28,8 +29,10 @@
 
 import { tokenizeHtml } from '../lang/html-tokenizer.js';
 
+// form-action no depèn de default-src: sense 'none', un formulari que el
+// simulador no aturés (data-forms) enviaria les dades fora (comprovat a Chromium)
 export const DEFAULT_CSP = "default-src 'none'; img-src 'self' data: blob:; " +
-  "style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self'";
+  "style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self'; form-action 'none'";
 
 const escapeAttr = (text) => text.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 

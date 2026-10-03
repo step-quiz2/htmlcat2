@@ -246,10 +246,12 @@ async function checkFreeEditor() {
   // 4. Seguretat (dues proteccions independents, es comproven per separat):
   //    a) l'iframe no pot executar scripts (sandbox sense allow-scripts);
   //    b) la CSP del document bloqueja scripts i peticions externes.
+  //    L'editor lliure permet formularis (data-forms): allow-forms, mai allow-scripts.
   const sandbox = await page.locator('.sim-preview__frame').getAttribute('sandbox');
-  if (sandbox !== 'allow-same-origin') fail(`l'iframe té sandbox="${sandbox}" (ha de ser "allow-same-origin")`);
+  if (sandbox !== 'allow-same-origin allow-forms') fail(`l'iframe té sandbox="${sandbox}" (ha de ser "allow-same-origin allow-forms")`);
   const csp = await preview.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content');
   if (!/default-src 'none'/.test(csp) || /script-src/.test(csp)) fail('la CSP de la previsualització no bloqueja els scripts: ' + csp);
+  if (!/form-action 'none'/.test(csp)) fail('la CSP de la previsualització no bloqueja els enviaments de formularis: ' + csp);
   await page.keyboard.type('<script>parent.document.title = "PIRATEJAT"</script>');
   await page.keyboard.type('<img src="https://example.com/x.png" alt="x" onerror="parent.document.title = \'PIRATEJAT\'">');
   await page.waitForTimeout(800);
@@ -264,6 +266,23 @@ async function checkFreeEditor() {
   const message = await page.locator('.sim-message').innerText();
   if (!message.includes('https://example.com')) fail('no s\'avisa de l\'enllaç: ' + JSON.stringify(message));
   if (!(await previewText()).includes('Pomes')) fail('l\'enllaç ha fet sortir la previsualització');
+
+  // 5a. Un formulari no envia res: el simulador mostra les dades que enviaria
+  //     (fins i tot amb action cap a un altre web). El clic d'abans ha deixat
+  //     el focus a la previsualització: el cursor torna a l'editor, abans de </body>
+  await editor.evaluate((ta) => {
+    ta.focus();
+    const pos = ta.value.indexOf('</body>');
+    ta.setSelectionRange(pos, pos);
+  });
+  await page.keyboard.type('<form action="https://example.com/f"><input name="nom" value="Anna"><button>Envia</button></form>');
+  await page.waitForTimeout(600);
+  await preview.locator('button', { hasText: 'Envia' }).click();
+  await page.waitForTimeout(300);
+  const sent = await page.locator('.sim-message').innerText();
+  if (!sent.includes('nom = «Anna»')) fail('no es mostren les dades del formulari: ' + JSON.stringify(sent));
+  if (!(await previewText()).includes('Pomes')) fail('el formulari ha fet sortir la previsualització');
+  if (externalRequests.length) fail('el formulari ha enviat dades fora: ' + externalRequests[0]);
 
   // 5b. La CSP protegeix encara que l'alumne escrigui alguna cosa abans de
   //     <html> (el navegador ignora una CSP que no és dins del <head>)
