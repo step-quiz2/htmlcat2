@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capítol 2 — Text amb significat | HTMLCat</title>
+  <link rel="icon" href="../img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/course.css">
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link rel="stylesheet" href="../css/simulador.css">
+  <script type="module" src="../js/pages/course-page.js"></script>
+</head>
+<body data-pagina="capitol" data-num="2">
+
+<main class="curs-content">
+  <header class="chapter-header">
+    <h1>Text amb significat</h1>
+    <p class="chapter-lead">En acabar aquest capítol sabràs organitzar un text amb títols de diversos nivells, marcar què és important i escriure qualsevol caràcter, fins i tot &lt; i &amp;.</p>
+  </header>
+
+  <section class="chapter-section">
+    <h2>Sis nivells de títols</h2>
+    <p>
+      Al capítol 1 vas fer servir <code>&lt;h1&gt;</code>, el títol principal. N'hi ha sis nivells, de
+      <code>&lt;h1&gt;</code> a <code>&lt;h6&gt;</code>: com en un llibre, hi ha el títol, els capítols, els apartats…
+    </p>
+    <div class="simulador" data-id="c02-titols">
+      <script type="text/plain" data-file="index.html">
+        <h1>Els gats</h1>
+        <p>Els gats són animals de companyia molt populars.</p>
+        <h2>Alimentació</h2>
+        <p>Mengen pinso i, de tant en tant, peix.</p>
+        <h2>Cura</h2>
+        <h3>El pèl</h3>
+        <p>Cal raspallar-los un cop per setmana.</p>
+        <h3>Les ungles</h3>
+        <p>Els agrada esmolar-se-les en un rascador.</p>
+      </script>
+    </div>
+    <p>
+      Els títols fan d'<strong>índex</strong> de la pàgina: un sol <code>&lt;h1&gt;</code> per al títol principal,
+      <code>&lt;h2&gt;</code> per als apartats, <code>&lt;h3&gt;</code> per als subapartats que hi ha a dins, i així fins a
+      <code>&lt;h6&gt;</code>. Els cercadors i els lectors de pantalla (els programes que llegeixen la pàgina en veu alta)
+      fan servir aquest índex per saber com està organitzat el text.
+    </p>
+    <p>
+      Tria el nivell pel <strong>lloc que ocupa</strong> el títol, no per la mida. Si vols un títol més petit, la mida es
+      canvia amb CSS, com aprendràs a la part B del curs. Prova d'afegir-hi un apartat «Joc», amb un <code>&lt;h2&gt;</code>
+      i un paràgraf.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Important i èmfasi</h2>
+    <p>Dins d'un paràgraf pots marcar paraules amb dos elements nous:</p>
+    <div class="simulador" data-id="c02-strong-em">
+      <script type="text/plain" data-file="index.html">
+        <p>Abans de sortir, <strong>tanca la finestra</strong>: el gat s'escaparia.</p>
+        <p>No vull <em>qualsevol</em> gat: vull aquest.</p>
+      </script>
+    </div>
+    <ul>
+      <li><code>&lt;strong&gt;</code> diu que el text és <strong>important</strong>: un avís, una idea clau. El navegador el mostra en negreta.</li>
+      <li><code>&lt;em&gt;</code> (de l'anglès <em>emphasis</em>) marca l'<strong>èmfasi</strong>: la paraula que diries amb més força i que pot canviar el sentit de la frase. El navegador la mostra en cursiva.</li>
+    </ul>
+    <p>
+      Aquests dos elements van dins del text i no comencen cap línia nova. Per això es poden posar dins d'un paràgraf,
+      al contrari que un títol (recorda els errors típics del capítol 1).
+    </p>
+    <p class="nota">
+      També existeixen <code>&lt;b&gt;</code> (negreta) i <code>&lt;i&gt;</code> (cursiva), però només diuen com s'ha de
+      veure el text, no què vol dir. A HTMLCat fem servir <code>&lt;strong&gt;</code> i <code>&lt;em&gt;</code>: el codi
+      explica el significat, i l'aspecte ja el decidirà el CSS.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Els espais del codi</h2>
+    <p>Aquest codi té molts espais i salts de línia, però el resultat no els té:</p>
+    <div class="simulador" data-id="c02-espais">
+      <script type="text/plain" data-file="index.html">
+        <p>Hi    ha    molts    espais
+        i     també
+        salts de línia.</p>
+      </script>
+    </div>
+    <p>
+      El navegador converteix qualsevol grup d'espais i de salts de línia en <strong>un sol espai</strong>.
+      Per això pots indentar el codi com et convingui sense canviar el resultat, i per això un salt de línia al codi
+      no és un salt de línia a la pàgina.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Saltar de línia: &lt;br&gt;</h2>
+    <p>
+      De vegades sí que vols saltar de línia dins del mateix paràgraf: en una adreça, en un poema…
+      Per a això hi ha <code>&lt;br&gt;</code> (de l'anglès <em>break</em>, «trencar»):
+    </p>
+    <div class="simulador" data-id="c02-br">
+      <script type="text/plain" data-file="index.html">
+        <p>
+          Refugi de gats Mixa<br>
+          Carrer dels Til·lers, 12<br>
+          08001 Barcelona
+        </p>
+      </script>
+    </div>
+    <p>
+      <code>&lt;br&gt;</code> és un element <strong>buit</strong>, com <code>&lt;meta&gt;</code>: no té contingut ni etiqueta
+      de tancament. Però compte: no serveix per fer espai entre dos blocs de text. Si poses diversos <code>&lt;br&gt;</code>
+      seguits per separar dues parts, el que necessites és un paràgraf nou.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Comentaris</h2>
+    <p>
+      Un <strong>comentari</strong> és un text per a les persones que llegeixen el codi: el navegador no el mostra.
+      Comença amb <code>&lt;!--</code> i acaba amb <code>--&gt;</code>.
+    </p>
+    <div class="simulador" data-id="c02-comentaris">
+      <script type="text/plain" data-file="index.html">
+        <!-- Capçalera de la fitxa -->
+        <h1>Mixa</h1>
+        <!-- Dades de l'animal -->
+        <p>Gata europea de tres anys.</p>
+      </script>
+    </div>
+    <p>
+      Fes servir els comentaris per marcar les parts de la pàgina o per explicar alguna cosa que no és evident,
+      no per repetir el que el codi ja diu. I tanca'ls sempre: si oblides el <code>--&gt;</code>, tot el que ve després
+      es converteix en comentari i desapareix de la pàgina.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Caràcters especials: les entitats</h2>
+    <p>
+      Com pots escriure <code>&lt;p&gt;</code> en un text, si <code>&lt;</code> vol dir «aquí comença una etiqueta»?
+      Amb una <strong>entitat</strong>: un codi que comença amb <code>&amp;</code>, acaba amb <code>;</code> i que el
+      navegador canvia pel caràcter.
+    </p>
+    <ul>
+      <li><code>&amp;lt;</code> es veu <code>&lt;</code> (de l'anglès <em>less than</em>, «menor que»);</li>
+      <li><code>&amp;gt;</code> es veu <code>&gt;</code> (<em>greater than</em>, «major que»);</li>
+      <li><code>&amp;amp;</code> es veu <code>&amp;</code>;</li>
+      <li><code>&amp;copy;</code> es veu ©.</li>
+    </ul>
+    <div class="simulador" data-id="c02-entitats">
+      <script type="text/plain" data-file="index.html">
+        <p>Un paràgraf s'escriu amb &lt;p&gt; i &lt;/p&gt;.</p>
+        <p>Ciència &amp; tecnologia</p>
+        <p>&copy; 2026 Refugi de gats Mixa</p>
+      </script>
+    </div>
+    <p>
+      Les lletres catalanes, com à, é, ç o l·l, no necessiten entitats: amb el <code>&lt;meta charset="UTF-8"&gt;</code>
+      del capítol 1 les pots escriure directament.
+    </p>
+    <aside class="codi-net">
+      <p class="codi-net__titol">🧹 Codi net: el significat abans que l'aspecte</p>
+      <ul>
+        <li>Tria cada element pel que <strong>vol dir</strong>, no per com es veu: un títol d'apartat és un <code>&lt;h2&gt;</code> encara que el vulguis petit, i un text important és <code>&lt;strong&gt;</code>, no «negreta».</li>
+        <li>Els títols van en ordre: després d'un <code>&lt;h1&gt;</code> ve un <code>&lt;h2&gt;</code>, sense saltar-te'n cap.</li>
+        <li>Per separar blocs, fes paràgrafs; <code>&lt;br&gt;</code> només serveix per saltar de línia dins d'un text.</li>
+        <li>Fes servir els comentaris per marcar les parts del codi, no per repetir-lo.</li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Errors típics</h2>
+    <p>Aquests exemples tenen errors. Mira el resultat i després llegeix el panell ⚠ Problemes.</p>
+
+    <h3>Et saltes un nivell de títol</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <h1>Els gats</h1>
+        <h3>Alimentació</h3>
+        <p>Mengen pinso.</p>
+      </script>
+    </div>
+    <p>
+      Es veu bé, però a l'índex de la pàgina hi falta un nivell: després d'un <code>&lt;h1&gt;</code> ve un
+      <code>&lt;h2&gt;</code>. Si el <code>&lt;h2&gt;</code> et sembla massa gros, la mida es canvia amb CSS.
+    </p>
+
+    <h3>Fas espai amb &lt;br&gt;</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <p>Els gats dormen molt.</p>
+        <br>
+        <br>
+        <br>
+        <p>També els agrada jugar.</p>
+      </script>
+    </div>
+    <p>
+      El resultat sembla correcte, però cada bloc de text ha de ser un paràgraf, i l'espai que hi ha entre paràgrafs
+      es canvia amb CSS.
+    </p>
+
+    <h3>Escrius una etiqueta dins del text</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <p>Per fer un paràgraf, escriu <p> i el text.</p>
+      </script>
+    </div>
+    <p>
+      El navegador ha llegit <code>&lt;p&gt;</code> com una etiqueta de debò i ha començat un paràgraf nou a la meitat
+      de la frase. Per escriure-la com a text, fes servir entitats: <code>&amp;lt;p&amp;gt;</code>.
+    </p>
+
+    <h3>T'oblides de tancar un comentari</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <h1>Els gats</h1>
+        <!-- Apartat d'alimentació
+        <h2>Alimentació</h2>
+        <p>Mengen pinso i peix.</p>
+      </script>
+    </div>
+    <p>On és l'apartat? Com que el comentari no està tancat, el navegador s'ho ha empassat tot fins al final.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Exercici: la fitxa del teu preferit</h2>
+    <p>Fes una fitxa del teu llibre, la teva sèrie o el teu videojoc preferit. Ha de tenir:</p>
+    <ul>
+      <li>un títol <code>&lt;h1&gt;</code> amb el nom;</li>
+      <li>almenys dos apartats amb títol <code>&lt;h2&gt;</code> (per exemple, «De què va» i «Per què m'agrada»), cadascun amb un paràgraf a sota;</li>
+      <li>dins dels paràgrafs, alguna cosa important marcada amb <code>&lt;strong&gt;</code> i alguna paraula amb èmfasi marcada amb <code>&lt;em&gt;</code> (sense <code>&lt;b&gt;</code> ni <code>&lt;i&gt;</code>);</li>
+      <li>cap error ni cap avís al panell ⚠ Problemes.</li>
+    </ul>
+    <p>Si vols, marca cada apartat amb un comentari. Quan acabis, prem <strong>✓ Comprova</strong>.</p>
+    <div class="simulador" data-id="c02-exercici" data-goal-id="cap-2-ex" data-height="520">
+      <script type="text/plain" data-file="index.html">
+        <h1>El meu llibre preferit</h1>
+        <p>Canvia aquest text: explica de què va.</p>
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "count", "selector": "h1", "eq": 1,
+            "msg": "Hi ha un títol <h1>, i només un." },
+          { "type": "text", "selector": "h1", "matches": "\\S",
+            "msg": "El <h1> té el nom del teu preferit." },
+          { "type": "count", "selector": "h2", "min": 2,
+            "msg": "Hi ha almenys dos apartats amb títol <h2>." },
+          { "type": "count", "selector": "h2 + p", "min": 2,
+            "msg": "Just a sota de cada títol <h2> hi ha un paràgraf." },
+          { "type": "exists", "selector": "p strong",
+            "msg": "Dins d'un paràgraf, alguna cosa important està marcada amb <strong>." },
+          { "type": "exists", "selector": "p em",
+            "msg": "Dins d'un paràgraf, alguna paraula té èmfasi amb <em>." },
+          { "type": "count", "selector": "b, i", "max": 0,
+            "msg": "No hi ha <b> ni <i>: el significat es marca amb <strong> i <em>." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís: títols en ordre, sense <br> seguits i amb la indentació correcta." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Troba l'error</h2>
+    <p>
+      Aquesta pàgina té quatre problemes, i un d'ells n'amaga una part. Arregla'ls tots sense canviar els textos
+      (els títols poden canviar de nivell) i prem <strong>✓ Comprova</strong>.
+    </p>
+    <div class="simulador" data-id="c02-troba-error" data-goal-id="cap-2-bug" data-height="520">
+      <script type="text/plain" data-file="index.html">
+        <h1>Excursió a Montserrat</h1>
+        <h3>Què cal portar</h3>
+        <p>Aigua, entrepà i <strong>calçat còmode</strong>.</p>
+        <br>
+        <br>
+        <!-- Horari
+        <h1>Horari</h1>
+        <p>Sortim a les 8 i tornem a les 6.</p>
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "text", "selector": "body", "includes": "Sortim a les 8",
+            "msg": "Es veu l'horari (ara queda amagat)." },
+          { "type": "text", "selector": "h1", "equals": "Excursió a Montserrat",
+            "msg": "El títol principal <h1> és «Excursió a Montserrat»." },
+          { "type": "count", "selector": "h1", "eq": 1,
+            "msg": "Hi ha un sol <h1>." },
+          { "type": "count", "selector": "h2", "eq": 2,
+            "msg": "Els dos apartats, «Què cal portar» i «Horari», són títols <h2>." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Resum</h2>
+    <div class="resum">
+      <ul>
+        <li>Hi ha sis nivells de títols, de <code>&lt;h1&gt;</code> a <code>&lt;h6&gt;</code>: un sol <code>&lt;h1&gt;</code>, i sense saltar-te'n cap.</li>
+        <li><code>&lt;strong&gt;</code> marca el que és important i <code>&lt;em&gt;</code>, l'èmfasi. Van dins del text.</li>
+        <li>El navegador converteix els espais i els salts de línia del codi en un sol espai. Per saltar de línia dins d'un text, <code>&lt;br&gt;</code>.</li>
+        <li>Els comentaris (<code>&lt;!-- … --&gt;</code>) no es veuen a la pàgina, i s'han de tancar.</li>
+        <li>Per escriure <code>&lt;</code>, <code>&gt;</code> i <code>&amp;</code> al text, fes servir entitats: <code>&amp;lt;</code>, <code>&amp;gt;</code> i <code>&amp;amp;</code>.</li>
+        <li>Tria cada element pel que vol dir, no per com es veu.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>

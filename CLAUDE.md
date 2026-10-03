@@ -16,7 +16,9 @@ If the code and a doc disagree, the code is right and the doc is a bug: fix the 
 
 - HTML, CSS and JavaScript only. No framework, bundler, transpiler, build step,
   runtime dependency or CDN script. Native ES modules (`<script type="module">`), no globals.
-- Only `site/` is deployed (Cloudflare Pages output directory). Tests, solutions and docs stay outside it.
+- The website lives in `site/`; the root `index.html` is the free simulator (like PyCat) and loads its
+  CSS/JS from `site/`. Cloudflare publishes the whole repository (owner's decision, 2026-10-03), so
+  everything committed is public, solutions in `tests/solutions/` included: never commit private data.
 - Everything the student sees is in Catalan. Engine identifiers and file names in English;
   code comments in Catalan.
 - Students never write JavaScript. The preview iframe uses `sandbox="allow-same-origin"`
