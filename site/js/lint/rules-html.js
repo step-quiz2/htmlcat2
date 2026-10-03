@@ -22,7 +22,7 @@
 
 import {
   KNOWN_ELEMENTS, DEPRECATED_ELEMENTS, GLOBAL_ATTRIBUTES, ELEMENT_ATTRIBUTES,
-  OBSOLETE_ATTRIBUTES, isGlobalAttribute,
+  OBSOLETE_ATTRIBUTES, ENUMERATED_ATTRIBUTES, isGlobalAttribute,
 } from '../lang/html-spec.js';
 import { RECURSOS } from '../preview/recursos.js';
 import { closest } from './suggest.js';
@@ -727,6 +727,178 @@ const semanticDiv = {
   },
 };
 
+// ── Taules (capítol 7) ──
+
+const TABLE_SECTIONS = new Set(['thead', 'tbody', 'tfoot']);
+const CELLS = new Set(['td', 'th']);
+
+/**
+ * Què pot anar directament dins de cada part d'una taula. El navegador treu
+ * de la taula qualsevol altra cosa (text o elements) i la posa just abans
+ * («foster parenting», comprovat a Chromium). Les files i les cel·les mal
+ * posades tenen el seu propi missatge.
+ */
+const ROW_GROUP_CHILDREN = new Set(['tr', 'script', 'template']);
+const TABLE_CHILDREN = {
+  table: new Set(['caption', 'colgroup', 'thead', 'tbody', 'tfoot', 'tr', 'script', 'template', 'style']),
+  thead: ROW_GROUP_CHILDREN,
+  tbody: ROW_GROUP_CHILDREN,
+  tfoot: ROW_GROUP_CHILDREN,
+  tr: new Set(['td', 'th', 'script', 'template']),
+};
+
+const parentName = (el) => (el.parent.type === 'element' ? el.parent.name : null);
+const childElements = (el, names) => el.children.filter((node) => isElement(node) && names.has(node.name));
+
+const tableStructure = {
+  id: 'html/table-structure',
+  lang: 'html',
+  since: 7,
+  severity: 'error',
+  check(ctx, report) {
+    for (const el of htmlElements(ctx.root)) {
+      const parent = parentName(el);
+      if (el.name === 'tr' && parent !== 'table' && !TABLE_SECTIONS.has(parent)) {
+        report(nameRange(el.startTag), { kind: 'row-outside' });
+      } else if (CELLS.has(el.name) && parent !== 'tr') {
+        const inTable = parent === 'table' || TABLE_SECTIONS.has(parent);
+        report(nameRange(el.startTag), { kind: inTable ? 'cell-no-row' : 'cell-outside', tag: el.name });
+      }
+      const allowed = TABLE_CHILDREN[el.name];
+      if (!allowed) continue;
+      for (const child of el.children) {
+        if (isElement(child)) {
+          // (els formularis dins de taules són un cas a part que no s'ensenya)
+          const handled = allowed.has(child.name) || child.name === 'tr' || CELLS.has(child.name) || child.name === 'form' ||
+            (child.name === 'input' && (attrOf(child.startTag, 'type')?.value || '').toLowerCase() === 'hidden');
+          if (!handled) report(nameRange(child.startTag), { kind: 'foster', tag: child.name });
+        } else if (child.type === 'text' && !isBlankText(ctx.src, child)) {
+          report(trimmedRange(ctx.src, child.token), { kind: 'foster-text' });
+        }
+      }
+    }
+  },
+};
+
+/** Les files d'una taula, per grups (thead, tbody, tfoot o files soltes): rowspan no passa d'un grup a un altre. */
+function rowGroups(table) {
+  const groups = [];
+  let loose = null;
+  for (const child of table.children) {
+    if (!isElement(child)) continue;
+    if (child.name === 'tr') {
+      if (!loose) groups.push(loose = []);
+      loose.push(child);
+    } else if (TABLE_SECTIONS.has(child.name)) {
+      loose = null;
+      groups.push(childElements(child, new Set(['tr'])));
+    }
+  }
+  return groups;
+}
+
+function spanOf(cell, name) {
+  const n = parseInt(attrOf(cell.startTag, name)?.value ?? '', 10);
+  if (name === 'rowspan' && n === 0) return Infinity;   // rowspan="0": fins al final del grup
+  return n >= 1 ? n : 1;
+}
+
+/** Columnes que ocupa cada fila d'un grup, comptant colspan i les cel·les de més amunt amb rowspan. */
+function rowWidths(group) {
+  const pending = [];   // per columna: quantes files més ocupa una cel·la (incloent-hi la fila actual)
+  return group.map((tr) => {
+    const used = pending.map((n) => n > 0);
+    let col = 0;
+    for (const cell of childElements(tr, CELLS)) {
+      while (used[col]) col++;
+      const colspan = spanOf(cell, 'colspan');
+      const rowspan = spanOf(cell, 'rowspan');
+      for (let k = col; k < col + colspan; k++) {
+        used[k] = true;
+        pending[k] = rowspan;
+      }
+      col += colspan;
+    }
+    for (let k = 0; k < pending.length; k++) if (pending[k] > 0) pending[k]--;
+    return used.lastIndexOf(true) + 1;
+  });
+}
+
+const tables = (root) => htmlElements(root).filter((el) => el.name === 'table');
+
+const tableColumns = {
+  id: 'html/table-columns',
+  lang: 'html',
+  since: 7,
+  severity: 'warning',
+  check(ctx, report) {
+    for (const table of tables(ctx.root)) {
+      const groups = rowGroups(table);
+      const rows = groups.flat();
+      const widths = groups.flatMap(rowWidths);
+      if (!rows.length) continue;
+      const firstLine = ctx.lineOf(rows[0].startTag.start);
+      rows.forEach((tr, i) => {
+        if (widths[i] !== widths[0]) report(nameRange(tr.startTag), { columns: widths[i], expected: widths[0], firstLine });
+      });
+    }
+  },
+};
+
+const tableHeaders = {
+  id: 'html/table-headers',
+  lang: 'html',
+  since: 7,
+  severity: 'warning',
+  check(ctx, report) {
+    for (const table of tables(ctx.root)) {
+      const rows = rowGroups(table).flat();
+      if (rows.length && !rows.some((tr) => childElements(tr, new Set(['th'])).length)) report(nameRange(table.startTag), {});
+    }
+  },
+};
+
+/** Confusions habituals amb els valors dels atributs enumerats. */
+const VALUE_MIXUPS = {
+  scope: {
+    column: 'col', columns: 'col', colum: 'col', cols: 'col', columna: 'col', columnes: 'col',
+    rows: 'row', fila: 'row', files: 'row', filera: 'row',
+  },
+};
+
+const invalidAttributeValue = {
+  id: 'html/invalid-attribute-value',
+  lang: 'html',
+  since: 7,
+  severity: 'error',
+  check(ctx, report) {
+    for (const el of htmlElements(ctx.root)) {
+      const enumerated = ENUMERATED_ATTRIBUTES[el.name];
+      if (!enumerated) continue;
+      for (const attr of el.startTag.attrs) {
+        const values = enumerated[attr.name];
+        const value = (attr.value || '').trim();
+        if (!values || values.includes(value.toLowerCase())) continue;
+        const key = value.toLowerCase();
+        const suggestion = VALUE_MIXUPS[attr.name]?.[key] || (key ? closest(key, values) : null);
+        report(attr, { attr: attr.name, tag: el.name, value, values, suggestion });
+      }
+    }
+  },
+};
+
+const thScope = {
+  id: 'html/th-scope',
+  lang: 'html',
+  since: 7,
+  severity: 'info',
+  check(ctx, report) {
+    for (const el of htmlElements(ctx.root)) {
+      if (el.name === 'th' && !attrOf(el.startTag, 'scope')) report(nameRange(el.startTag), {});
+    }
+  },
+};
+
 const inlineStyle = {
   id: 'html/inline-style',
   lang: 'html',
@@ -781,5 +953,10 @@ export const HTML_RULES = [
   headInBody,
   sectionHeading,
   semanticDiv,
+  tableStructure,
+  tableColumns,
+  tableHeaders,
+  invalidAttributeValue,
+  thScope,
   inlineStyle,
 ];

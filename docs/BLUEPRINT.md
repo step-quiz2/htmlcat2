@@ -867,7 +867,7 @@ export function createPreview(frame, { onLoad, onLinkClick, onSubmit }) {
 
 > **Note (2026-10-02):** the static rules up to chapter 9 are built; the real catalogue (with new ids and two `since` changes) is in `docs/STATE.md` §2.6, which wins over this table.
 >
-> **Note (2026-10-03):** `html/missing-anchor` (ch. 4) and `html/image-not-found` (ch. 5) were built as static rules: the ids are in the source, and every image a student can use lives in `site/recursos/` (listed in `site/js/preview/recursos.js`, kept in sync by a test). Chapter 5 also added `html/vague-alt`, `html/obsolete-attribute` and `html/img-size`; chapter 6, `html/head-in-body`, `html/section-heading` and `html/semantic-div` (the "div-soup hints").
+> **Note (2026-10-03):** `html/missing-anchor` (ch. 4) and `html/image-not-found` (ch. 5) were built as static rules: the ids are in the source, and every image a student can use lives in `site/recursos/` (listed in `site/js/preview/recursos.js`, kept in sync by a test). Chapter 5 also added `html/vague-alt`, `html/obsolete-attribute` and `html/img-size`; chapter 6, `html/head-in-body`, `html/section-heading` and `html/semantic-div` (the "div-soup hints"); chapter 7, `html/table-columns`, `html/table-headers` and `html/invalid-attribute-value`.
 
 | Id | Since | Sev | Phase | Detects |
 |---|---|---|---|---|

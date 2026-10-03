@@ -256,7 +256,7 @@ problemes ordenada (errors, avisos, suggeriments; després per fitxer i línia):
   («i 4 més com aquest»).
 - Rendiment mesurat (Node, 300 línies): HTML ≈ 3,6 ms i CSS ≈ 1 ms.
 
-Catàleg (E error, A avís). «Cap.» = capítol a partir del qual s'activa.
+Catàleg (E error, A avís, S suggeriment). «Cap.» = capítol a partir del qual s'activa.
 
 | Regla | Cap. | | Detecta |
 |---|---|---|---|
@@ -299,6 +299,11 @@ Catàleg (E error, A avís). «Cap.» = capítol a partir del qual s'activa.
 | `html/single-main` | 6 | A | Cap `<main>` (només en mode document, si el `<body>` té contingut), més d'un, o un `<main>` dins de `<header>`, `<article>`… (només pot anar dins de `<body>`, `<div>` o `<form>`) |
 | `html/section-heading` | 6 | A | `<section>` o `<article>` sense cap títol (el d'una part de dins no compta) |
 | `html/semantic-div` | 6 | A | `<div class="menu">`, `<div id="peu">`, `<div class="capcalera">`…: hi ha un element propi (`nav`, `footer`, `header`…) |
+| `html/table-structure` | 7 | E | `<tr>` fora d'una taula, cel·les fora d'una fila, i text o elements dins de la taula però fora de les cel·les (el navegador els treu i els posa abans de la taula) |
+| `html/invalid-attribute-value` | 7 | E | Valor que l'atribut no admet: `scope="column"` (suggereix `col`; valors possibles a `html-spec.js`) |
+| `html/table-columns` | 7 | A | Una fila amb més o menys columnes que la primera (compta `colspan` i `rowspan`) |
+| `html/table-headers` | 7 | A | Taula sense cap `<th>` (les taules per maquetar no en tenen) |
+| `html/th-scope` | 7 | S | `<th>` sense `scope` (el primer suggeriment del catàleg: no compta com a avís a les comprovacions) |
 | `html/inline-style` | 9 | A | Atribut `style=""` |
 | `css/unbalanced-braces` | 9 | E | Falta `{` o `}`, o sobra una `}` |
 | `css/missing-semicolon` | 9 | E | Falta `;` entre dues declaracions |
@@ -313,7 +318,7 @@ Catàleg (E error, A avís). «Cap.» = capítol a partir del qual s'activa.
 | `css/indentation` | 9 | A | Declaracions no indentades 2 espais, `}` mal alineada (no als `<style>`) |
 
 Les regles que necessiten el document ja pintat (selector que no selecciona res,
-contrast) i les dels capítols 7–14 s'afegiran amb cada capítol (BLUEPRINT
+contrast) i les dels capítols 8–14 s'afegiran amb cada capítol (BLUEPRINT
 apèndix C). `html/image-not-found` no el necessita: totes les imatges que pot fer
 servir l'alumne són a `site/recursos/` (la previsualització les hi busca amb el
 `<base>`, §2.4) i `preview/recursos.js` en té la llista; el test estàtic comprova
@@ -424,6 +429,7 @@ motiu; si se'n canvia alguna, s'anota aquí amb la data i el motiu.
 | 2026-10-03 | Revisor, capítol 4: `html/missing-anchor` es fa sobre el codi font (el BLUEPRINT la preveia sobre la pàgina pintada); `html/vague-link-text` és un avís (el BLUEPRINT deia suggeriment); regla nova `html/missing-protocol` | Els id del codi són els que ha escrit l'alumne; els textos d'enllaç clars són l'hàbit de codi net del capítol (i l'exercici els exigeix); oblidar `https://` és un error molt habitual que el navegador no explica |
 | 2026-10-03 | Revisor, capítol 5: `html/image-not-found` es fa sobre el codi font amb la llista `preview/recursos.js` (el BLUEPRINT la preveia sobre la pàgina pintada, amb `naturalWidth`); regles noves `html/vague-alt`, `html/obsolete-attribute` (avisos) i `html/img-size` (error) | Les imatges de l'alumne només poden ser les de `site/recursos/`: el resultat és el mateix que mirar la pàgina pintada, però surt de seguida, val igual per a les comprovacions i es pot provar amb Node. Els atributs antics d'aspecte encara funcionen (`align="left"` fa flotar la imatge, comprovat a Chromium): són avisos. `width="200px"` el navegador l'arregla en silenci (llegeix el 200) i `width="5cm"` el converteix en 5 píxels: errors, com les altres reparacions |
 | 2026-10-03 | Revisor, capítol 6: regles noves `html/head-in-body`, `html/section-heading` i `html/semantic-div` (el BLUEPRINT en deia «div-soup hints»); `html/single-main` també avisa d'un `<main>` mal posat. El codi inicial de l'editor lliure (`site/editor/` i el simulador de l'arrel) i l'exemple de la portada tenen `<main>` (i la imatge, `height`) | Confondre `<head>` amb `<header>` és molt habitual i el navegador s'empassa el `<head>` sense dir res (comprovat a Chromium). El codi d'exemple del web és el model que copien els alumnes i ha de passar totes les regles (ho comprova un test) |
+| 2026-10-03 | Revisor, capítol 7: `html/table-structure`, `html/table-columns`, `html/table-headers` i `html/invalid-attribute-value` (el BLUEPRINT en preveia dues, `table-structure` i `th-scope`); `html/th-scope` és un suggeriment, el primer del catàleg | El navegador arregla en silenci els errors d'estructura de les taules, i alguns es veuen molt (un text fora de les cel·les surt a sobre de la taula, comprovat a Chromium); una cel·la oblidada desquadra la taula. `scope` és recomanable però no imprescindible en una taula simple: per això és un suggeriment, que no compta a `maxWarnings` |
 | 2026-10-02 | El repositori definitiu és `step-quiz2/htmlcat2` | Ho ha confirmat el propietari. L'historial de les fases 0–2 (PR #1–#4) és a l'antic repositori; el codi es va copiar aquí amb una pujada pel web, que va perdre `.github/`, `.editorconfig` i `.gitignore` (restaurats amb Git el mateix dia) |
 
 ### Decisions confirmades pel propietari el 2026-10-03
@@ -459,7 +465,7 @@ cd tests && npm ci && node course-browser.mjs   # navegador (Playwright + Chromi
 
 | Test | Què comprova |
 |---|---|
-| `unit/` | Cada mòdul pur de `site/js/` (182 tests): tokenitzador, arbre i errors d'estructura, analitzador de CSS, ressaltat (conserva el codi, escapa, una línia per entrada, rendiment), robustesa amb 500 codis aleatoris (també el revisor), edició (Retorn, Tab, Maj+Tab), `localStorage`, document de previsualització, textos de la interfície i revisor de codi: per a cada regla, un codi que la dispara i un que no (un test falla si una regla no en té), missatges sense buits, activació per capítol i mode, ordre, agrupació, rendiment, i que el codi d'exemple de l'editor lliure (també el del simulador de l'arrel) i de la portada no tingui cap problema; dades del curs i progrés; esquema de les comprovacions i les que no necessiten navegador (`uses-html`, `uses-css`, `lint`) |
+| `unit/` | Cada mòdul pur de `site/js/` (188 tests): tokenitzador, arbre i errors d'estructura, analitzador de CSS, ressaltat (conserva el codi, escapa, una línia per entrada, rendiment), robustesa amb 500 codis aleatoris (també el revisor), edició (Retorn, Tab, Maj+Tab), `localStorage`, document de previsualització, textos de la interfície i revisor de codi: per a cada regla, un codi que la dispara i un que no (un test falla si una regla no en té), missatges sense buits, activació per capítol i mode, ordre, agrupació, rendiment, i que el codi d'exemple de l'editor lliure (també el del simulador de l'arrel) i de la portada no tingui cap problema; dades del curs i progrés; esquema de les comprovacions i les que no necessiten navegador (`uses-html`, `uses-css`, `lint`) |
 | `course-static.mjs` | Cada pàgina té `<!DOCTYPE html>`, `lang="ca"`, `charset` i `<title>`; cap `style=""` ni `on…=""`; cap tabulació; tots els enllaços relatius existeixen; sintaxi de cada `.js`; cap menció de CC BY-NC-ND; existeixen `.editorconfig`, `.gitignore` i `.github/workflows/ci.yml` (una pujada pel web no els inclou). Curs: dades (`course/data.js`) ↔ fitxers de `site/curs/`; `<body data-pagina data-num>` d'acord amb el fitxer; l'exercici principal de cada capítol hi és; tot simulador editable té `data-id`; `data-id` i `data-goal-id` únics; blocs de codi amb nom permès i sense `<script`; comprovacions vàlides (`checks/schema.js`); cada exercici té la seva solució a `tests/solutions/`. Imatges: la llista de `preview/recursos.js`, els fitxers de `site/recursos/` i les files de `CREDITS.md` coincideixen |
 | `course-browser.mjs` | Cada pàgina, a 360 i 1280 px: cap error a la consola, cap petició fallida, cap petició a servidors externs, tots els simuladors es munten en arribar-hi, cap desplaçament horitzontal, cap id repetit; a cada simulador, les imatges que el navegador no pot mostrar són tantes com les que el panell ⚠ Problemes diu que no es troben (`html/image-not-found`), i només n'hi pot haver als exemples no editables i als exercicis (les peticions d'aquestes imatges, un 404 a `recursos/` o una imatge d'Internet que bloqueja la CSP, no compten com a errors de la pàgina). Cada exercici dels capítols, en un mòbil: el codi inicial no el supera, la solució sí (i sense errors al panell ⚠ Problemes), el menú hi posa ✓ i es manté després de recarregar. Dos exemples no editables a la mateixa pàgina no repeteixen els ids de les pestanyes. A més, prova l'editor lliure de punta a punta: escriure, indentació automàtica, resultat en directe, Ctrl+Z, `sandbox` i CSP correctes (també amb text abans de `<html>`), cap script ni imatge externa, enllaços interceptats, CSS aplicat i codi desat després de recarregar. I el panell ⚠ Problemes: «Cap problema» amb el codi inicial, el `<p>` del codi inicial sense tancar surt amb la seva línia i es marca, el clic i el teclat porten el cursor a la línia (i canvien de pestanya), i una propietat CSS mal escrita es detecta amb el `CSS.supports` del navegador |
 

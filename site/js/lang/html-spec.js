@@ -184,3 +184,11 @@ export const OBSOLETE_ATTRIBUTES = Object.fromEntries(Object.entries({
   tr: 'align bgcolor char charoff valign height',
   ul: 'compact type',
 }).map(([name, list]) => [name, words(list)]));
+
+/**
+ * Atributs que només admeten uns quants valors (sense distingir majúscules):
+ * { element: { atribut: [valors] } } (regla html/invalid-attribute-value).
+ */
+export const ENUMERATED_ATTRIBUTES = {
+  th: { scope: ['col', 'row', 'colgroup', 'rowgroup'] },
+};

@@ -7,6 +7,24 @@ import { lintCase, rulesOf, css, doc, documentCase } from './lint-helpers.mjs';
 
 const GOOD_CSS = 'h1 {\n  color: red;\n  font-size: 2em;\n}\n';
 
+/** Una taula ben feta: títol, capçaleres de columna i de fila, files completes. */
+const TABLE = `<table>
+  <caption>Els gats del refugi</caption>
+  <thead>
+    <tr>
+      <th scope="col">Nom</th>
+      <th scope="COL">Edat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Mixa</th>
+      <td>3 anys</td>
+    </tr>
+  </tbody>
+</table>
+`;
+
 /** id de la regla → [codi que la dispara, codi correcte] */
 const CASES = {
   // HTML: estructura
@@ -55,6 +73,12 @@ const CASES = {
   'html/head-in-body': ['<head>\n  <h1>Botiga</h1>\n</head>\n', documentCase(doc())],
   'html/section-heading': ['<section>\n  <p>x</p>\n</section>\n', '<section>\n  <h2>A</h2>\n  <p>x</p>\n</section>\n<article>\n  <header>\n    <h2>B</h2>\n  </header>\n</article>\n'],
   'html/semantic-div': ['<div class="menu">\n  <a href="a.html">A</a>\n</div>\n', '<nav class="menu">\n  <a href="a.html">A</a>\n</nav>\n<div class="caixa">x</div>\n'],
+  // HTML: taules
+  'html/table-structure': ['<table>\n  <tr>\n    <th scope="col">A</th>\n  </tr>\n  Hola\n</table>\n', TABLE],
+  'html/table-columns': ['<table>\n  <tr>\n    <th scope="col">A</th>\n    <th scope="col">B</th>\n  </tr>\n  <tr>\n    <td>1</td>\n  </tr>\n</table>\n', TABLE],
+  'html/table-headers': ['<table>\n  <tr>\n    <td>A</td>\n  </tr>\n</table>\n', TABLE],
+  'html/invalid-attribute-value': ['<table>\n  <tr>\n    <th scope="column">A</th>\n  </tr>\n</table>\n', TABLE],
+  'html/th-scope': ['<table>\n  <tr>\n    <th>A</th>\n  </tr>\n</table>\n', TABLE],
   'html/inline-style': ['<p style="color: red">x</p>\n', '<p class="avis">x</p>\n'],
   // CSS: errors
   'css/unbalanced-braces': [css('h1 {\n  color: red;\n'), css(GOOD_CSS)],
@@ -279,4 +303,41 @@ test('estructura de la pàgina: detalls de les regles del capítol 6', () => {
   assert.ok(!rulesOf('<div class="contingut">x</div>\n<div class="constructor">x</div>\n').includes('html/semantic-div'));
   // Abans del capítol 6, cap d'aquestes regles
   assert.deepEqual(rulesOf({ files: { 'index.html': '<head></head>\n<section>x</section>\n<div class="menu">x</div>\n<main>a</main>\n<main>b</main>\n' }, chapter: 5 }), []);
+});
+
+test('taules: detalls de les regles del capítol 7', () => {
+  const kinds = (src) => lintCase(src).filter((p) => p.rule === 'html/table-structure').map((p) => p.data.kind);
+  const table = (rows) => `<table>\n${rows}</table>\n`;
+  const row = (cells) => `  <tr>\n${cells.map((c) => `    ${c}\n`).join('')}  </tr>\n`;
+  // Files i cel·les fora de lloc, i contingut fora de les cel·les (el navegador el treu de la taula)
+  assert.deepEqual(kinds('<tr>\n  <td>a</td>\n</tr>\n'), ['row-outside']);
+  assert.deepEqual(kinds('<p>\n  <td>a</td>\n</p>\n'), ['cell-outside']);
+  assert.deepEqual(kinds(table('  <td>a</td>\n')), ['cell-no-row']);
+  assert.deepEqual(kinds(table('  <tbody>\n    <th scope="col">a</th>\n  </tbody>\n')), ['cell-no-row']);
+  assert.deepEqual(kinds(table(row(['<td>a</td>', '<p>b</p>']))), ['foster']);
+  assert.deepEqual(kinds(table(row(['<td>a</td>', '-', '<td>b</td>']))), ['foster-text']);
+  assert.equal(first(table('  <p>Fora</p>\n'), 'html/table-structure').data.tag, 'p');
+  // El que sí que hi pot anar: files soltes, <caption>, comentaris, espais
+  assert.deepEqual(kinds(table('  <caption>T</caption>\n  <!-- files -->\n' + row(['<td>a</td>']))), []);
+  // Columnes: colspan i rowspan compten; la primera fila mana
+  const columns = (rows) => lintCase(table(rows)).filter((p) => p.rule === 'html/table-columns').map((p) => [p.line, p.data.columns, p.data.expected]);
+  assert.deepEqual(columns(row(['<td colspan="2">a</td>']) + row(['<td>b</td>', '<td>c</td>'])), []);
+  assert.deepEqual(columns(row(['<td rowspan="2">a</td>', '<td>b</td>']) + row(['<td>c</td>'])), []);
+  assert.deepEqual(columns(row(['<td>a</td>', '<td>b</td>', '<td>c</td>']) + row(['<td>d</td>', '<td>e</td>'])), [[7, 2, 3]]);
+  assert.deepEqual(columns(row(['<td>a</td>']) + row(['<td>b</td>', '<td>c</td>'])), [[5, 2, 1]]);
+  // Les taules de dins d'una cel·la es compten a part
+  assert.deepEqual(columns(row(['<td>a</td>', '<td>\n      <table>\n        <tr>\n          <th scope="col">x</th>\n        </tr>\n      </table>\n    </td>'])), []);
+  // Valors de scope: majúscules, confusions habituals i valor buit
+  const scope = (value) => first(table(row([`<th scope="${value}">a</th>`])), 'html/invalid-attribute-value')?.data;
+  assert.equal(scope('Row'), undefined);
+  assert.equal(scope('columna').suggestion, 'col');
+  assert.equal(scope('fila').suggestion, 'row');
+  assert.equal(scope('rwo').suggestion, 'row');
+  assert.equal(scope('').suggestion, null);
+  // scope a una <td>: atribut antic, amb la pista de fer-la <th>
+  assert.match(first(table(row(['<th scope="col">a</th>']) + row(['<td scope="row">b</td>'])), 'html/obsolete-attribute').hint, /<th>/);
+  // th-scope és un suggeriment (no compta com a avís)
+  assert.equal(first(table(row(['<th>a</th>'])), 'html/th-scope').severity, 'info');
+  // Abans del capítol 7, cap d'aquestes regles
+  assert.deepEqual(rulesOf({ files: { 'index.html': '<table>\n  <td>a</td>\n  Hola\n</table>\n<tr>x</tr>\n' }, chapter: 6 }), []);
 });
