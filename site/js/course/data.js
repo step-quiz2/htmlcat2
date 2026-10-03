@@ -35,6 +35,7 @@ export const CAPITOLS = [
   { num: 5, titol: 'Imatges', arxiu: 'capitol-5.html', goalId: 'cap-5-ex', part: 'HTML' },
   { num: 6, titol: 'Estructura de la pàgina', arxiu: 'capitol-6.html', goalId: 'cap-6-ex', part: 'HTML' },
   { num: 7, titol: 'Taules', arxiu: 'capitol-7.html', goalId: 'cap-7-ex', part: 'HTML' },
+  { num: 8, titol: 'Formularis', arxiu: 'capitol-8.html', goalId: 'cap-8-ex', part: 'HTML' },
 ];
 
 export const REPTES = [];

@@ -864,6 +864,14 @@ const VALUE_MIXUPS = {
     column: 'col', columns: 'col', colum: 'col', cols: 'col', columna: 'col', columnes: 'col',
     rows: 'row', fila: 'row', files: 'row', filera: 'row',
   },
+  // (data és «date» en català; un suggeriment que l'atribut no admet es descarta)
+  type: {
+    txt: 'text', texte: 'text', mail: 'email', 'e-mail': 'email', correu: 'email',
+    numero: 'number', 'número': 'number', num: 'number', telefon: 'tel', 'telèfon': 'tel', phone: 'tel',
+    data: 'date', hora: 'time', contrasenya: 'password', pass: 'password', casella: 'checkbox',
+    check: 'checkbox', boto: 'button', 'botó': 'button', enviar: 'submit', envia: 'submit',
+    send: 'submit', datetime: 'datetime-local', colour: 'color',
+  },
 };
 
 const invalidAttributeValue = {
@@ -880,7 +888,8 @@ const invalidAttributeValue = {
         const value = (attr.value || '').trim();
         if (!values || values.includes(value.toLowerCase())) continue;
         const key = value.toLowerCase();
-        const suggestion = VALUE_MIXUPS[attr.name]?.[key] || (key ? closest(key, values) : null);
+        const mixup = VALUE_MIXUPS[attr.name]?.[key];
+        const suggestion = values.includes(mixup) ? mixup : (key ? closest(key, values) : null);
         report(attr, { attr: attr.name, tag: el.name, value, values, suggestion });
       }
     }
@@ -895,6 +904,78 @@ const thScope = {
   check(ctx, report) {
     for (const el of htmlElements(ctx.root)) {
       if (el.name === 'th' && !attrOf(el.startTag, 'scope')) report(nameRange(el.startTag), {});
+    }
+  },
+};
+
+// ── Formularis (capítol 8) ──
+
+/** Elements que poden tenir etiqueta (WHATWG: «labelable elements»). */
+const LABELABLE = new Set(['button', 'input', 'meter', 'output', 'progress', 'select', 'textarea']);
+/** Tipus d'<input> que no necessiten etiqueta (són botons, o no es veuen) ni, alguns, name. */
+const BUTTON_INPUTS = new Set(['submit', 'reset', 'button', 'image']);
+
+const inputType = (el) => (attrOf(el.startTag, 'type')?.value || 'text').trim().toLowerCase();
+
+/** Camps que l'alumne omple: necessiten etiqueta i name. */
+function isField(el) {
+  if (el.name === 'select' || el.name === 'textarea') return true;
+  return el.name === 'input' && !BUTTON_INPUTS.has(inputType(el)) && inputType(el) !== 'hidden';
+}
+
+const controlLabel = {
+  id: 'html/control-label',
+  lang: 'html',
+  since: 8,
+  severity: 'error',
+  check(ctx, report) {
+    const elements = htmlElements(ctx.root);
+    const byId = new Map();   // amb ids repetits, el navegador fa servir el primer
+    for (const el of elements) {
+      const id = (attrOf(el.startTag, 'id')?.value || '').trim();
+      if (id && !byId.has(id)) byId.set(id, el);
+    }
+    const labelled = new Set();
+    for (const label of elements.filter((el) => el.name === 'label')) {
+      const forAttr = attrOf(label.startTag, 'for');
+      if (!forAttr) {
+        // Sense for, l'etiqueta és del primer camp que té a dins
+        const inner = [...walk(label)].find((node) => isElement(node) && LABELABLE.has(node.name));
+        if (inner) labelled.add(inner);
+        continue;
+      }
+      const id = (forAttr.value || '').trim();
+      const target = byId.get(id);
+      if (!target) report(forAttr, { kind: 'for-missing', id, suggestion: id ? closest(id, byId.keys()) : null });
+      else if (!LABELABLE.has(target.name)) report(forAttr, { kind: 'for-not-control', id, tag: target.name });
+      else labelled.add(target);
+    }
+    for (const el of elements) {
+      if (!isField(el) || labelled.has(el)) continue;
+      if ((attrOf(el.startTag, 'aria-label')?.value || '').trim() || attrOf(el.startTag, 'aria-labelledby')) continue;
+      const placeholder = (attrOf(el.startTag, 'placeholder')?.value || '').trim();
+      report(nameRange(el.startTag), { kind: placeholder ? 'placeholder' : 'missing', tag: el.name });
+    }
+  },
+};
+
+function insideForm(el) {
+  for (let node = el.parent; node.type === 'element'; node = node.parent) {
+    if (node.name === 'form') return true;
+  }
+  return Boolean(attrOf(el.startTag, 'form'));
+}
+
+const controlName = {
+  id: 'html/control-name',
+  lang: 'html',
+  since: 8,
+  severity: 'warning',
+  check(ctx, report) {
+    for (const el of htmlElements(ctx.root)) {
+      const sends = isField(el) || (el.name === 'input' && inputType(el) === 'hidden');
+      if (!sends || !insideForm(el) || (attrOf(el.startTag, 'name')?.value || '').trim()) continue;
+      report(nameRange(el.startTag), { tag: el.name, radio: el.name === 'input' && inputType(el) === 'radio' });
     }
   },
 };
@@ -958,5 +1039,7 @@ export const HTML_RULES = [
   tableHeaders,
   invalidAttributeValue,
   thScope,
+  controlLabel,
+  controlName,
   inlineStyle,
 ];

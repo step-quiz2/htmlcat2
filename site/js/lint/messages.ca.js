@@ -337,16 +337,42 @@ export const MESSAGES = {
     text: 'Aquesta taula no té cap cel·la de capçalera <th>.',
     hint: 'Les capçaleres diuen què hi ha a cada columna (o a cada fila): escriu-les amb <th> en lloc de <td>. Si la taula només serveix per col·locar coses a la pàgina, no és una taula de dades: això es fa amb CSS.',
   }),
-  'html/invalid-attribute-value': ({ attr, value, values, suggestion }) => ({
+  'html/invalid-attribute-value': ({ attr, tag: name, value, values, suggestion }) => ({
     text: value
       ? `«${value}» no és un valor vàlid per a l'atribut ${attr}.`
       : `L'atribut ${attr} és buit.`,
     hint: (suggestion ? `Potser volies escriure ${attr}="${suggestion}"? ` : '') +
-      `Els valors possibles són ${values.join(', ')}. El navegador no entén cap altre valor i no en fa cas.`,
+      (values.length > 10 ? `Alguns dels valors possibles: ${values.slice(0, 11).join(', ')}…` : `Els valors possibles són ${values.join(', ')}.`) +
+      (name === 'input' && attr === 'type'
+        ? ' El navegador no entén cap altre valor i en fa un camp de text normal.'
+        : ' El navegador no entén cap altre valor i no en fa cas.'),
   }),
   'html/th-scope': () => ({
     text: 'Aquesta capçalera <th> no diu si és d\'una columna o d\'una fila.',
     hint: 'Afegeix-hi scope="col" (capçalera d\'una columna) o scope="row" (capçalera d\'una fila): així els lectors de pantalla saben a quina capçalera pertany cada cel·la.',
+  }),
+  // ── HTML: formularis ──
+  'html/control-label': ({ kind, tag: name, id, suggestion }) => ({
+    text: {
+      missing: `Aquest camp ${tag(name)} no té cap etiqueta <label>.`,
+      placeholder: 'Aquest camp només té un placeholder: li falta l\'etiqueta <label>.',
+      'for-missing': id ? `L'etiqueta apunta a id="${id}", però no hi ha cap element amb aquest id.` : 'L\'atribut for de l\'etiqueta és buit.',
+      'for-not-control': `L'etiqueta apunta a un ${tag(name)}, que no és cap camp del formulari.`,
+    }[kind],
+    hint: {
+      missing: 'Escriu-li un <label for="…"> amb el mateix valor que l\'id del camp. Sense etiqueta, qui fa servir un lector de pantalla no sap què ha d\'escriure-hi, i clicar el text no porta al camp.',
+      placeholder: 'El placeholder desapareix quan comences a escriure, i molts lectors de pantalla no el llegeixen: no és una etiqueta. Afegeix-hi un <label for="…">, i deixa el placeholder per a un exemple, si cal.',
+      'for-missing': suggestion
+        ? `Potser volies dir for="${suggestion}"? El for de l'etiqueta ha de ser igual que l'id del camp.`
+        : 'El for de l\'etiqueta ha de ser igual que l\'id del camp: <label for="nom"> i <input id="nom">.',
+      'for-not-control': 'Una etiqueta només va amb un camp (<input>, <select>, <textarea>…). Posa l\'id al camp, no a un altre element.',
+    }[kind],
+  }),
+  'html/control-name': ({ tag: name, radio }) => ({
+    text: `Aquest camp ${tag(name)} no té name.`,
+    hint: radio
+      ? 'Sense name, el navegador no sap que aquests botons d\'opció van junts: es poden marcar tots alhora, i la resposta no s\'envia. Posa el mateix name a tots els botons d\'una pregunta.'
+      : 'Sense name, quan s\'envia el formulari la dada d\'aquest camp no s\'envia: el name és el nom amb què arriba la dada.',
   }),
   'html/inline-style': ({ tag: name }) => ({
     text: `L'atribut style de ${tag(name)} barreja l'estil amb el contingut.`,

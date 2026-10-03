@@ -191,4 +191,12 @@ export const OBSOLETE_ATTRIBUTES = Object.fromEntries(Object.entries({
  */
 export const ENUMERATED_ATTRIBUTES = {
   th: { scope: ['col', 'row', 'colgroup', 'rowgroup'] },
+  // Els tipus més habituals, primer (el missatge en mostra uns quants)
+  input: {
+    type: ['text', 'email', 'password', 'number', 'tel', 'url', 'search', 'date', 'time',
+      'checkbox', 'radio', 'file', 'color', 'range', 'datetime-local', 'month', 'week',
+      'hidden', 'submit', 'reset', 'button', 'image'],
+  },
+  button: { type: ['submit', 'reset', 'button'] },
+  form: { method: ['get', 'post', 'dialog'] },
 };
