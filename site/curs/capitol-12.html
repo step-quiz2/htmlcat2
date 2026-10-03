@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capítol 12 — El model de caixa | HTMLCat</title>
+  <link rel="icon" href="../img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/course.css">
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link rel="stylesheet" href="../css/simulador.css">
+  <script type="module" src="../js/pages/course-page.js"></script>
+</head>
+<body data-pagina="capitol" data-num="12">
+
+<main class="curs-content">
+  <header class="chapter-header">
+    <h1>El model de caixa</h1>
+    <p class="chapter-lead">En acabar aquest capítol sabràs controlar l'espai de la pàgina: el farciment, la vora i el marge de cada element, la seva amplada, i si ocupa tota la línia o només el seu tros.</p>
+  </header>
+
+  <section class="chapter-section">
+    <h2>Cada element és una caixa</h2>
+    <p>El navegador dibuixa cada element com una caixa rectangular, amb quatre capes:</p>
+    <figure class="figura">
+      <img src="../img/model-caixa.svg" width="480" height="300" alt="Esquema del model de caixa: el contingut al centre, envoltat pel farciment; al voltant del farciment, la vora, i per fora de tot, el marge.">
+      <figcaption>De dins cap a fora: contingut, farciment, vora i marge.</figcaption>
+    </figure>
+    <div class="simulador" data-id="c12-caixa" data-height="500">
+      <script type="text/plain" data-file="index.html">
+        <p class="nota">Aquesta nota és una caixa.</p>
+        <p>I aquest paràgraf, una altra.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        .nota {
+          background-color: lightyellow;
+          padding: 1rem;
+          border: 4px solid goldenrod;
+          margin: 2rem;
+        }
+      </script>
+    </div>
+    <ul>
+      <li>El <strong>contingut</strong>: el text o les imatges de l'element.</li>
+      <li>El <strong>farciment</strong> (<code>padding</code>): l'espai entre el contingut i la vora. Té el color de fons de l'element.</li>
+      <li>La <strong>vora</strong> (<code>border</code>): la línia que envolta el farciment.</li>
+      <li>El <strong>marge</strong> (<code>margin</code>): l'espai de fora de la vora, que separa la caixa de les altres. És transparent.</li>
+    </ul>
+    <p>Canvia els números i mira què passa amb cada capa. Prova també de treure el color de fons: el farciment continua allà, però ja no es veu.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Farciment i marge</h2>
+    <div class="simulador" data-id="c12-costats" data-height="480">
+      <script type="text/plain" data-file="index.html">
+        <h1>Tauler d'avisos</h1>
+        <p class="avis">Demà no hi ha classe de música.</p>
+        <p class="avis">Divendres, sortida al museu.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        .avis {
+          background-color: lavender;
+          padding: 0.5rem 1rem;
+          margin: 1rem 0;
+        }
+      </script>
+    </div>
+    <p><code>padding</code> i <code>margin</code> admeten d'un a quatre valors:</p>
+    <ul>
+      <li><code>padding: 1rem;</code> → els quatre costats.</li>
+      <li><code>padding: 0.5rem 1rem;</code> → dalt i baix 0.5rem; dreta i esquerra 1rem.</li>
+      <li><code>padding: 0.5rem 1rem 2rem;</code> → dalt 0.5rem; dreta i esquerra 1rem; baix 2rem.</li>
+      <li><code>padding: 0.5rem 1rem 2rem 3rem;</code> → dalt, dreta, baix i esquerra, en el sentit de les agulles del rellotge.</li>
+    </ul>
+    <p>Els valors se separen amb espais, sense comes. Per a un sol costat hi ha <code>padding-top</code>, <code>padding-right</code>, <code>padding-bottom</code> i <code>padding-left</code> (i igual amb <code>margin</code>). El farciment no pot ser negatiu; el marge, sí: un marge negatiu acosta les caixes.</p>
+    <p class="nota">
+      Els dos avisos estan separats 1rem, no 2rem: quan el marge de baix d'una caixa toca el de dalt de la següent, no se
+      sumen, sinó que guanya el més gran.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>La vora</h2>
+    <div class="simulador" data-id="c12-vores" data-height="560">
+      <script type="text/plain" data-file="index.html">
+        <h1>Botiga de l'escola</h1>
+        <p class="producte">Samarreta: 12 €</p>
+        <p class="cupo">Cupó: 10 % de descompte</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        h1 {
+          border-bottom: 4px double teal;
+        }
+
+        .producte {
+          border: 2px solid teal;
+          border-radius: 8px;
+          padding: 1rem;
+        }
+
+        .cupo {
+          border: 3px dashed tomato;
+          padding: 1rem;
+        }
+      </script>
+    </div>
+    <ul>
+      <li><code>border</code> porta tres valors: el gruix, l'<strong>estil</strong> i el color: <code>2px solid teal</code>.</li>
+      <li>Estils: <code>solid</code> (contínua), <code>dashed</code> (de guions), <code>dotted</code> (de punts) i <code>double</code> (doble). Sense estil, la vora no es dibuixa.</li>
+      <li>Per a un sol costat: <code>border-top</code>, <code>border-right</code>, <code>border-bottom</code> i <code>border-left</code>.</li>
+      <li><code>border-radius</code> arrodoneix les cantonades.</li>
+    </ul>
+  </section>
+
+  <section class="chapter-section">
+    <h2>L'amplada i box-sizing</h2>
+    <div class="simulador" data-id="c12-amplada" data-height="520">
+      <script type="text/plain" data-file="index.html">
+        <p class="primera">Sense box-sizing</p>
+        <p class="segona">Amb box-sizing: border-box</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        p {
+          width: 200px;
+          padding: 20px;
+          border: 5px solid teal;
+        }
+
+        .segona {
+          box-sizing: border-box;
+        }
+      </script>
+    </div>
+    <p>
+      Tots dos paràgrafs tenen <code>width: 200px</code>, però el primer és més ample. Per defecte, <code>width</code> és
+      l'amplada del <strong>contingut</strong>, i el farciment i la vora s'hi afegeixen: 200 + 2 · 20 + 2 · 5 = 250 píxels.
+      Amb <code>box-sizing: border-box</code>, <code>width</code> és l'amplada de tota la caixa, vora inclosa: 200 píxels.
+    </p>
+    <p>Com que és molt més fàcil de calcular, molts fulls d'estil comencen així (el selector <code>*</code> vol dir «tots els elements»):</p>
+    <pre class="code-example" data-lang="css" tabindex="0">* {
+  box-sizing: border-box;
+}</pre>
+    <p>I amb una amplada i els marges dels costats a <code>auto</code>, una caixa queda centrada: el navegador reparteix l'espai que sobra a parts iguals.</p>
+    <div class="simulador" data-id="c12-centrar" data-height="460">
+      <script type="text/plain" data-file="index.html">
+        <main>
+          <h1>Club de lectura</h1>
+          <p>Ens trobem cada dijous a la biblioteca.</p>
+        </main>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        main {
+          width: 15rem;
+          margin: 0 auto;
+          padding: 1rem;
+          background-color: whitesmoke;
+        }
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>En bloc o en línia</h2>
+    <div class="simulador" data-id="c12-display" data-height="480">
+      <script type="text/plain" data-file="index.html">
+        <nav>
+          <a href="index.html">Inici</a>
+          <a href="horari.html">Horari</a>
+          <a href="menjador.html">Menjador</a>
+        </nav>
+        <p>Els enllaços del menú semblen botons.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        nav {
+          background-color: #00695c;
+        }
+
+        nav a {
+          display: inline-block;
+          padding: 0.5rem 1rem;
+          color: white;
+          background-color: #004d40;
+        }
+      </script>
+    </div>
+    <ul>
+      <li>
+        Els elements <strong>de bloc</strong> (<code>p</code>, <code>h1</code>, <code>ul</code>, <code>li</code>,
+        <code>nav</code>, <code>section</code>, <code>div</code>…) comencen en una línia nova i ocupen tota l'amplada.
+      </li>
+      <li>
+        Els elements <strong>en línia</strong> (<code>a</code>, <code>span</code>, <code>strong</code>, <code>em</code>…) van
+        dins del text i només ocupen el seu tros. No tenen amplada ni alçada (<code>width</code> i <code>height</code> no hi
+        fan res), i els marges i el farciment de dalt i de baix no aparten les línies.
+      </li>
+    </ul>
+    <p>La propietat <code>display</code> ho canvia:</p>
+    <ul>
+      <li><code>display: block</code>: l'element es comporta com un bloc.</li>
+      <li><code>display: inline</code>: es comporta com un element en línia.</li>
+      <li><code>display: inline-block</code>: va en línia, com un tros de text, però és una caixa sencera: té amplada, i el farciment i els marges aparten el que té al voltant.</li>
+      <li><code>display: none</code>: l'element no es mostra i no ocupa cap lloc.</li>
+    </ul>
+    <p>Prova d'esborrar <code>display: inline-block</code>: els enllaços ja no eixamplen el menú, i el seu fons surt per dalt i per baix de la franja verda.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Una escala d'espais</h2>
+    <p>Una pàgina queda més endreçada quan fa servir sempre les mateixes poques mides d'espai. Guarda-les en variables:</p>
+    <div class="simulador" data-id="c12-escala" data-height="620">
+      <script type="text/plain" data-file="index.html">
+        <h1>Club de lectura</h1>
+        <article class="llibre">
+          <h2>El petit príncep</h2>
+          <p>Antoine de Saint-Exupéry</p>
+        </article>
+        <article class="llibre">
+          <h2>Mecanoscrit del segon origen</h2>
+          <p>Manuel de Pedrolo</p>
+        </article>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        :root {
+          --espai-petit: 0.5rem;
+          --espai: 1rem;
+          --espai-gran: 2rem;
+        }
+
+        .llibre {
+          padding: var(--espai);
+          margin-bottom: var(--espai-gran);
+          border: 1px solid silver;
+          border-radius: 8px;
+        }
+
+        .llibre h2 {
+          margin: 0 0 var(--espai-petit);
+        }
+      </script>
+    </div>
+    <p>Canvia el valor de <code>--espai</code>: tots els llocs que el fan servir canvien alhora, i les proporcions es mantenen.</p>
+    <aside class="codi-net">
+      <p class="codi-net__titol">🧹 Codi net: una escala d'espais coherent</p>
+      <ul>
+        <li>Tria poques mides d'espai (per exemple 0.5rem, 1rem i 2rem) i guarda-les en variables. Res de 7px aquí i 13px allà.</li>
+        <li>Comença el full d'estil amb <code>* { box-sizing: border-box; }</code>: les amplades seran les que escrius.</li>
+        <li>Escriu les vores sempre amb els tres valors: gruix, estil i color.</li>
+        <li>Si fas servir una drecera com <code>margin</code>, posa-la abans dels costats sols (<code>margin-top</code>), no després.</li>
+        <li>Per donar mida a un element en línia, primer <code>display: inline-block</code>.</li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Errors típics</h2>
+    <p>Aquests exemples tenen errors. Mira el resultat i llegeix el panell ⚠ Problemes.</p>
+
+    <h3>La vora no es veu</h3>
+    <div class="simulador" data-readonly data-height="300">
+      <script type="text/plain" data-file="index.html">
+        <p class="nota">Ens trobem dijous a la biblioteca.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        .nota {
+          border: 3px teal;
+          padding: 1rem;
+        }
+      </script>
+    </div>
+    <p>Hi ha el gruix i el color, però falta l'estil (<code>solid</code>, <code>dashed</code>…), i sense estil el navegador no dibuixa la vora.</p>
+
+    <h3>Amplada en un enllaç</h3>
+    <div class="simulador" data-readonly data-height="360">
+      <script type="text/plain" data-file="index.html">
+        <nav>
+          <a href="index.html">Inici</a>
+          <a href="horari.html">Horari</a>
+        </nav>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        nav a {
+          width: 8rem;
+          background-color: lavender;
+        }
+      </script>
+    </div>
+    <p>Els enllaços són elements en línia: <code>width</code> no hi fa res. Amb <code>display: inline-block</code>, sí.</p>
+
+    <h3>Una drecera que n'esborra una altra</h3>
+    <div class="simulador" data-readonly data-height="380">
+      <script type="text/plain" data-file="index.html">
+        <h1>Club de lectura</h1>
+        <p class="avis">Ens trobem dijous.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        .avis {
+          margin-top: 3rem;
+          margin: 0;
+          background-color: lavender;
+        }
+      </script>
+    </div>
+    <p><code>margin: 0</code> posa a 0 els quatre marges, també el de dalt que s'havia escrit just abans.</p>
+
+    <h3>Un farciment negatiu</h3>
+    <div class="simulador" data-readonly data-height="300">
+      <script type="text/plain" data-file="index.html">
+        <p class="nota">Ens trobem dijous a la biblioteca.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        .nota {
+          padding: -1rem;
+          background-color: lavender;
+        }
+      </script>
+    </div>
+    <p>El farciment no pot ser negatiu, i el navegador ignora la declaració.</p>
+
+    <h3>Comes entre els valors</h3>
+    <div class="simulador" data-readonly data-height="300">
+      <script type="text/plain" data-file="index.html">
+        <p class="nota">Ens trobem dijous a la biblioteca.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        .nota {
+          padding: 1rem, 2rem;
+          background-color: lavender;
+        }
+      </script>
+    </div>
+    <p>Els valors de <code>padding</code> i <code>margin</code> se separen amb espais: <code>1rem 2rem</code>.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Exercici: les targetes del club de lectura</h2>
+    <p>Dona espai a la pàgina del club de lectura:</p>
+    <ul>
+      <li>a <code>:root</code>, defineix les variables <code>--espai-petit</code> (<code>0.5rem</code>) i <code>--espai</code> (<code>1rem</code>);</li>
+      <li>posa <code>box-sizing: border-box</code> a tots els elements;</li>
+      <li>converteix els llibres (<code>.llibre</code>) en targetes: farciment de <code>var(--espai)</code>, una vora, cantonades arrodonides i un <code>margin-bottom</code> de <code>var(--espai)</code> per separar-les;</li>
+      <li>fes que els enllaços del menú (<code>nav a</code>) siguin <code>inline-block</code> i tinguin farciment;</li>
+      <li>cap error ni cap avís al panell ⚠ Problemes.</li>
+    </ul>
+    <p>Quan acabis, prem <strong>✓ Comprova</strong>.</p>
+    <div class="simulador" data-id="c12-exercici" data-goal-id="cap-12-ex" data-mode="document" data-height="600">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>Club de lectura</title>
+            <link rel="stylesheet" href="estils.css">
+          </head>
+          <body>
+            <header>
+              <h1>Club de lectura</h1>
+              <nav>
+                <a href="index.html">Inici</a>
+                <a href="llibres.html">Llibres</a>
+                <a href="trobades.html">Trobades</a>
+              </nav>
+            </header>
+            <main>
+              <article class="llibre">
+                <h2>El petit príncep</h2>
+                <p>Antoine de Saint-Exupéry. Un pilot perdut al desert coneix un nen vingut d'un altre planeta.</p>
+              </article>
+              <article class="llibre">
+                <h2>Mecanoscrit del segon origen</h2>
+                <p>Manuel de Pedrolo. Dos joves sobreviuen a la destrucció del món i l'han de tornar a començar.</p>
+              </article>
+            </main>
+          </body>
+        </html>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        /* Estils del club de lectura */
+
+        body {
+          font-family: Verdana, sans-serif;
+          background-color: #f4f1de;
+        }
+
+        nav {
+          background-color: #00695c;
+        }
+
+        nav a {
+          color: white;
+        }
+
+        .llibre {
+          background-color: white;
+        }
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "uses-css", "selector": ":root", "prop": "--espai",
+            "msg": "A :root hi ha la variable --espai." },
+          { "type": "style", "selector": ".llibre", "prop": "box-sizing", "equals": "border-box", "all": true,
+            "msg": "Els elements tenen box-sizing: border-box." },
+          { "type": "uses-css", "selector": ".llibre", "prop": "padding", "valueIncludes": "var(--espai)",
+            "msg": "Les targetes (.llibre) tenen un farciment de var(--espai)." },
+          { "type": "uses-css", "selector": ".llibre", "prop": "border",
+            "msg": "Les targetes tenen una vora (border)." },
+          { "type": "uses-css", "selector": ".llibre", "prop": "border-radius",
+            "msg": "Les targetes tenen les cantonades arrodonides (border-radius)." },
+          { "type": "style", "selector": ".llibre", "prop": "margin-bottom", "equals": "1rem", "all": true,
+            "msg": "Les targetes se separen amb un marge de baix de var(--espai), és a dir, 1rem." },
+          { "type": "style", "selector": "nav a", "prop": "display", "equals": "inline-block", "all": true,
+            "msg": "Els enllaços del menú són inline-block." },
+          { "type": "uses-css", "selector": "nav a", "prop": "padding",
+            "msg": "Els enllaços del menú tenen farciment (padding)." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís (com una vora sense estil)." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Troba l'error</h2>
+    <p>
+      El menú del menjador hauria d'estar centrat i separat 2rem de dalt, cada plat hauria de tenir una vora contínua de
+      color tomàquet, un farciment d'1rem i un marge d'1rem a dalt i a baix, i els preus haurien de ser unes etiquetes de
+      4rem d'amplada. Hi ha cinc errors a <code>estils.css</code>. Arregla'ls amb l'ajuda del panell ⚠ Problemes, i quan
+      acabis prem <strong>✓ Comprova</strong>.
+    </p>
+    <div class="simulador" data-id="c12-troba-error" data-goal-id="cap-12-bug" data-mode="document" data-height="600">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>Menú del menjador</title>
+            <link rel="stylesheet" href="estils.css">
+          </head>
+          <body>
+            <main>
+              <h1>Menú del menjador</h1>
+              <article class="plat">
+                <h2>Dilluns</h2>
+                <p>Macarrons i truita de patates <span class="preu">5 €</span></p>
+              </article>
+              <article class="plat">
+                <h2>Dimarts</h2>
+                <p>Arròs a la cubana i fruita <span class="preu">5 €</span></p>
+              </article>
+            </main>
+          </body>
+        </html>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        /* Estils del menú */
+
+        main {
+          width: 18rem;
+          margin-top: 2rem;
+          margin: 0 auto;
+        }
+
+        .plat {
+          border: 2px tomato;
+          padding: -1rem;
+          margin: 1rem, 0;
+        }
+
+        .preu {
+          width: 4rem;
+          background-color: gold;
+          text-align: center;
+        }
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "style", "selector": "main", "prop": "margin-top", "equals": "2rem",
+            "msg": "El menú està separat 2rem de dalt." },
+          { "type": "uses-css", "selector": "main", "prop": "margin", "valueIncludes": "auto",
+            "msg": "El menú està centrat (marges dels costats a auto)." },
+          { "type": "style", "selector": ".plat", "prop": "border-top-style", "equals": "solid", "all": true,
+            "msg": "Els plats tenen una vora contínua (solid)." },
+          { "type": "style", "selector": ".plat", "prop": "padding-top", "equals": "1rem", "all": true,
+            "msg": "Els plats tenen un farciment d'1rem." },
+          { "type": "style", "selector": ".plat", "prop": "margin-bottom", "equals": "1rem", "all": true,
+            "msg": "Els plats tenen un marge d'1rem a baix (i a dalt)." },
+          { "type": "style", "selector": ".preu", "prop": "display", "equals": "inline-block", "all": true,
+            "msg": "Els preus són inline-block, perquè l'amplada hi faci efecte." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Resum</h2>
+    <div class="resum">
+      <ul>
+        <li>Cada element és una caixa: contingut, farciment (<code>padding</code>), vora (<code>border</code>) i marge (<code>margin</code>).</li>
+        <li><code>padding</code> i <code>margin</code> admeten d'1 a 4 valors (dalt, dreta, baix, esquerra), separats amb espais. Dos marges verticals que es toquen no se sumen.</li>
+        <li><code>border</code>: gruix, estil i color (<code>2px solid teal</code>); <code>border-radius</code> arrodoneix les cantonades.</li>
+        <li>Amb <code>box-sizing: border-box</code>, <code>width</code> és l'amplada de tota la caixa. <code>margin: 0 auto</code> centra una caixa que té amplada.</li>
+        <li>Elements de bloc i en línia; <code>display</code> ho canvia (<code>block</code>, <code>inline</code>, <code>inline-block</code>, <code>none</code>).</li>
+        <li>Poques mides d'espai, guardades en variables.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>
