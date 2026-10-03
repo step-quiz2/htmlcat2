@@ -7,6 +7,9 @@ import { lintCase, rulesOf, css, doc, documentCase } from './lint-helpers.mjs';
 
 const GOOD_CSS = 'h1 {\n  color: red;\n  font-size: 2em;\n}\n';
 
+/** Un document amb un fitxer de CSS al costat (mode document). */
+const withCss = (html) => ({ files: { 'index.html': html, 'estils.css': GOOD_CSS }, mode: 'document' });
+
 /** Un formulari ben fet: cada camp amb la seva etiqueta (de les dues maneres) i el seu name. */
 const FORM = `<form method="post">
   <label for="nom">Nom</label>
@@ -96,6 +99,8 @@ const CASES = {
   // HTML: formularis
   'html/control-label': ['<form>\n  <input type="text" name="nom">\n</form>\n', FORM],
   'html/control-name': ['<form>\n  <label for="nom">Nom</label>\n  <input type="text" id="nom">\n</form>\n', FORM],
+  // HTML: fulls d'estil
+  'html/stylesheet-link': [withCss(doc()), withCss(doc().replace('  </head>', '    <link rel="stylesheet" href="estils.css">\n  </head>'))],
   'html/inline-style': ['<p style="color: red">x</p>\n', '<p class="avis">x</p>\n'],
   // CSS: errors
   'css/unbalanced-braces': [css('h1 {\n  color: red;\n'), css(GOOD_CSS)],
@@ -106,6 +111,8 @@ const CASES = {
   'css/unclosed-string': [css('p::before {\n  content: "hola;\n}\n'), css('p::before {\n  content: "hola";\n}\n')],
   'css/unknown-property': [css('h1 {\n  colr: red;\n}\n'), css('h1 {\n  color: red;\n  --meu-color: red;\n}\n')],
   'css/invalid-value': [css('h1 {\n  color: vermell;\n}\n'), css(GOOD_CSS)],
+  'css/wrong-comment': [css('// Títols\n' + GOOD_CSS), css('/* Títols: http://x.cat */\n' + GOOD_CSS)],
+  'css/unknown-element-selector': [css('paragraf {\n  color: red;\n}\n'), css('p,\nh1 > em,\na:hover,\n.avis,\nmeu-element {\n  color: red;\n}\n')],
   'css/last-semicolon': [css('h1 {\n  color: red\n}\n'), css(GOOD_CSS)],
   'css/one-declaration-per-line': [css('h1 {\n  color: red; font-size: 2em;\n}\n'), css('h1 { color: red; }\n')],
   'css/indentation': [css('h1 {\ncolor: red;\n}\n'), css(GOOD_CSS)],
@@ -391,4 +398,36 @@ test('formularis: detalls de les regles del capítol 8', () => {
   assert.match(first('<input type="txt" aria-label="t">\n', 'html/invalid-attribute-value').hint, /camp de text normal/);
   // Abans del capítol 8, cap d'aquestes regles (els valors de type ja es miren des del 7)
   assert.deepEqual(rulesOf({ files: { 'index.html': '<form>\n  <input type="text">\n</form>\n' }, chapter: 7 }), []);
+});
+
+test('CSS: detalls de les regles del capítol 9', () => {
+  // Comentaris mal escrits: <!-- i //, però no dins de /* */, de cadenes ni d'url()
+  const comments = (src) => lintCase(css(src)).filter((p) => p.rule === 'css/wrong-comment').map((p) => [p.line, p.data.kind]);
+  assert.deepEqual(comments('<!-- Títols -->\n' + GOOD_CSS), [[1, 'html']]);
+  assert.deepEqual(comments('h1 {\n  color: red; // vermell\n  font-size: 2em;\n}\n'), [[2, 'slash']]);
+  assert.deepEqual(comments('p::before {\n  content: "//";\n}\n/* <!-- */\n'), []);
+  // El comentari mal escrit no dona, a més, missatges confusos de propietat o de selector
+  assert.deepEqual(rulesOf(css('h1 {\n  color: red; // vermell\n  font-size: 2em;\n}\n')), ['css/wrong-comment']);
+  assert.deepEqual(rulesOf(css('<!-- Títols -->\n' + GOOD_CSS)), ['css/wrong-comment']);
+  // Selectors: noms en català, lletres canviades, i el que no són noms d'element
+  const selectors = (src) => lintCase(css(src)).filter((p) => p.rule === 'css/unknown-element-selector').map((p) => [p.data.name, p.data.suggestion]);
+  assert.deepEqual(selectors('paragraf,\nh1 > spam {\n  color: red;\n}\n'), [['paragraf', 'p'], ['spam', 'span']]);
+  assert.deepEqual(selectors('input[type="text"],\nli:not(.avis),\np::first-line,\nsvg circle,\n#menu,\n* {\n  color: red;\n}\n'), []);
+  assert.deepEqual(selectors('@media (min-width: 40em) {\n  titol {\n    color: red;\n  }\n}\n'), [['titol', 'h1']]);
+  assert.deepEqual(selectors('@keyframes x {\n  from {\n    color: red;\n  }\n}\n'), []);
+  // <link>: només en mode document; un nom mal escrit, sense rel, extern, sense href
+  const kinds = (head, files = { 'estils.css': GOOD_CSS }) => lintCase({ files: { 'index.html': doc().replace('  </head>', head + '  </head>'), ...files }, mode: 'document' })
+    .filter((p) => p.rule === 'html/stylesheet-link').map((p) => p.data.kind);
+  assert.deepEqual(kinds('    <link rel="stylesheet" href="./estils.css">\n'), []);
+  assert.deepEqual(kinds('    <link rel="stylesheet" href="Estils.css">\n'), ['not-found']);
+  assert.deepEqual(kinds('    <link rel="stylesheet" href="/estils.css">\n'), ['not-found']);
+  assert.deepEqual(kinds('    <link href="estils.css">\n'), ['no-rel']);
+  assert.deepEqual(kinds('    <link rel="stylesheet" href="https://cdn.exemple.cat/a.css">\n'), ['unlinked', 'external']);   // per ordre de línia
+  assert.deepEqual(kinds('    <link rel="stylesheet">\n'), ['unlinked', 'no-href']);
+  assert.deepEqual(kinds('    <link rel="icon" href="logo.svg">\n', {}), []);
+  const wrong = first({ files: { 'index.html': doc().replace('  </head>', '    <link rel="stylesheet" href="estil.css">\n  </head>'), 'estils.css': GOOD_CSS }, mode: 'document' }, 'html/stylesheet-link');
+  assert.equal(wrong.data.suggestion, 'estils.css');
+  assert.ok(!rulesOf({ files: { 'index.html': '<p>x</p>\n', 'estils.css': GOOD_CSS } }).includes('html/stylesheet-link'));
+  // Abans del capítol 9, cap d'aquestes regles
+  assert.deepEqual(rulesOf({ files: { 'estils.css': '// x\nparagraf {\n  color: red;\n}\n' }, chapter: 8 }), []);
 });

@@ -374,6 +374,25 @@ export const MESSAGES = {
       ? 'Sense name, el navegador no sap que aquests botons d\'opció van junts: es poden marcar tots alhora, i la resposta no s\'envia. Posa el mateix name a tots els botons d\'una pregunta.'
       : 'Sense name, quan s\'envia el formulari la dada d\'aquest camp no s\'envia: el name és el nom amb què arriba la dada.',
   }),
+  // ── HTML: fulls d'estil ──
+  'html/stylesheet-link': ({ kind, href, suggestion, files = [], file }) => ({
+    text: {
+      'not-found': `No hi ha cap fitxer «${href}».`,
+      external: 'Els fulls d\'estil d\'Internet no es carreguen a HTMLCat.',
+      'no-rel': 'A aquest <link> li falta rel="stylesheet".',
+      'no-href': 'A aquest <link> li falta href.',
+      unlinked: `El fitxer ${file} no s'aplica a la pàgina: cap <link> no hi porta.`,
+    }[kind],
+    hint: {
+      'not-found': suggestion
+        ? `Potser volies dir «${suggestion}»? El nom ha de ser exactament el del fitxer. Sense el fitxer, la pàgina es veu sense estils.`
+        : (files.length ? `Els fitxers de CSS d'aquí són: ${files.join(', ')}.` : 'En aquest simulador no hi ha cap fitxer de CSS.'),
+      external: 'Per protegir la teva privacitat, el resultat no carrega res d\'Internet. Escriu els estils al fitxer de CSS del simulador.',
+      'no-rel': 'Sense rel="stylesheet", el navegador no sap que el fitxer és un full d\'estil i no l\'aplica: <link rel="stylesheet" href="estils.css">.',
+      'no-href': 'El href diu quin fitxer de CSS cal aplicar: <link rel="stylesheet" href="estils.css">.',
+      unlinked: `Escriu <link rel="stylesheet" href="${file}"> dins del <head>. Sense aquesta línia, la pàgina es veu sense estils.`,
+    }[kind],
+  }),
   'html/inline-style': ({ tag: name }) => ({
     text: `L'atribut style de ${tag(name)} barreja l'estil amb el contingut.`,
     hint: 'Posa una classe a l\'element (class="…") i escriu les declaracions en una regla del fitxer CSS.',
@@ -421,6 +440,18 @@ export const MESSAGES = {
   'css/invalid-value': (data) => ({
     text: `«${data.value}» no és un valor vàlid per a ${data.property}.`,
     hint: VALUE_HINTS[data.kind](data),
+  }),
+
+  'css/wrong-comment': ({ kind }) => ({
+    text: kind === 'html' ? 'Al CSS, els comentaris no s\'escriuen amb <!-- -->.' : 'Al CSS, els comentaris no s\'escriuen amb //.',
+    hint: kind === 'html'
+      ? 'Escriu-los entre /* i */, així: /* Estils del títol */. El navegador no entén <!--: el text del comentari s\'enganxa a la regla següent, i aquesta regla deixa de funcionar.'
+      : 'Escriu-los entre /* i */, així: /* vermell */. El navegador llegeix el // i el text que el segueix com si fossin codi, i la regla o la declaració següent deixa de funcionar.',
+  }),
+  'css/unknown-element-selector': ({ name, suggestion }) => ({
+    text: `L'element <${name}> no existeix: aquesta regla no s'aplica a res.`,
+    hint: (suggestion ? `Potser volies escriure ${suggestion}? ` : '') +
+      'Un selector sense punt ni # davant és el nom d\'un element de l\'HTML (p, h1, body…). Si és el nom d\'una classe, porta un punt davant: .nom.',
   }),
 
   // ── CSS: codi net ──

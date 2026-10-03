@@ -78,7 +78,7 @@ export function lintStatic({ files, mode = 'fragment', chapter = Infinity, env =
     }
     const tokens = tokenizeHtml(src);
     const { root, problems: structure } = buildSourceTree(src, tokens);
-    const ctx = { src, tokens, root, structure, mode, lineOf: (pos) => at(pos).line };
+    const ctx = { src, tokens, root, structure, mode, fileNames: Object.keys(files), lineOf: (pos) => at(pos).line };
     for (const rule of htmlRules) rule.check(ctx, reporter(rule, 0));
 
     // CSS de dins dels <style> (un text «raw» sempre ve just després de la seva etiqueta)

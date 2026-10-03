@@ -12,9 +12,10 @@
 //   check     rep el context i crida report({ start, end }, data) per a
 //             cada problema; el text en català és a messages.ca.js
 //
-// Context: { src, tokens, root, structure, mode, lineOf(pos) }
+// Context: { src, tokens, root, structure, mode, fileNames, lineOf(pos) }
 //   root i structure són l'arbre del codi font i els seus problemes
-//   d'estructura (lang/html-model.js).
+//   d'estructura (lang/html-model.js); fileNames, els fitxers del
+//   simulador (index.html, estils.css…).
 //
 // API pública:
 //   HTML_RULES
@@ -22,20 +23,12 @@
 
 import {
   KNOWN_ELEMENTS, DEPRECATED_ELEMENTS, GLOBAL_ATTRIBUTES, ELEMENT_ATTRIBUTES,
-  OBSOLETE_ATTRIBUTES, ENUMERATED_ATTRIBUTES, isGlobalAttribute,
+  OBSOLETE_ATTRIBUTES, ENUMERATED_ATTRIBUTES, CATALAN_TAGS, isGlobalAttribute,
 } from '../lang/html-spec.js';
 import { RECURSOS } from '../preview/recursos.js';
 import { closest } from './suggest.js';
 import { indentChecker } from './lines.js';
 
-/** Noms en català que els alumnes escriuen a vegades com a etiqueta. */
-const CATALAN_TAGS = {
-  paragraf: 'p', parragraf: 'p', 'paràgraf': 'p', titol: 'h1', 'títol': 'h1',
-  llista: 'ul', enllac: 'a', 'enllaç': 'a', imatge: 'img', negreta: 'strong',
-  cursiva: 'em', taula: 'table', fila: 'tr', cos: 'body', capcalera: 'header',
-  'capçalera': 'header', peu: 'footer', seccio: 'section', 'secció': 'section',
-  boto: 'button', 'botó': 'button', formulari: 'form',
-};
 
 const FOREIGN = new Set(['svg', 'math']);   // SVG i MathML tenen les seves pròpies regles
 const LISTS = new Set(['ul', 'ol', 'menu']);
@@ -980,6 +973,52 @@ const controlName = {
   },
 };
 
+// ── Fulls d'estil (capítol 9) ──
+
+/** Adreces que no són fitxers del simulador (el document de la previsualització no les substitueix). */
+const NOT_A_FILE = /^(?:[a-z][a-z0-9+.-]*:|\/\/|\/)/i;
+
+// Només en mode document: en mode fragment, el simulador hi posa tots els CSS sol
+const stylesheetLink = {
+  id: 'html/stylesheet-link',
+  lang: 'html',
+  since: 9,
+  severity: 'error',
+  mode: 'document',
+  check(ctx, report) {
+    const cssFiles = ctx.fileNames.filter((name) => name.endsWith('.css'));
+    const handled = new Set();   // fitxers que ja tenen el seu missatge (enllaçats, o amb el nom mal escrit)
+    for (const el of htmlElements(ctx.root)) {
+      if (el.name !== 'link') continue;
+      const href = attrOf(el.startTag, 'href');
+      const value = (href?.value || '').trim();
+      const name = value.replace(/^\.\//, '');
+      const rels = (attrOf(el.startTag, 'rel')?.value || '').toLowerCase().split(/\s+/);
+      if (!rels.includes('stylesheet')) {
+        if (/\.css$/i.test(name.split(/[?#]/)[0])) {
+          report(nameRange(el.startTag), { kind: 'no-rel' });
+          if (cssFiles.includes(name)) handled.add(name);
+        }
+        continue;
+      }
+      if (!value) {
+        report(nameRange(el.startTag), { kind: 'no-href' });
+      } else if (/^(https?:)?\/\//i.test(value)) {
+        report(href, { kind: 'external' });
+      } else if (!NOT_A_FILE.test(value) && cssFiles.includes(name)) {
+        handled.add(name);
+      } else {
+        const bare = name.replace(/^\//, '');
+        const suggestion = cssFiles.find((file) => file.toLowerCase() === bare.toLowerCase()) ||
+          closest(bare, cssFiles) || (cssFiles.length === 1 ? cssFiles[0] : null);
+        if (suggestion) handled.add(suggestion);
+        report(href, { kind: 'not-found', href: value, suggestion, files: cssFiles });
+      }
+    }
+    for (const file of cssFiles.filter((name) => !handled.has(name))) report(headAnchor(ctx.tokens), { kind: 'unlinked', file });
+  },
+};
+
 const inlineStyle = {
   id: 'html/inline-style',
   lang: 'html',
@@ -1041,5 +1080,6 @@ export const HTML_RULES = [
   thScope,
   controlLabel,
   controlName,
+  stylesheetLink,
   inlineStyle,
 ];
