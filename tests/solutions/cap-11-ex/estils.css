@@ -1,0 +1,33 @@
+/* Estils del club d'escacs */
+
+:root {
+  --color-principal: #00695c;
+  --color-fons: #f4f1de;
+}
+
+body {
+  background-color: var(--color-fons);
+  font-family: Verdana, sans-serif;
+}
+
+h1,
+h2 {
+  color: var(--color-principal);
+}
+
+h1 {
+  text-align: center;
+}
+
+p {
+  line-height: 1.5;
+}
+
+a {
+  color: var(--color-principal);
+}
+
+footer {
+  color: var(--color-fons);
+  background-color: var(--color-principal);
+}

@@ -59,6 +59,7 @@ site/                  ← l'única carpeta que es publica
   curs/capitol-8.html  Capítol 8, «Formularis» (exercicis cap-8-ex i cap-8-bug; tots els simuladors amb data-forms)
   curs/capitol-9.html  Capítol 9, «Hola, CSS!» (exercicis cap-9-ex i cap-9-bug, amb index.html i estils.css editables)
   curs/capitol-10.html Capítol 10, «Selectors i cascada» (exercicis cap-10-ex i cap-10-bug)
+  curs/capitol-11.html Capítol 11, «Colors, text i unitats» (exercicis cap-11-ex i cap-11-bug)
   editor/index.html    Editor lliure (simulador a pantalla completa, clau code:editor)
   404.html             Pàgina d'error (Cloudflare la fa servir sola)
   _headers             Capçaleres de seguretat per a Cloudflare Pages
@@ -539,21 +540,22 @@ Fases del BLUEPRINT §9.1:
 - [x] **Fase 1 — Nucli del llenguatge:** tokenitzador d'HTML, analitzador de CSS, arbre del codi font, ressaltat.
 - [x] **Fase 2 — Editor, previsualització i editor lliure.**
 - [x] **Fase 3 — Revisor de codi v1 i panell ⚠ Problemes** (35 regles fins al capítol 9, §2.6).
-      Queda per a més endavant: les regles que necessiten el document pintat (fase 4 i
-      capítols 4, 5, 10 i 11), les dels capítols 4–14 (amb cada capítol) i les correccions
-      ràpides (fase 6). L'arbre del codi font encara no entén `<circle />` dins d'`<svg>`.
+      Després s'hi han afegit les dels capítols 4–11; les dels capítols 4, 5, 10 i 11 que el
+      BLUEPRINT preveia sobre el document pintat s'han fet sobre el codi font (§2.6). Queden les
+      dels capítols 12–14 (amb cada capítol) i les correccions ràpides (fase 6). L'arbre del codi font encara no entén `<circle />` dins d'`<svg>`.
 - [x] **Fase 4 — Primer capítol complet** (esquelet del curs, progrés, comprovacions, capítol 1
       amb dos exercicis i solucions, tests del curs). Queda per a més endavant: exportar/importar
       el progrés i les activitats (fase 6), pantalla completa, glossari i la portada amb targetes
       (fase 7).
-- [ ] **Fase 5 — Continguts:** un capítol per PR. Fets: 1 a 10 (la part A sencera i els capítols 9 i 10). Els capítols 2 i 3 no han
+- [ ] **Fase 5 — Continguts:** un capítol per PR. Fets: 1 a 11 (la part A sencera i els capítols 9 a 11). Els capítols 2 i 3 no han
       necessitat regles noves; amb el 3, `html/list-structure` assenyala el text solt d'una llista a
       la seva línia. El 4 n'ha afegit sis (enllaços); el 5, sis més (imatges i atributs), a més de
       quatre imatges noves a `site/recursos/`; el 6, quatre (estructura de la pàgina); el 7, cinc
       (taules); el 8, dues (formularis), a més de `form-action 'none'` a la CSP; el 9, tres (CSS:
-      comentaris mal escrits, selectors d'elements que no existeixen i el `<link>`), i el 10, sis
-      (selectors i cascada, §2.6). Des del capítol 6, els exercicis són documents sencers (D3). Al 7, els
+      comentaris mal escrits, selectors d'elements que no existeixen i el `<link>`); el 10, sis
+      (selectors i cascada, §2.6), i l'11, quatre (colors, lletra i variables), més pistes a
+      `css/invalid-value`, el mòdul `lang/css-colors.js` i `valueIncludes` a `uses-css`. Des del capítol 6, els exercicis són documents sencers (D3). Al 7, els
       simuladors porten un `estils.css` de només lectura perquè es vegin les vores de les taules
-      (el CSS s'ensenya a la part B). Següent: capítol 11, «Colors, text i unitats».
+      (el CSS s'ensenya a la part B). Següent: capítol 12, «El model de caixa».
 - [ ] **Fase 6 — Activitats i eines:** Parsons, qüestionaris, 🌳 Arbre, exportar/importar el progrés.
 - [ ] **Fase 7 — Acabats:** portada amb progrés, glossari, accessibilitat, guia del professorat.

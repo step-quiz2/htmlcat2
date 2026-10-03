@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capítol 11 — Colors, text i unitats | HTMLCat</title>
+  <link rel="icon" href="../img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/course.css">
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link rel="stylesheet" href="../css/simulador.css">
+  <script type="module" src="../js/pages/course-page.js"></script>
+</head>
+<body data-pagina="capitol" data-num="11">
+
+<main class="curs-content">
+  <header class="chapter-header">
+    <h1>Colors, text i unitats</h1>
+    <p class="chapter-lead">En acabar aquest capítol sabràs escriure qualsevol color, triar la lletra i la mida del text, i guardar els colors en variables perquè canviar-los sigui cosa d'un moment.</p>
+  </header>
+
+  <section class="chapter-section">
+    <h2>Colors amb números</h2>
+    <p>Fins ara has fet servir noms de colors, com <code>tomato</code>. Però n'hi ha només 148, i amb números en pots escriure milions:</p>
+    <div class="simulador" data-id="c11-colors" data-height="460">
+      <script type="text/plain" data-file="index.html">
+        <p class="nom">tomato</p>
+        <p class="hex">#ff6347</p>
+        <p class="rgb">rgb(255, 99, 71)</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        .nom {
+          background-color: tomato;
+        }
+
+        .hex {
+          background-color: #ff6347;
+        }
+
+        .rgb {
+          background-color: rgb(255, 99, 71);
+        }
+      </script>
+    </div>
+    <p>Els tres paràgrafs tenen el mateix color, escrit de tres maneres.</p>
+    <ul>
+      <li>
+        <code>rgb(255, 99, 71)</code> diu quanta llum vermella (<em>red</em>), verda (<em>green</em>) i blava (<em>blue</em>)
+        té el color, de 0 a 255 cadascuna. És llum, no pintura: <code>rgb(255, 255, 0)</code>, vermell i verd junts, fa groc;
+        <code>rgb(0, 0, 0)</code> és negre, i <code>rgb(255, 255, 255)</code>, blanc.
+      </li>
+      <li>
+        <code>#ff6347</code> diu el mateix amb tres parelles de xifres en <strong>hexadecimal</strong> (base 16): <code>ff</code> per al
+        vermell, <code>63</code> per al verd i <code>47</code> per al blau. En base 16, després del 9 vénen
+        <code>a</code> (10), <code>b</code> (11), <code>c</code> (12), <code>d</code> (13), <code>e</code> (14) i <code>f</code> (15).
+        Així, <code>ff</code> = 15 · 16 + 15 = 255, <code>63</code> = 6 · 16 + 3 = 99 i <code>47</code> = 4 · 16 + 7 = 71.
+      </li>
+      <li>Si les xifres de cada parella són iguals, n'hi ha prou amb una de cada: <code>#f60</code> és <code>#ff6600</code>.</li>
+    </ul>
+    <p>El color hexadecimal és el més habitual: és curt i el donen tots els programes de dibuix i les pàgines de paletes de colors.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>To, saturació i lluminositat</h2>
+    <div class="simulador" data-id="c11-hsl" data-height="540">
+      <script type="text/plain" data-file="index.html">
+        <h1>Mapa del poble</h1>
+        <p class="mar">El mar</p>
+        <p class="bosc">El bosc</p>
+        <p class="platja">La platja</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        .mar {
+          background-color: hsl(210, 80%, 75%);
+        }
+
+        .bosc {
+          background-color: hsl(120, 50%, 70%);
+        }
+
+        .platja {
+          background-color: hsl(40, 90%, 75%);
+        }
+      </script>
+    </div>
+    <p><code>hsl()</code> descriu el color com el veiem les persones:</p>
+    <ul>
+      <li><strong>To</strong> (<em>hue</em>): un angle de la roda dels colors, de 0 a 360 graus. El 0 és vermell, el 60 groc, el 120 verd, el 180 cian, el 240 blau i el 300 magenta.</li>
+      <li><strong>Saturació</strong>: del 0% (gris) al 100% (el color més viu).</li>
+      <li><strong>Lluminositat</strong>: del 0% (negre) al 100% (blanc); al 50% hi ha el color pur.</li>
+    </ul>
+    <p>Prova de canviar només el primer número d'un color, i després només l'últim: amb <code>hsl()</code> és fàcil fer un color més clar o més fosc sense canviar-ne el to.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Unitats de mida</h2>
+    <div class="simulador" data-id="c11-unitats" data-height="520">
+      <script type="text/plain" data-file="index.html">
+        <h1>Receptes de l'àvia</h1>
+        <p>Les millors receptes, explicades pas a pas.</p>
+        <h2>Coca de llardons <small>(per a quatre persones)</small></h2>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        h1 {
+          font-size: 2.5rem;
+        }
+
+        h2 {
+          font-size: 1.5rem;
+        }
+
+        p {
+          font-size: 1.25rem;
+        }
+
+        small {
+          font-size: 0.6em;
+        }
+      </script>
+    </div>
+    <ul>
+      <li><code>px</code>: píxels, una mida fixa.</li>
+      <li><code>rem</code>: vegades la mida de la lletra de la pàgina, que normalment és de 16 píxels. <code>2.5rem</code> = 2,5 · 16 = 40 píxels. Si algú que hi veu poc fa la lletra més gran a la configuració del navegador, tot el que està en <code>rem</code> creix amb ella. Per això és la millor unitat per a la mida de la lletra.</li>
+      <li><code>em</code>: vegades la mida de la lletra de l'element pare. El <code>small</code> fa el 60% de la lletra del seu <code>h2</code>: prova de canviar la mida del <code>h2</code> i mira com el <code>small</code> el segueix.</li>
+      <li><code>%</code>: un percentatge de la mida del pare. El faràs servir al capítol 12, per a les amplades.</li>
+    </ul>
+    <p>Recorda que el 0 pot anar sense unitat, però qualsevol altre número la necessita, i ha d'anar enganxada al número: <code>1.5rem</code>, no <code>1.5 rem</code>. Els decimals, amb punt.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Famílies de lletra</h2>
+    <div class="simulador" data-id="c11-lletres" data-height="440">
+      <script type="text/plain" data-file="index.html">
+        <h1>El diari de l'institut</h1>
+        <p>Avui comença la setmana de la ciència.</p>
+        <p>Inscripcions: <code>ciencia@institut.cat</code></p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        h1 {
+          font-family: Georgia, "Times New Roman", serif;
+        }
+
+        p {
+          font-family: Verdana, Arial, sans-serif;
+        }
+
+        code {
+          font-family: "Courier New", monospace;
+        }
+      </script>
+    </div>
+    <ul>
+      <li><code>font-family</code> és una llista de lletres per ordre de preferència, separades per comes. El navegador fa servir la primera que tingui l'ordinador.</li>
+      <li>Els noms amb espais van entre cometes: <code>"Times New Roman"</code>.</li>
+      <li>
+        Cada ordinador té lletres diferents, i si no té cap de les de la llista, en fa servir una altra qualsevol. Per això la
+        llista acaba sempre amb una <strong>família genèrica</strong>, que existeix a tots els ordinadors:
+        <code>serif</code> (amb gràcies, els petits remats dels traços, com Georgia), <code>sans-serif</code> (de pal sec,
+        sense gràcies, com Verdana) o <code>monospace</code> (totes les lletres igual d'amples, com Courier New).
+      </li>
+    </ul>
+    <p class="nota">
+      Hi ha webs que ofereixen lletres per descarregar (com Google Fonts), però a HTMLCat no hi funcionen: la previsualització
+      no es connecta a cap altre web, per protegir la teva privacitat. Fes servir les lletres de l'ordinador.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>El text</h2>
+    <div class="simulador" data-id="c11-text" data-height="620">
+      <script type="text/plain" data-file="index.html">
+        <h1>La setmana de la ciència</h1>
+        <p class="entradeta">Cinc dies d'experiments, tallers i xerrades per a tot l'institut.</p>
+        <p>
+          Dilluns obrim amb una xerrada sobre els volcans de la Garrotxa. Dimarts i dimecres, els laboratoris estaran
+          oberts tota la tarda, i dijous farem el concurs de ponts de paper. Divendres, la fira de projectes al pati.
+        </p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        h1 {
+          text-align: center;
+        }
+
+        p {
+          line-height: 1.6;
+        }
+
+        .entradeta {
+          font-style: italic;
+          font-weight: bold;
+        }
+      </script>
+    </div>
+    <ul>
+      <li><code>text-align</code>: com s'alinea el text: <code>left</code> (a l'esquerra), <code>center</code>, <code>right</code> (a la dreta) o <code>justify</code> (justificat).</li>
+      <li><code>line-height</code>: l'interlineat, és a dir, l'alçada de cada línia. Sense unitat vol dir «vegades la mida de la lletra»: <code>1.6</code> fa les línies 1,6 vegades més altes que la lletra. Entre <code>1.4</code> i <code>1.6</code>, els paràgrafs es llegeixen millor. Prova de posar-hi <code>1</code>.</li>
+      <li><code>font-weight: bold</code> fa la lletra negreta, i <code>font-style: italic</code>, cursiva.</li>
+    </ul>
+    <p>Els valors de les propietats del CSS són paraules en anglès: <code>center</code>, no «centre»; <code>bold</code>, no «negreta».</p>
+    <p class="nota">
+      Negreta i cursiva amb CSS quan només és una qüestió d'aspecte, com aquí l'entradeta. Quan el text és important o té
+      èmfasi, <code>&lt;strong&gt;</code> i <code>&lt;em&gt;</code> a l'HTML (capítol 2).
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Variables</h2>
+    <p>Una pàgina fa servir sempre els mateixos colors. En lloc d'escriure'ls cada vegada, guarda'ls en <strong>variables</strong>:</p>
+    <div class="simulador" data-id="c11-variables" data-height="560">
+      <script type="text/plain" data-file="index.html">
+        <h1>Club d'escacs</h1>
+        <h2>Properes partides</h2>
+        <p>Dimarts, a la biblioteca. <a href="inscripcio.html">Apunta-t'hi</a>.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        :root {
+          --color-principal: #00695c;
+          --color-fons: #f4f1de;
+        }
+
+        body {
+          background-color: var(--color-fons);
+        }
+
+        h1,
+        h2 {
+          color: var(--color-principal);
+        }
+
+        a {
+          color: var(--color-principal);
+        }
+      </script>
+    </div>
+    <ul>
+      <li>Les variables es defineixen a <code>:root</code>, que vol dir «l'element arrel», el <code>&lt;html&gt;</code>: així es poden fer servir a tota la pàgina.</li>
+      <li>El nom d'una variable comença amb dos guions: <code>--color-principal</code>. Distingeix majúscules i minúscules.</li>
+      <li>Per fer-la servir, escriu-la dins de <code>var()</code>: <code>color: var(--color-principal);</code>.</li>
+    </ul>
+    <p>Canvia el valor de <code>--color-principal</code> (per exemple, a <code>#6a1b9a</code>): els títols i l'enllaç canvien alhora. Sense la variable, hauries de buscar el color per tot el full d'estil.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>El contrast</h2>
+    <p>
+      Un text es llegeix bé si el seu color i el del fons són prou diferents. El <strong>contrast</strong> ho mesura: va de
+      1:1 (el mateix color) a 21:1 (negre sobre blanc). Perquè tothom el pugui llegir, també qui hi veu poc o
+      llegeix el mòbil al sol, ha de ser com a mínim de <strong>4,5:1</strong>.
+    </p>
+    <div class="simulador" data-id="c11-contrast" data-height="620">
+      <script type="text/plain" data-file="index.html">
+        <p class="primer">Negre sobre blanc: 21:1.</p>
+        <p class="segon">Gris fosc sobre blanc: 4,5:1, just el mínim.</p>
+        <p class="tercer">Gris clar sobre blanc: 2,3:1, costa de llegir.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        .primer {
+          color: black;
+          background-color: white;
+        }
+
+        .segon {
+          color: #767676;
+          background-color: white;
+        }
+
+        .tercer {
+          color: #aaa;
+          background-color: white;
+        }
+      </script>
+    </div>
+    <p>Quan una regla dona el color del text i el del fons, el panell ⚠ Problemes en calcula el contrast i avisa si no arriba a 4,5:1.</p>
+    <aside class="codi-net">
+      <p class="codi-net__titol">🧹 Codi net: no et repeteixis, fes servir variables</p>
+      <ul>
+        <li>Si un color surt més d'una vegada, guarda'l en una variable a <code>:root</code>. El panell avisa quan el mateix color surt tres vegades.</li>
+        <li>Noms de variables pel significat: <code>--color-principal</code>, <code>--color-fons</code>. Res de <code>--verd</code>: si demà el color principal és blau, el nom mentiria.</li>
+        <li>Acaba sempre <code>font-family</code> amb una família genèrica.</li>
+        <li>Les mides de la lletra, en <code>rem</code>.</li>
+        <li>Contrast de 4,5:1 com a mínim entre el text i el fons.</li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Errors típics</h2>
+    <p>Aquests exemples tenen errors. Mira el resultat i llegeix el panell ⚠ Problemes.</p>
+
+    <h3>Falta el #</h3>
+    <div class="simulador" data-readonly data-height="300">
+      <script type="text/plain" data-file="index.html">
+        <h1>Club d'escacs</h1>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        h1 {
+          color: 00695c;
+        }
+      </script>
+    </div>
+    <p>Sense el <code>#</code>, el navegador no sap que és un color i ignora la declaració.</p>
+
+    <h3>Una variable mal escrita</h3>
+    <div class="simulador" data-readonly data-height="400">
+      <script type="text/plain" data-file="index.html">
+        <h1>Club d'escacs</h1>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        :root {
+          --color-principal: #00695c;
+        }
+
+        h1 {
+          color: var(--color-principl);
+        }
+      </script>
+    </div>
+    <p>La variable <code>--color-principl</code> no existeix, i el títol es queda negre. Compte: el navegador no torna al color que tenia abans, sinó que la propietat queda com si no li haguessis donat cap valor.</p>
+
+    <h3>Una variable sense var()</h3>
+    <div class="simulador" data-readonly data-height="400">
+      <script type="text/plain" data-file="index.html">
+        <h1>Club d'escacs</h1>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        :root {
+          --color-principal: #00695c;
+        }
+
+        h1 {
+          color: --color-principal;
+        }
+      </script>
+    </div>
+    <p>El nom tot sol no val: per fer servir una variable, cal escriure-la dins de <code>var()</code>.</p>
+
+    <h3>Centre, en lloc de center</h3>
+    <div class="simulador" data-readonly data-height="300">
+      <script type="text/plain" data-file="index.html">
+        <h1>Club d'escacs</h1>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        h1 {
+          text-align: centre;
+        }
+      </script>
+    </div>
+    <p>Les paraules del CSS són en anglès dels Estats Units: <code>center</code>.</p>
+
+    <h3>Un espai abans de la unitat</h3>
+    <div class="simulador" data-readonly data-height="300">
+      <script type="text/plain" data-file="index.html">
+        <h1>Club d'escacs</h1>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        h1 {
+          font-size: 3 rem;
+        }
+      </script>
+    </div>
+    <p>El número i la unitat van enganxats: <code>3rem</code>.</p>
+
+    <h3>Una lletra sense família genèrica</h3>
+    <div class="simulador" data-readonly data-height="300">
+      <script type="text/plain" data-file="index.html">
+        <h1>Club d'escacs</h1>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        h1 {
+          font-family: Georgia;
+        }
+      </script>
+    </div>
+    <p>Potser al teu ordinador es veu bé, però si un altre ordinador no té Georgia, no se sap quina lletra hi sortirà. Acaba la llista amb <code>serif</code>.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Exercici: els colors del club</h2>
+    <p>La pàgina del club d'escacs repeteix els mateixos colors per tot el full d'estil. Endreça-la:</p>
+    <ul>
+      <li>a <code>:root</code>, defineix les variables <code>--color-principal</code> (<code>#00695c</code>) i <code>--color-fons</code> (<code>#f4f1de</code>);</li>
+      <li>fes-les servir amb <code>var()</code> a tots els llocs on surten aquests dos colors;</li>
+      <li>acaba la llista de <code>font-family</code> amb una família genèrica;</li>
+      <li>centra el títol <code>h1</code> i dona un interlineat (<code>line-height</code>) als paràgrafs;</li>
+      <li>cap error ni cap avís al panell ⚠ Problemes.</li>
+    </ul>
+    <p>La pàgina s'ha de veure igual que abans (amb el títol centrat). Quan acabis, prem <strong>✓ Comprova</strong>.</p>
+    <div class="simulador" data-id="c11-exercici" data-goal-id="cap-11-ex" data-mode="document" data-height="600">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>Club d'escacs</title>
+            <link rel="stylesheet" href="estils.css">
+          </head>
+          <body>
+            <main>
+              <h1>Club d'escacs</h1>
+              <h2>Properes partides</h2>
+              <p>Dimarts i dijous, de 5 a 7 de la tarda, a la biblioteca.</p>
+              <p>No cal saber-ne: hi ha taulers per aprendre. <a href="inscripcio.html">Apunta-t'hi</a>.</p>
+            </main>
+            <footer>
+              <p>Institut del Parc</p>
+            </footer>
+          </body>
+        </html>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        /* Estils del club d'escacs */
+
+        body {
+          background-color: #f4f1de;
+          font-family: Verdana;
+        }
+
+        h1,
+        h2 {
+          color: #00695c;
+        }
+
+        a {
+          color: #00695c;
+        }
+
+        footer {
+          color: #f4f1de;
+          background-color: #00695c;
+        }
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "uses-css", "selector": "h1", "prop": "color", "valueIncludes": "var(--color-principal)",
+            "msg": "Els títols fan servir var(--color-principal)." },
+          { "type": "uses-css", "selector": "a", "prop": "color", "valueIncludes": "var(--color-principal)",
+            "msg": "Els enllaços fan servir var(--color-principal)." },
+          { "type": "uses-css", "selector": "footer", "prop": "background-color", "valueIncludes": "var(--color-principal)",
+            "msg": "El fons del peu fa servir var(--color-principal)." },
+          { "type": "uses-css", "selector": "body", "prop": "background-color", "valueIncludes": "var(--color-fons)",
+            "msg": "El fons de la pàgina fa servir var(--color-fons)." },
+          { "type": "uses-css", "selector": "footer", "prop": "color", "valueIncludes": "var(--color-fons)",
+            "msg": "El text del peu fa servir var(--color-fons)." },
+          { "type": "style", "selector": "h1", "prop": "color", "equals": "#00695c",
+            "msg": "El color principal continua sent #00695c." },
+          { "type": "style", "selector": "body", "prop": "background-color", "equals": "#f4f1de",
+            "msg": "El color de fons continua sent #f4f1de." },
+          { "type": "style", "selector": "h1", "prop": "text-align", "equals": "center",
+            "msg": "El títol h1 està centrat." },
+          { "type": "uses-css", "selector": "p", "prop": "line-height",
+            "msg": "Els paràgrafs (p) tenen un interlineat (line-height)." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error (com una variable que no existeix)." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís (com una lletra sense família genèrica, o un color repetit)." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Troba l'error</h2>
+    <p>
+      La pàgina del concert hauria de tenir el títol blau fosc i centrat, el peu blau fosc amb la lletra blanca, i un avís
+      que es llegeixi bé. Hi ha cinc errors a <code>estils.css</code>. Arregla'ls amb l'ajuda del panell ⚠ Problemes, i
+      quan acabis prem <strong>✓ Comprova</strong>.
+    </p>
+    <div class="simulador" data-id="c11-troba-error" data-goal-id="cap-11-bug" data-mode="document" data-height="600">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>Concert de primavera</title>
+            <link rel="stylesheet" href="estils.css">
+          </head>
+          <body>
+            <main>
+              <h1>Concert de primavera</h1>
+              <p class="data">Divendres 15 de maig, a les 7 de la tarda</p>
+              <p>La coral i l'orquestra de l'institut toquen al pati. L'entrada és lliure.</p>
+              <p class="avis">Si plou, el concert es fa al gimnàs.</p>
+            </main>
+            <footer>
+              <p>Institut del Parc</p>
+            </footer>
+          </body>
+        </html>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        /* Estils del concert */
+
+        :root {
+          --color-principal: #1d3557;
+          --color-destacat: #c1121f;
+        }
+
+        body {
+          font-family: Georgia;
+          line-height: 1.5;
+        }
+
+        h1 {
+          color: var(--color-principl);
+          text-align: centre;
+        }
+
+        .data {
+          color: var(--color-destacat);
+          font-weight: bold;
+        }
+
+        .avis {
+          color: #ffd166;
+          background-color: white;
+        }
+
+        footer {
+          color: white;
+          background-color: 1d3557;
+        }
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "style", "selector": "h1", "prop": "color", "equals": "#1d3557",
+            "msg": "El títol és blau fosc (#1d3557)." },
+          { "type": "style", "selector": "h1", "prop": "text-align", "equals": "center",
+            "msg": "El títol està centrat." },
+          { "type": "style", "selector": "footer", "prop": "background-color", "equals": "#1d3557",
+            "msg": "El fons del peu és blau fosc (#1d3557)." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís (com un text amb poc contrast)." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Resum</h2>
+    <div class="resum">
+      <ul>
+        <li>Colors amb números: <code>#ff6347</code> (hexadecimal), <code>rgb(255, 99, 71)</code> (llum vermella, verda i blava, de 0 a 255) i <code>hsl(9, 100%, 64%)</code> (to, saturació i lluminositat).</li>
+        <li>Unitats: <code>px</code> (fixa), <code>rem</code> (vegades la lletra de la pàgina; la millor per a la mida de la lletra), <code>em</code> (vegades la lletra del pare) i <code>%</code>.</li>
+        <li><code>font-family</code>: una llista de lletres que acaba amb una família genèrica (<code>serif</code>, <code>sans-serif</code> o <code>monospace</code>).</li>
+        <li><code>text-align</code> alinea el text, <code>line-height</code> en dona l'interlineat, i <code>font-weight</code> i <code>font-style</code> fan negreta i cursiva.</li>
+        <li>Variables: es defineixen a <code>:root</code> (<code>--color-principal: #00695c;</code>) i es fan servir amb <code>var(--color-principal)</code>.</li>
+        <li>Contrast entre el text i el fons: 4,5:1 com a mínim.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>
