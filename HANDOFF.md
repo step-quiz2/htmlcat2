@@ -1,6 +1,6 @@
 # HANDOFF — start here (for a Claude session with no prior context)
 
-Last updated: 2026-10-03, after chapter 8 (phase 5, content): part A (HTML) is complete.
+Last updated: 2026-10-03, after chapter 9 (phase 5, content): part A (HTML) is complete and part B (CSS) has started.
 Keep it short and current: when you finish a phase, rewrite the "Where we are" and
 "Next task" sections.
 
@@ -36,12 +36,13 @@ copied here by a GitHub web upload, which dropped every dot-file (see §6).
 - Phase 4 ✅ course shell (`site/js/course/`: data, progress, shell; STATE §2.8), checks DSL v1
   (`site/js/checks/`, "✓ Comprova", hidden 800×600 check frame; STATE §2.7) and chapter 1
   (`site/curs/capitol-1.html`, exercises `cap-1-ex` and `cap-1-bug`, solutions in `tests/solutions/`).
-- Phase 5 (content, one chapter per PR): chapters 1–8 done (`site/curs/capitol-N.html`,
+- Phase 5 (content, one chapter per PR): chapters 1–9 done (`site/curs/capitol-N.html`,
   exercises `cap-N-ex` and `cap-N-bug`); chapter 4 added six link rules, chapter 5 six
   image/attribute rules (per-element attributes in `lang/html-spec.js`), chapter 6 four
   page-structure rules, chapter 7 five table rules (`html/th-scope` is the first `info`
   rule; enumerated attribute values live in `ENUMERATED_ATTRIBUTES`, STATE §2.6), chapter 8 two
-  form rules. Chapter 7 simulators carry a read-only `estils.css` so table borders show (CSS is
+  form rules, chapter 9 three CSS rules (`css/wrong-comment`, `css/unknown-element-selector`,
+  `html/stylesheet-link`; HTML rules now get `ctx.fileNames`). Chapter 7 simulators carry a read-only `estils.css` so table borders show (CSS is
   taught in part B). Form simulators use `data-forms`; the preview CSP has `form-action 'none'`
   (second layer behind the submit interception) and the free editor accepts forms too. From chapter 6 on, exercises are full documents
   (`data-mode="document"`, D3), and `html/single-main` warns when a document has no `<main>`:
@@ -51,13 +52,13 @@ copied here by a GitHub web upload, which dropped every dot-file (see §6).
   `site/recursos/CREDITS.md` in sync; add a new image to all three). The browser test checks
   that, in every simulator, the images the browser cannot show match the panel's
   `html/image-not-found` entries.
-  Next: chapter 9, «Hola, CSS!» (part B starts: rule syntax, `link rel="stylesheet"`, `color`,
-  `background-color`, `font-size`, comments; habit: separate content from presentation). The
-  CSS rules (`css/*`, since 9) and `html/inline-style` already exist from phase 3: re-check
-  their messages against the chapter text. Exercises are documents with an editable
-  `estils.css` linked by `<link rel="stylesheet" href="estils.css">` (the simulator inlines it,
-  and warns when the link points to a file that does not exist); use `style` and `uses-css`
-  checks (STATE §2.7).
+  Next: chapter 10, «Selectors i cascada» (type, class, id, descendant and grouped selectors;
+  cascade, specificity, inheritance; habit: name classes by meaning, `.avis` not `.vermell`).
+  BLUEPRINT Appendix C plans: selector matches nothing (rendered: no rendered lint phase exists
+  yet; `css/unknown-element-selector` already covers misspelt type selectors statically),
+  `!important` and id selectors (warnings), duplicate declarations. Chapter 9 exercises show the
+  pattern for two editable files (solutions hold `index.html` and `estils.css`); `style` checks
+  compare computed values, `uses-css` checks the source.
 - Decisions D3, D4, D6–D12: the owner accepted all recommended options (STATE §3).
 - 177 unit tests + static checks + browser checks (editor, panel and every exercise end-to-end), all green.
 - Still pending from phase 0 (owner's job): confirm Cloudflare Pages deploys

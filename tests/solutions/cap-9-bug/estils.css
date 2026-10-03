@@ -1,0 +1,18 @@
+/* Estils del club d'escacs */
+
+body {
+  background-color: lightyellow;
+  color: darkslategray;
+}
+
+h1 {
+  color: darkred;
+}
+
+h2 {
+  color: red;
+}
+
+p {
+  font-size: 18px;
+}

@@ -1,0 +1,17 @@
+/* Estils de la recepta */
+
+body {
+  background-color: oldlace;
+}
+
+h1 {
+  color: firebrick;
+}
+
+h2 {
+  color: darkolivegreen;
+}
+
+p {
+  font-size: 18px;
+}
