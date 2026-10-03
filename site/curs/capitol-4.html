@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capítol 4 — Enllaços | HTMLCat</title>
+  <link rel="icon" href="../img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/course.css">
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link rel="stylesheet" href="../css/simulador.css">
+  <script type="module" src="../js/pages/course-page.js"></script>
+</head>
+<body data-pagina="capitol" data-num="4">
+
+<main class="curs-content">
+  <header class="chapter-header">
+    <h1>Enllaços</h1>
+    <p class="chapter-lead">En acabar aquest capítol sabràs enllaçar pàgines entre elles i saltar a qualsevol part d'una pàgina, amb textos d'enllaç que diguin on porten.</p>
+  </header>
+
+  <section class="chapter-section">
+    <h2>El teu primer enllaç</h2>
+    <p>Els enllaços són el que converteix un munt de pàgines en una <em>web</em>, una teranyina. S'escriuen així:</p>
+    <div class="simulador" data-id="c04-primer-enllac">
+      <script type="text/plain" data-file="index.html">
+        <p>Vols saber més coses? Llegeix <a href="https://ca.wikipedia.org/wiki/Gat">l'article dels gats a la Viquipèdia</a>.</p>
+      </script>
+    </div>
+    <ul>
+      <li><code>&lt;a&gt;</code> (de l'anglès <em>anchor</em>, «àncora») és l'element de l'enllaç. Va dins del text, com <code>&lt;strong&gt;</code>.</li>
+      <li><code>href</code> és l'atribut que diu <strong>on porta</strong> l'enllaç: una adreça o un fitxer.</li>
+      <li>El contingut, entre <code>&lt;a&gt;</code> i <code>&lt;/a&gt;</code>, és el <strong>text de l'enllaç</strong>: el que es veu i es clica.</li>
+    </ul>
+    <p class="nota">
+      En aquest simulador els enllaços no s'obren: quan cliques un enllaç, a sota del resultat surt on t'hauria portat.
+      Així no perds el que estàs fent.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Adreces absolutes i relatives</h2>
+    <p>El <code>href</code> pot ser de dos tipus:</p>
+    <ul>
+      <li>Una adreça <strong>absoluta</strong>, completa, que comença amb <code>https://</code>: porta a una pàgina de qualsevol web.</li>
+      <li>Una adreça <strong>relativa</strong>, que porta a un altre fitxer del teu web i es compta des de la pàgina on és l'enllaç.</li>
+    </ul>
+    <p>Imagina que el teu web té aquests fitxers:</p>
+    <pre class="code-example" tabindex="0">el-meu-web/
+├── index.html
+├── contacte.html
+└── animals/
+    ├── gats.html
+    └── gossos.html</pre>
+    <p>Des d'<code>index.html</code>, els enllaços a les altres pàgines són:</p>
+    <div class="simulador" data-id="c04-adreces">
+      <script type="text/plain" data-file="index.html">
+        <ul>
+          <li><a href="contacte.html">Contacte</a></li>
+          <li><a href="animals/gats.html">Els gats</a></li>
+          <li><a href="https://www.xtec.cat">La XTEC</a></li>
+        </ul>
+      </script>
+    </div>
+    <ul>
+      <li><code>contacte.html</code>: un fitxer de la mateixa carpeta.</li>
+      <li><code>animals/gats.html</code>: el fitxer <code>gats.html</code> que hi ha dins de la carpeta <code>animals</code>.</li>
+      <li>I des de <code>animals/gats.html</code>, l'enllaç a <code>gossos.html</code> és simplement <code>gossos.html</code> (són a la mateixa carpeta), i el de tornar a l'inici és <code>../index.html</code>: <code>../</code> vol dir «la carpeta d'amunt».</li>
+    </ul>
+    <p>Clica els enllaços del resultat i mira a sota on et portarien.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Saltar dins de la mateixa pàgina</h2>
+    <p>
+      Un enllaç també pot portar a una altra part de la mateixa pàgina. Primer, posa un nom a l'element de destinació amb
+      l'atribut <code>id</code>; després, fes un enllaç amb <code>href="#nom"</code>:
+    </p>
+    <div class="simulador" data-id="c04-ancores" data-height="560">
+      <script type="text/plain" data-file="index.html">
+        <h1>Refugi de gats Mixa</h1>
+        <ul>
+          <li><a href="#horari">Horari</a></li>
+          <li><a href="#com-arribar">Com arribar-hi</a></li>
+          <li><a href="#com-ajudar">Com ajudar</a></li>
+        </ul>
+        <h2 id="horari">Horari</h2>
+        <p>Obrim de dilluns a dissabte, de 10 a 14 h.</p>
+        <p>Els diumenges i els festius, tanquem.</p>
+        <p>A l'agost, només obrim al matí.</p>
+        <h2 id="com-arribar">Com arribar-hi</h2>
+        <p>Amb el bus 21: baixa a la parada del parc.</p>
+        <p>Amb metro: línia 3, parada Parc.</p>
+        <p>En bicicleta: hi ha aparcament a l'entrada.</p>
+        <h2 id="com-ajudar">Com ajudar</h2>
+        <p>Pots venir a jugar amb els gats els dissabtes.</p>
+        <p>També ens va molt bé que ens portis mantes velles.</p>
+        <p>I, si tens lloc a casa, pots adoptar-ne un!</p>
+      </script>
+    </div>
+    <ul>
+      <li>L'<code>id</code> és el nom d'un element, i ha de ser <strong>únic</strong> a la pàgina: no hi pot haver dos elements amb el mateix.</li>
+      <li>Escriu els <code>id</code> en minúscules, sense accents i amb guions en lloc d'espais: <code>com-arribar</code>.</li>
+      <li>El <code>#</code> del <code>href</code> vol dir «dins d'aquesta pàgina»; a l'<code>id</code> no s'hi posa.</li>
+    </ul>
+    <p>Clica els enllaços del resultat: la pàgina es desplaça fins a l'apartat (si a sota hi ha prou text, el deixa a dalt de tot).</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Textos d'enllaç que diuen on porten</h2>
+    <p>Compara aquests dos enllaços:</p>
+    <pre class="code-example" data-lang="html" tabindex="0">&lt;p&gt;Per veure les fotos, &lt;a href="fotos.html"&gt;clica aquí&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Mira &lt;a href="fotos.html"&gt;les fotos del refugi&lt;/a&gt;.&lt;/p&gt;</pre>
+    <p>
+      Molta gent no llegeix les pàgines senceres: mira els enllaços per decidir on anar. I els lectors de pantalla
+      poden llegir tots els enllaços seguits, sense el text del voltant. «Clica aquí» no diu res; «les fotos del refugi»
+      s'entén tot sol.
+    </p>
+    <aside class="codi-net">
+      <p class="codi-net__titol">🧹 Codi net: textos d'enllaç que diuen on porten</p>
+      <ul>
+        <li>El text de l'enllaç ha d'explicar on porta, sense necessitat del text del voltant. Res de «clica aquí» ni «més».</li>
+        <li>Els <code>id</code>, en minúscules, sense accents i amb guions: <code>com-arribar</code>, <code>preguntes-frequents</code>.</li>
+        <li>Cada <code>id</code>, una sola vegada a la pàgina.</li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Errors típics</h2>
+    <p>Aquests exemples tenen errors. Clica els enllaços del resultat i després llegeix el panell ⚠ Problemes.</p>
+
+    <h3>Un enllaç sense href</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <p>Mira <a>les fotos del refugi</a>.</p>
+      </script>
+    </div>
+    <p>Sembla text normal i no es pot clicar: sense <code>href</code>, el navegador no sap on ha de portar l'enllaç.</p>
+
+    <h3>Una adreça sense https://</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <p>Més gats a <a href="www.gats.cat">gats.cat</a>.</p>
+      </script>
+    </div>
+    <p>
+      Clica l'enllaç: sense <code>https://</code>, el navegador creu que <code>www.gats.cat</code> és un fitxer del teu web.
+      Les adreces d'altres webs s'escriuen sempre senceres: <code>https://www.gats.cat</code>.
+    </p>
+
+    <h3>Una àncora que no existeix</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <p><a href="#contacte">Contacte</a></p>
+        <h2 id="contacta">Contacte</h2>
+        <p>Truca'ns al 93 000 00 00.</p>
+      </script>
+    </div>
+    <p>Clica l'enllaç: no salta enlloc, perquè l'<code>id</code> és <code>contacta</code> i l'enllaç busca <code>contacte</code>. Una sola lletra ho canvia tot.</p>
+
+    <h3>Un id repetit</h3>
+    <div class="simulador" data-readonly data-height="480">
+      <script type="text/plain" data-file="index.html">
+        <p><a href="#fotos">Fotos</a></p>
+        <h2 id="fotos">Fotos dels gats</h2>
+        <p>Aquí hi ha les fotos dels gats.</p>
+        <h2 id="fotos">Fotos dels voluntaris</h2>
+        <p>I aquí, les dels voluntaris.</p>
+      </script>
+    </div>
+    <p>Amb dos elements amb el mateix <code>id</code>, l'enllaç només pot portar al primer. Cada <code>id</code> ha de ser únic.</p>
+
+    <h3>Clica aquí</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <p>Per veure les fotos, <a href="fotos.html">clica aquí</a>.</p>
+      </script>
+    </div>
+    <p>Funciona, però «clica aquí» no diu on porta. Fes que el text de l'enllaç s'entengui tot sol: «les fotos del refugi».</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Exercici: la pàgina del club</h2>
+    <p>Completa la pàgina d'un club (de lectura, d'escacs, de futbol…). Ha de tenir:</p>
+    <ul>
+      <li>un índex, a dalt de tot: una llista <code>&lt;ul&gt;</code> amb almenys dos enllaços que portin a dos apartats de la mateixa pàgina (amb <code>href="#…"</code>);</li>
+      <li>aquests apartats, amb un títol <code>&lt;h2&gt;</code> que tingui l'<code>id</code> que toca, i amb un paràgraf a sota;</li>
+      <li>un enllaç a una altra web (<code>https://…</code>), amb un text que digui on porta;</li>
+      <li>cap error ni cap avís al panell ⚠ Problemes.</li>
+    </ul>
+    <p>Quan acabis, prem <strong>✓ Comprova</strong>.</p>
+    <div class="simulador" data-id="c04-exercici" data-goal-id="cap-4-ex" data-height="560">
+      <script type="text/plain" data-file="index.html">
+        <h1>El nostre club de lectura</h1>
+        <ul>
+          <li><a href="#qui-som">Qui som</a></li>
+        </ul>
+        <h2>Qui som</h2>
+        <p>Ens trobem cada dijous a la biblioteca.</p>
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "count", "selector": "ul a[href^='#']", "min": 2,
+            "msg": "L'índex (una llista <ul>) té almenys dos enllaços a apartats de la pàgina (href=\"#…\")." },
+          { "type": "count", "selector": "h2[id]", "min": 2,
+            "msg": "Almenys dos apartats <h2> tenen id." },
+          { "type": "lint", "rules": ["html/missing-anchor"], "maxWarnings": 0,
+            "msg": "Cada enllaç de l'índex porta a un id que existeix." },
+          { "type": "count", "selector": "h2 + p", "min": 2,
+            "msg": "Just a sota de cada títol <h2> hi ha un paràgraf." },
+          { "type": "exists", "selector": "a[href^='https://']",
+            "msg": "Hi ha un enllaç a una altra web (https://…)." },
+          { "type": "text", "selector": "a", "matches": "\\S", "all": true,
+            "msg": "Tots els enllaços tenen text." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís (com «clica aquí» o una adreça sense https://)." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Troba l'error</h2>
+    <p>
+      La pàgina del refugi té quatre problemes amb els enllaços. Arregla'ls: el formulari d'adopció és el fitxer
+      <code>formulari.html</code>, la web dels voluntaris és <code>www.refugimixa.cat/voluntaris</code>, i el text
+      d'aquest últim enllaç l'has de canviar per un que digui on porta. Quan acabis, prem <strong>✓ Comprova</strong>.
+    </p>
+    <div class="simulador" data-id="c04-troba-error" data-goal-id="cap-4-bug" data-height="560">
+      <script type="text/plain" data-file="index.html">
+        <h1>Refugi de gats Mixa</h1>
+        <p>Saltar a: <a href="#adopcions">adopcions</a> · <a href="#voluntaris">voluntaris</a></p>
+        <h2 id="adopcio">Adopcions</h2>
+        <p>Per adoptar un gat, <a>omple el formulari</a>.</p>
+        <h2 id="voluntaris">Voluntaris</h2>
+        <p>Necessitem ajuda els caps de setmana. Per apuntar-t'hi, <a href="www.refugimixa.cat/voluntaris">clica aquí</a>.</p>
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "exists", "selector": "a[href='formulari.html']",
+            "msg": "L'enllaç «omple el formulari» porta a formulari.html." },
+          { "type": "exists", "selector": "a[href='https://www.refugimixa.cat/voluntaris']",
+            "msg": "L'enllaç dels voluntaris porta a https://www.refugimixa.cat/voluntaris." },
+          { "type": "count", "selector": "h2[id]", "eq": 2,
+            "msg": "Els dos apartats continuen tenint id." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Resum</h2>
+    <div class="resum">
+      <ul>
+        <li>Un enllaç és <code>&lt;a href="on porta"&gt;text de l'enllaç&lt;/a&gt;</code>.</li>
+        <li>Les adreces d'altres webs són absolutes i comencen amb <code>https://</code>; les dels teus fitxers són relatives, comptades des de la pàgina on és l'enllaç (<code>animals/gats.html</code>, <code>../index.html</code>).</li>
+        <li>Per saltar a una part de la pàgina, dona-li un <code>id</code> i enllaça-hi amb <code>href="#id"</code>.</li>
+        <li>Cada <code>id</code> és únic a la pàgina, en minúscules, sense accents i amb guions.</li>
+        <li>El text de l'enllaç ha de dir on porta: res de «clica aquí».</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>
