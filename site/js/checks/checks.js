@@ -18,6 +18,7 @@ import { lintStatic } from '../lint/lint.js';
 import { t } from '../i18n/ca.js';
 
 const normalize = (text) => text.replace(/\s+/g, ' ').trim();
+const compact = (text) => text.replace(/\s+/g, '');
 const shorten = (text) => (text.length > 60 ? text.slice(0, 57) + '…' : text);
 
 /** Compara un text amb equals / includes / matches (ci: sense distingir majúscules). */
@@ -113,7 +114,8 @@ const EVALUATORS = {
     const passed = cssSources(ctx.files).some((css) => styleRules(parseCss(css).rules).some((rule) =>
       selectorMatches(rule, check) && rule.declarations.some((decl) =>
         decl.property.text.toLowerCase() === prop &&
-        (check.value === undefined || (decl.value && normalize(decl.value.text) === normalize(check.value))))));
+        (check.value === undefined || (decl.value && normalize(decl.value.text) === normalize(check.value))) &&
+        (check.valueIncludes === undefined || (decl.value && compact(decl.value.text).includes(compact(check.valueIncludes)))))));
     return { passed };
   },
 

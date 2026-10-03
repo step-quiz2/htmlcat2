@@ -18,6 +18,7 @@
 //   summarize(problems, max?)                → { entries, counts, hidden }
 //
 // env: { supports(prop, value) } (al navegador, CSS.supports)
+// Les regles de CSS reben també les variables (--nom) de tot el CSS.
 // Problem: { file, rule, severity, start, end, line, col, data, text, hint }
 //   start/end: posicions al fitxer (com textarea.selectionStart)
 // Ordre: errors, avisos i suggeriments; dins de cada grup, per fitxer i línia.
@@ -62,6 +63,15 @@ export function lintStatic({ files, mode = 'fragment', chapter = Infinity, env =
   }
   const page = parsed.size ? pageNames([...parsed.values()]) : null;
 
+  // Tot el CSS (fitxers i <style>) s'analitza un sol cop: les variables
+  // (--nom) es poden definir en un lloc i fer servir en un altre
+  const sheets = new Map();   // fitxer → [{ css, offset, sheet }]
+  Object.keys(files).forEach((file) => {
+    const sources = file.endsWith('.css') ? [{ css: files[file], offset: 0 }] : styleContents(parsed.get(file).tokens, files[file]);
+    sheets.set(file, sources.map((source) => ({ ...source, sheet: parseCss(source.css) })));
+  });
+  const variables = customProperties([...sheets.values()].flat().map((source) => source.sheet));
+
   Object.keys(files).forEach((file, fileIndex) => {
     const src = files[file];
     const at = makeLineIndex(src);
@@ -73,31 +83,56 @@ export function lintStatic({ files, mode = 'fragment', chapter = Infinity, env =
         start, end, ...at(start), data, ...describe(rule.id, data),
       });
     };
-    const lintCss = (css, offset, embedded) => {
+    const lintCss = ({ css, offset, sheet }, embedded) => {
       const lineOf = makeLineIndex(css);
-      const ctx = { src: css, sheet: parseCss(css), supports: env.supports || null, embedded, page, lineOf: (pos) => lineOf(pos).line };
+      const ctx = { src: css, sheet, supports: env.supports || null, embedded, page, variables, lineOf: (pos) => lineOf(pos).line };
       for (const rule of cssRules) {
         if (!(embedded && rule.embedded === false)) rule.check(ctx, reporter(rule, offset));
       }
     };
 
     if (file.endsWith('.css')) {
-      lintCss(src, 0, false);
+      lintCss(sheets.get(file)[0], false);
       return;
     }
     const { tokens, root, problems: structure } = parsed.get(file);
     const ctx = { src, tokens, root, structure, mode, fileNames: Object.keys(files), lineOf: (pos) => at(pos).line };
     for (const rule of htmlRules) rule.check(ctx, reporter(rule, 0));
-
-    // CSS de dins dels <style> (un text «raw» sempre ve just després de la seva etiqueta)
-    tokens.forEach((token, i) => {
-      if (token.raw && tokens[i - 1].name === 'style') lintCss(src.slice(token.start, token.end), token.start, true);
-    });
+    for (const source of sheets.get(file)) lintCss(source, true);
   });
 
   return problems.sort((a, b) =>
     SEVERITIES.indexOf(a.severity) - SEVERITIES.indexOf(b.severity) ||
     a.fileIndex - b.fileIndex || a.start - b.start);
+}
+
+/** El CSS de dins dels <style> (un text «raw» sempre ve just després de la seva etiqueta). */
+function styleContents(tokens, src) {
+  return tokens.filter((token, i) => token.raw && tokens[i - 1].name === 'style')
+    .map((token) => ({ css: src.slice(token.start, token.end), offset: token.start }));
+}
+
+/**
+ * Les variables (propietats --nom) definides en qualsevol regla, amb tots
+ * els valors que se'ls donen. Els noms distingeixen majúscules.
+ *
+ * @returns {Map<string, string[]>}
+ */
+function customProperties(sheets) {
+  const variables = new Map();
+  const visit = (list) => {
+    for (const rule of list) {
+      for (const decl of rule.declarations || []) {
+        const name = decl.property.text.trim();
+        if (!name.startsWith('--') || !decl.value) continue;
+        if (!variables.has(name)) variables.set(name, []);
+        variables.get(name).push(decl.value.text.trim());
+      }
+      if (rule.rules) visit(rule.rules);
+    }
+  };
+  for (const sheet of sheets) visit(sheet.rules);
+  return variables;
 }
 
 /**

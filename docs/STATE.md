@@ -59,6 +59,7 @@ site/                  ← l'única carpeta que es publica
   curs/capitol-8.html  Capítol 8, «Formularis» (exercicis cap-8-ex i cap-8-bug; tots els simuladors amb data-forms)
   curs/capitol-9.html  Capítol 9, «Hola, CSS!» (exercicis cap-9-ex i cap-9-bug, amb index.html i estils.css editables)
   curs/capitol-10.html Capítol 10, «Selectors i cascada» (exercicis cap-10-ex i cap-10-bug)
+  curs/capitol-11.html Capítol 11, «Colors, text i unitats» (exercicis cap-11-ex i cap-11-bug)
   editor/index.html    Editor lliure (simulador a pantalla completa, clau code:editor)
   404.html             Pàgina d'error (Cloudflare la fa servir sola)
   _headers             Capçaleres de seguretat per a Cloudflare Pages
@@ -78,6 +79,7 @@ site/                  ← l'única carpeta que es publica
   js/lang/html-model.js      Mòdul pur: arbre del codi font i errors d'estructura (§2.1)
   js/lang/css-parser.js      Mòdul pur: analitzador de CSS tolerant (§2.2)
   js/lang/css-spec.js        Propietats CSS habituals (per suggerir «potser volies dir…»)
+  js/lang/css-colors.js      Mòdul pur: llegeix colors del CSS i calcula el contrast (WCAG)
   js/lint/lint.js            Mòdul pur: revisor de codi, lintStatic i summarize (§2.6)
   js/lint/rules-html.js      Mòdul pur: regles d'HTML (§2.6)
   js/lint/rules-css.js       Mòdul pur: regles de CSS (§2.6)
@@ -324,7 +326,7 @@ Catàleg (E error, A avís, S suggeriment). «Cap.» = capítol a partir del qua
 | `css/unclosed-comment` | 9 | E | `/*` sense `*/` |
 | `css/unclosed-string` | 9 | E | Cadena sense la cometa de tancament |
 | `css/unknown-property` | 9 | E | `colr`, `color-de-fons` (suggereix el nom correcte) |
-| `css/invalid-value` | 9 | E | Valor no vàlid; missatges propis per a color en català, coma decimal i número sense unitat |
+| `css/invalid-value` | 9 | E | Valor no vàlid; missatges propis per a color en català, coma decimal i número sense unitat. Des del capítol 11 (tots els capítols, perquè es decideix pel valor): paraules en català (`centre`, `negreta`, `sòlid`), espai entre el número i la unitat (`1.2 rem`), color hexadecimal sense `#` o amb un nombre de xifres que no toca, variable sense `var()` (`color: --principal`) o sense els dos guions (`var(principal)`) |
 | `css/wrong-comment` | 9 | E | Comentaris amb `<!--` o `//` (fora de cadenes i d'`url()`): la regla o la declaració següent deixa de funcionar. Els altres missatges sobre aquest text no surten |
 | `css/unknown-element-selector` | 9 | A | Selector d'un element que no existeix: `paragraf` (suggereix `p`), `spam` (`span`); no mira dins de `[…]` ni `(…)`, ni els `@keyframes` |
 | `css/selector-matches-nothing` | 10 | A | Selector amb una classe o un id que cap element de l'HTML no té (suggereix el nom més semblant; les majúscules i els accents compten). Es fa sobre el codi font; sense HTML al simulador, no diu res |
@@ -332,13 +334,20 @@ Catàleg (E error, A avís, S suggeriment). «Cap.» = capítol a partir del qua
 | `css/important` | 10 | A | `!important` |
 | `css/duplicate-declaration` | 10 | A | La mateixa propietat dues vegades a la mateixa regla (només compta l'última) |
 | `css/presentational-class` | 10 | S | Classes que diuen com es veu l'element (`.vermell`, `.text-gran`, `.centrat`) en lloc de què és |
+| `css/generic-font-family` | 11 | A | `font-family` que no acaba amb una família genèrica (`serif`, `sans-serif`, `monospace`…); proposa la que s'assembla a la lletra (Georgia → `serif`). També `"serif"` entre cometes. No mira la drecera `font` |
+| `css/undefined-variable` | 11 | E | `var(--x)` sense valor de reserva i sense cap `--x` definida en tot el CSS del simulador (fitxers i `<style>`); suggereix la més semblant (les majúscules compten) |
+| `css/low-contrast` | 11 | A | Contrast per sota de 4,5:1 entre `color` i `background-color`/`background` de la **mateixa regla** (amb variables, si se sap què valen; no amb colors transparents). Es fa sobre el codi font |
+| `css/repeated-color` | 11 | A | El mateix color escrit amb `#`, `rgb()` o `hsl()` 3 vegades o més en un full d'estil (`#fff` = `#ffffff` = `rgb(255, 255, 255)`); definir la variable no compta. Els noms (`white`) no compten |
 | `css/last-semicolon` | 9 | A | L'última declaració sense `;` |
 | `css/one-declaration-per-line` | 9 | A | Dues declaracions a la mateixa línia |
 | `css/indentation` | 9 | A | Declaracions no indentades 2 espais, `}` mal alineada (no als `<style>`) |
 
-La regla que necessita el document ja pintat (contrast) i les dels capítols 11–14
-s'afegiran amb cada capítol (BLUEPRINT apèndix C). `css/selector-matches-nothing` no el
-necessita: es fa amb les classes i els id del codi font. `html/image-not-found` no el necessita: totes les imatges que pot fer
+Les regles dels capítols 12–14 s'afegiran amb cada capítol (BLUEPRINT apèndix C).
+Cap regla no necessita el document ja pintat. `css/selector-matches-nothing` es fa amb
+les classes i els id del codi font, i `css/low-contrast`, amb els colors del codi font
+(`lang/css-colors.js` llegeix noms, `#hex`, `rgb()` i `hsl()` igual que Chromium,
+comprovat amb 167 colors, i calcula el contrast amb la fórmula de les WCAG). Les
+regles de CSS reben les variables de tot el CSS del simulador (`ctx.variables`). `html/image-not-found` no el necessita: totes les imatges que pot fer
 servir l'alumne són a `site/recursos/` (la previsualització les hi busca amb el
 `<base>`, §2.4) i `preview/recursos.js` en té la llista; el test estàtic comprova
 que la llista, els fitxers i `CREDITS.md` coincideixen. Una imatge nova s'afegeix
@@ -375,7 +384,7 @@ comprovar.
 | `attr` | `selector`, `name` i un de `present` / `nonEmpty` / `equals` / `includes` / `matches`; `all`, `ci` | Un atribut del primer element (o de tots) |
 | `style` | `selector`, `prop`, `equals`; `all` | L'estil calculat, comparat amb el d'un element de prova amb el valor demanat (el navegador normalitza tots dos: `teal` = `rgb(0, 128, 128)`) |
 | `uses-html` | `tag` i/o `attr` | Que aparegui al **codi font** (no al DOM, que té elements afegits pel navegador) |
-| `uses-css` | `prop`; `selector` (exacte) o `matches`; `value` | Que hi hagi la declaració als fitxers CSS o als `<style>` |
+| `uses-css` | `prop`; `selector` (exacte) o `matches`; `value` (exacte) i/o `valueIncludes` (un tros del valor, sense tenir en compte els espais: `var(--color-principal)`) | Que hi hagi la declaració als fitxers CSS o als `<style>` |
 | `lint` | `maxErrors` (per defecte 0), `maxWarnings`, `rules` | Els problemes del revisor de codi (§2.6) al nivell del capítol; `rules` en filtra uns quants |
 
 Les comprovacions es fan sobre el DOM que construeix el navegador, que inclou
@@ -452,6 +461,7 @@ motiu; si se'n canvia alguna, s'anota aquí amb la data i el motiu.
 | 2026-10-03 | La CSP de la previsualització inclou `form-action 'none'`, i l'editor lliure permet formularis (`data-forms`, sandbox `allow-same-origin allow-forms`) | Comprovat a Chromium: sense `form-action`, un formulari que no s'aturés enviaria les dades a qualsevol web (la CSP amb `default-src` no ho impedeix). Ara hi ha dues proteccions independents, com amb els scripts. L'editor lliure ha de poder provar el que ensenya el capítol 8 |
 | 2026-10-03 | Revisor, capítol 8: `html/control-label` (com el BLUEPRINT, amb el `for` que no coincideix i el «només placeholder»), regla nova `html/control-name`, i els valors de `<input type>`, `<button type>` i `<form method>` a `html-spec.js` | Un camp sense `name` no s'envia, i uns botons d'opció sense `name` es poden marcar tots alhora (comprovat a Chromium); amb un `type` que no existeix, el navegador en fa un camp de text normal |
 | 2026-10-03 | Revisor, capítol 9: regles noves `css/wrong-comment`, `css/unknown-element-selector` i `html/stylesheet-link`; les regles d'HTML reben els noms dels fitxers del simulador (`ctx.fileNames`) | Comprovat a Chromium: un comentari amb `<!--` o `//` inutilitza la regla següent sense cap avís, i un selector mal escrit no s'aplica a res. En mode document, sense un `<link>` correcte el CSS no s'aplica, i fins ara només ho deia un missatge del simulador, sense línia ni suggeriment |
+| 2026-10-03 | Revisor, capítol 11: `css/low-contrast` es fa sobre el codi font i només quan el color i el fons són a la mateixa regla (el BLUEPRINT la preveia amb els colors calculats de la pàgina pintada); regles noves `css/undefined-variable` (error) i `css/repeated-color` (avís), a més de la prevista `css/generic-font-family`; comprovació `uses-css` amb `valueIncludes` | Amb la mateixa regla se sap segur que el text i el fons van junts; comparar amb el fons d'un altre element donaria falsos avisos (un peu fosc amb enllaços clars). Comprovat a Chromium: una variable que no existeix no torna al valor anterior, sinó que deixa la propietat sense valor (`color: blue; color: var(--x)` → el color del pare), i els noms de les variables distingeixen majúscules. Els colors repetits són l'hàbit del capítol («No et repeteixis: variables»); l'exercici demana fer servir les variables, i `valueIncludes` permet comprovar-ho |
 | 2026-10-03 | Revisor, capítol 10: `css/selector-matches-nothing` es fa sobre el codi font, amb les classes i els id de l'HTML del simulador (el BLUEPRINT la preveia sobre la pàgina pintada); regles noves `html/class-syntax` i `css/presentational-class` (suggeriment), a més de les previstes `css/id-selector`, `css/important` i `css/duplicate-declaration`. Les regles de CSS reben `ctx.page` | Els selectors que no seleccionen res són, gairebé sempre, una classe o un id mal escrits o que falten a l'HTML: es detecten igual sense esperar la pàgina pintada, amb suggeriment i provant-ho amb Node. Comprovat a Chromium: `class=".avis"` i `class="avis, gran"` fan que `.avis` no s'apliqui. Les classes que diuen com es veu l'element són l'hàbit de codi net del capítol, però és opinable: suggeriment |
 | 2026-10-02 | El repositori definitiu és `step-quiz2/htmlcat2` | Ho ha confirmat el propietari. L'historial de les fases 0–2 (PR #1–#4) és a l'antic repositori; el codi es va copiar aquí amb una pujada pel web, que va perdre `.github/`, `.editorconfig` i `.gitignore` (restaurats amb Git el mateix dia) |
 
@@ -488,7 +498,7 @@ cd tests && npm ci && node course-browser.mjs   # navegador (Playwright + Chromi
 
 | Test | Què comprova |
 |---|---|
-| `unit/` | Cada mòdul pur de `site/js/` (202 tests): tokenitzador, arbre i errors d'estructura, analitzador de CSS, ressaltat (conserva el codi, escapa, una línia per entrada, rendiment), robustesa amb 500 codis aleatoris (també el revisor), edició (Retorn, Tab, Maj+Tab), `localStorage`, document de previsualització, textos de la interfície i revisor de codi: per a cada regla, un codi que la dispara i un que no (un test falla si una regla no en té), missatges sense buits, activació per capítol i mode, ordre, agrupació, rendiment, i que el codi d'exemple de l'editor lliure (també el del simulador de l'arrel) i de la portada no tingui cap problema; dades del curs i progrés; esquema de les comprovacions i les que no necessiten navegador (`uses-html`, `uses-css`, `lint`) |
+| `unit/` | Cada mòdul pur de `site/js/` (212 tests): tokenitzador, arbre i errors d'estructura, analitzador de CSS, colors del CSS (cada sintaxi i el contrast), ressaltat (conserva el codi, escapa, una línia per entrada, rendiment), robustesa amb 500 codis aleatoris (també el revisor), edició (Retorn, Tab, Maj+Tab), `localStorage`, document de previsualització, textos de la interfície i revisor de codi: per a cada regla, un codi que la dispara i un que no (un test falla si una regla no en té), missatges sense buits, activació per capítol i mode, ordre, agrupació, rendiment, i que el codi d'exemple de l'editor lliure (també el del simulador de l'arrel) i de la portada no tingui cap problema; dades del curs i progrés; esquema de les comprovacions i les que no necessiten navegador (`uses-html`, `uses-css`, `lint`) |
 | `course-static.mjs` | Cada pàgina té `<!DOCTYPE html>`, `lang="ca"`, `charset` i `<title>`; cap `style=""` ni `on…=""`; cap tabulació; tots els enllaços relatius existeixen; sintaxi de cada `.js`; cap menció de CC BY-NC-ND; existeixen `.editorconfig`, `.gitignore` i `.github/workflows/ci.yml` (una pujada pel web no els inclou). Curs: dades (`course/data.js`) ↔ fitxers de `site/curs/`; `<body data-pagina data-num>` d'acord amb el fitxer; l'exercici principal de cada capítol hi és; tot simulador editable té `data-id`; `data-id` i `data-goal-id` únics; blocs de codi amb nom permès i sense `<script`; comprovacions vàlides (`checks/schema.js`); cada exercici té la seva solució a `tests/solutions/`. Imatges: la llista de `preview/recursos.js`, els fitxers de `site/recursos/` i les files de `CREDITS.md` coincideixen |
 | `course-browser.mjs` | Cada pàgina, a 360 i 1280 px: cap error a la consola, cap petició fallida, cap petició a servidors externs, tots els simuladors es munten en arribar-hi, cap desplaçament horitzontal, cap id repetit; a cada simulador, les imatges que el navegador no pot mostrar són tantes com les que el panell ⚠ Problemes diu que no es troben (`html/image-not-found`), i només n'hi pot haver als exemples no editables i als exercicis (les peticions d'aquestes imatges, un 404 a `recursos/` o una imatge d'Internet que bloqueja la CSP, no compten com a errors de la pàgina). Cada exercici dels capítols, en un mòbil: el codi inicial no el supera, la solució sí (i sense errors al panell ⚠ Problemes), el menú hi posa ✓ i es manté després de recarregar. Dos exemples no editables a la mateixa pàgina no repeteixen els ids de les pestanyes. A més, prova l'editor lliure de punta a punta: escriure, indentació automàtica, resultat en directe, Ctrl+Z, `sandbox` i CSP correctes (també amb text abans de `<html>`), cap script ni imatge externa, enllaços interceptats, un formulari amb `action` cap a un altre web que no envia res i mostra les dades a sota, CSS aplicat i codi desat després de recarregar. I el panell ⚠ Problemes: «Cap problema» amb el codi inicial, el `<p>` del codi inicial sense tancar surt amb la seva línia i es marca, el clic i el teclat porten el cursor a la línia (i canvien de pestanya), i una propietat CSS mal escrita es detecta amb el `CSS.supports` del navegador |
 
@@ -530,21 +540,22 @@ Fases del BLUEPRINT §9.1:
 - [x] **Fase 1 — Nucli del llenguatge:** tokenitzador d'HTML, analitzador de CSS, arbre del codi font, ressaltat.
 - [x] **Fase 2 — Editor, previsualització i editor lliure.**
 - [x] **Fase 3 — Revisor de codi v1 i panell ⚠ Problemes** (35 regles fins al capítol 9, §2.6).
-      Queda per a més endavant: les regles que necessiten el document pintat (fase 4 i
-      capítols 4, 5, 10 i 11), les dels capítols 4–14 (amb cada capítol) i les correccions
-      ràpides (fase 6). L'arbre del codi font encara no entén `<circle />` dins d'`<svg>`.
+      Després s'hi han afegit les dels capítols 4–11; les dels capítols 4, 5, 10 i 11 que el
+      BLUEPRINT preveia sobre el document pintat s'han fet sobre el codi font (§2.6). Queden les
+      dels capítols 12–14 (amb cada capítol) i les correccions ràpides (fase 6). L'arbre del codi font encara no entén `<circle />` dins d'`<svg>`.
 - [x] **Fase 4 — Primer capítol complet** (esquelet del curs, progrés, comprovacions, capítol 1
       amb dos exercicis i solucions, tests del curs). Queda per a més endavant: exportar/importar
       el progrés i les activitats (fase 6), pantalla completa, glossari i la portada amb targetes
       (fase 7).
-- [ ] **Fase 5 — Continguts:** un capítol per PR. Fets: 1 a 10 (la part A sencera i els capítols 9 i 10). Els capítols 2 i 3 no han
+- [ ] **Fase 5 — Continguts:** un capítol per PR. Fets: 1 a 11 (la part A sencera i els capítols 9 a 11). Els capítols 2 i 3 no han
       necessitat regles noves; amb el 3, `html/list-structure` assenyala el text solt d'una llista a
       la seva línia. El 4 n'ha afegit sis (enllaços); el 5, sis més (imatges i atributs), a més de
       quatre imatges noves a `site/recursos/`; el 6, quatre (estructura de la pàgina); el 7, cinc
       (taules); el 8, dues (formularis), a més de `form-action 'none'` a la CSP; el 9, tres (CSS:
-      comentaris mal escrits, selectors d'elements que no existeixen i el `<link>`), i el 10, sis
-      (selectors i cascada, §2.6). Des del capítol 6, els exercicis són documents sencers (D3). Al 7, els
+      comentaris mal escrits, selectors d'elements que no existeixen i el `<link>`); el 10, sis
+      (selectors i cascada, §2.6), i l'11, quatre (colors, lletra i variables), més pistes a
+      `css/invalid-value`, el mòdul `lang/css-colors.js` i `valueIncludes` a `uses-css`. Des del capítol 6, els exercicis són documents sencers (D3). Al 7, els
       simuladors porten un `estils.css` de només lectura perquè es vegin les vores de les taules
-      (el CSS s'ensenya a la part B). Següent: capítol 11, «Colors, text i unitats».
+      (el CSS s'ensenya a la part B). Següent: capítol 12, «El model de caixa».
 - [ ] **Fase 6 — Activitats i eines:** Parsons, qüestionaris, 🌳 Arbre, exportar/importar el progrés.
 - [ ] **Fase 7 — Acabats:** portada amb progrés, glossari, accessibilitat, guia del professorat.

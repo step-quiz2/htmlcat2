@@ -74,6 +74,14 @@ const VALUE_HINTS = {
   'catalan-colour': ({ fix }) => `Els noms dels colors s'escriuen en anglès: ${fix}.`,
   comma: ({ fix }) => `Els decimals s'escriuen amb punt, no amb coma: ${fix}.`,
   unit: ({ fix }) => `Els números necessiten una unitat (px, em, rem, %…), per exemple ${fix}. Només el 0 pot anar sense.`,
+  'catalan-keyword': ({ fix }) => `Les paraules del CSS s'escriuen en anglès: ${fix}.`,
+  'unit-space': ({ fix }) => `Entre el número i la unitat no hi pot haver cap espai: ${fix}.`,
+  hash: ({ fix }) => `Els colors en hexadecimal comencen amb #: ${fix}.`,
+  hex: ({ hex, digits, letters }) => letters
+    ? `A «${hex}» hi ha lletres que no són xifres hexadecimals: només valen les xifres del 0 al 9 i les lletres de la a a la f.`
+    : `Un color hexadecimal té 3 o 6 xifres després del # (#f60 o #ff6600), i «${hex}» en té ${digits}.`,
+  var: ({ fix }) => `Per fer servir una variable, escriu-la dins de var(): ${fix}.`,
+  'var-dashes': ({ fix }) => `Els noms de les variables comencen amb dos guions: ${fix}.`,
   generic: () => 'El navegador ignora tota la declaració. Revisa com s\'escriu el valor.',
 };
 
@@ -489,6 +497,30 @@ export const MESSAGES = {
   'css/presentational-class': ({ name }) => ({
     text: `La classe «${name}» diu com es veu l'element, no què és.`,
     hint: 'Posa noms que expliquin què és: .avis, .preu, .destacat. Si demà els avisos han de ser blaus, una classe .vermell faria mentir el codi.',
+  }),
+
+  // ── CSS: colors, lletra i variables ──
+  'css/generic-font-family': ({ family, value, suggestion, quoted, fix }) => (quoted ? {
+    text: `"${family}" entre cometes no és la família genèrica, sinó el nom d'una lletra que no existeix.`,
+    hint: `Les famílies genèriques (serif, sans-serif, monospace) s'escriuen sense cometes: font-family: ${fix};`,
+  } : {
+    text: `Falta una família genèrica al final de font-family: si l'ordinador no té ${family}, no se sap quina lletra sortirà.`,
+    hint: `Cada ordinador té lletres diferents, i si no té la que demanes en fa servir una altra qualsevol. Acaba la llista amb una família genèrica (serif, sans-serif o monospace), que sempre existeix: font-family: ${value}, ${suggestion};`,
+  }),
+  'css/undefined-variable': ({ name, suggestion }) => ({
+    text: `La variable ${name} no està definida.`,
+    hint: (suggestion
+      ? `Potser volies dir ${suggestion}? El nom ha de ser exactament igual on la defineixes i on la fas servir: les majúscules i els guions compten. `
+      : `Defineix-la a :root, per exemple: :root { ${name}: #2a9d8f; }. `) +
+      'Compte: amb una variable que no existeix, el navegador no torna al valor d\'abans, sinó que la propietat queda com si no li haguessis donat cap valor.',
+  }),
+  'css/low-contrast': ({ ratio, color, background }) => ({
+    text: `El text (${color}) i el fons (${background}) tenen poc contrast: ${ratio}:1. Costa de llegir.`,
+    hint: 'Perquè el text es llegeixi bé, el contrast ha de ser com a mínim 4,5:1 (va de 1:1, el mateix color, a 21:1, negre sobre blanc). Fes el text més fosc o el fons més clar, o al revés.',
+  }),
+  'css/repeated-color': ({ color, count, firstLine }) => ({
+    text: `El color ${color} surt ${count} vegades en aquest full d'estil (la primera, a la línia ${firstLine}).`,
+    hint: `Guarda'l en una variable, per exemple :root { --color-principal: ${color}; }, i fes servir var(--color-principal) a tot arreu. Si un dia el vols canviar, només l'hauràs de canviar en un lloc.`,
   }),
 
   // ── CSS: codi net ──

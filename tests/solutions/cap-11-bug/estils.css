@@ -1,0 +1,31 @@
+/* Estils del concert */
+
+:root {
+  --color-principal: #1d3557;
+  --color-destacat: #c1121f;
+}
+
+body {
+  font-family: Georgia, serif;
+  line-height: 1.5;
+}
+
+h1 {
+  color: var(--color-principal);
+  text-align: center;
+}
+
+.data {
+  color: var(--color-destacat);
+  font-weight: bold;
+}
+
+.avis {
+  color: var(--color-principal);
+  background-color: #ffd166;
+}
+
+footer {
+  color: white;
+  background-color: var(--color-principal);
+}
