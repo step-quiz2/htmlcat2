@@ -5,8 +5,8 @@
 // Ús (des de l'arrel del projecte, només cal Node 22):
 //     node tests/course-static.mjs
 //
-// Sense dependències. Revisa els fitxers de site/ i surt amb codi 1
-// si troba algun problema:
+// Sense dependències. Revisa els fitxers de site/ (i l'index.html de
+// l'arrel, el simulador) i surt amb codi 1 si troba algun problema:
 //   1. cada pàgina HTML té <!DOCTYPE html>, <html lang="ca">,
 //      <meta charset="UTF-8"> i <title>;
 //   2. cap pàgina té atributs style="" ni gestors d'esdeveniments (on…="");
@@ -214,6 +214,14 @@ for (const file of siteFiles.filter((f) => extname(f) === '.html')) {
       for (const name of solution.filter((n) => !names.has(n))) problems.push(`${where(sim)}: la solució té ${name}, que el simulador no té`);
     }
   }
+}
+
+// ── index.html de l'arrel (el simulador, com a PyCat: docs/STATE.md §3) ──
+const rootIndex = join(ROOT, 'index.html');
+if (existsSync(rootIndex)) {
+  const text = readFileSync(rootIndex, 'utf8');
+  if (text.includes('\t')) report(rootIndex, 'conté tabulacions (fes servir 2 espais)');
+  checkHtml(rootIndex, text);
 }
 
 // ── Llicència coherent fora de site/ ──

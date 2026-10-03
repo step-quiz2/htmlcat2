@@ -33,6 +33,7 @@ exercicis amb «✓ Comprova» i el panell ⚠ Problemes, i l'editor lliure a
 
 ```
 README.md              Presentació del projecte (per a persones)
+index.html             El simulador d'HTML i CSS, a l'arrel com a PyCat (fa servir els recursos de site/)
 CLAUDE.md              Normes per a les IA que hi treballin
 LICENSE                Text de les dues llicències (CC BY-NC-SA 4.0 i MIT)
 LLICENCIA.md           Explicació de la llicència en català
@@ -376,7 +377,7 @@ motiu; si se'n canvia alguna, s'anota aquí amb la data i el motiu.
 |---|---|---|
 | 2026-10-02 | HTML, CSS i JS «vanilla», sense pas de compilació ni dependències en temps d'execució | Coherència amb la sèrie; es pot provar amb `python3 -m http.server` |
 | 2026-10-02 | Mòduls ES natius, sense objecte global | Dependències explícites; els mòduls purs es poden provar amb Node |
-| 2026-10-02 | Només es publica `site/` | Les solucions i els tests no han de ser públics |
+| 2026-10-02 | Només es publica `site/` *(canviat el 2026-10-03: vegeu més avall)* | Les solucions i els tests no han de ser públics |
 | 2026-10-02 | Previsualització en un `<iframe sandbox="allow-same-origin">` amb `srcdoc`, mai amb `allow-scripts` | El codi de l'alumne no pot executar res i el curs pot llegir el resultat (comprovat a Chromium, BLUEPRINT apèndix A) |
 | 2026-10-02 | Codi inicial dels exercicis en blocs `<script type="text/plain">` | Conserven el codi exactament; `<template>` i els atributs no ho fan |
 | 2026-10-02 | Llicència: contingut CC BY-NC-SA 4.0, codi MIT (igual que PyCat) | Coherència amb la sèrie |
@@ -392,6 +393,7 @@ motiu; si se'n canvia alguna, s'anota aquí amb la data i el motiu.
 | 2026-10-02 | Panell ⚠ Problemes: els errors es mostren tots; els avisos repetits s'agrupen | Cada error és diferent i important; els avisos d'estil (sobretot d'indentació) podrien omplir la llista |
 | 2026-10-03 | Als exercicis, el panell té pestanyes (⚠ Problemes / ✓ Comprovacions); «✓ Comprova» obre la segona | Les dues llistes no hi caben alhora en un mòbil |
 | 2026-10-03 | La comprovació `lint` fa servir el revisor estàtic (§2.6); `uses-css` també mira els `<style>` | Encara no hi ha regles que necessitin el document pintat |
+| 2026-10-03 | A l'arrel del repositori hi ha `index.html`: el simulador d'HTML i CSS, com a PyCat (substitueix D1 per a l'adreça `/`). Fa servir els CSS i el JS de `site/`, que continua sent on és el web | Ho ha decidit el propietari. Conseqüències acceptades: Cloudflare publica tot el repositori, de manera que els tests, les solucions dels exercicis (`tests/solutions/`) i la documentació són públics, i `site/_headers` i `site/404.html` no s'apliquen. El test estàtic revisa també aquest fitxer |
 | 2026-10-02 | El repositori definitiu és `step-quiz2/htmlcat2` | Ho ha confirmat el propietari. L'historial de les fases 0–2 (PR #1–#4) és a l'antic repositori; el codi es va copiar aquí amb una pujada pel web, que va perdre `.github/`, `.editorconfig` i `.gitignore` (restaurats amb Git el mateix dia) |
 
 ### Decisions confirmades pel propietari el 2026-10-03
@@ -445,10 +447,11 @@ cada PR. Configuració esperada: *framework preset* «None», ordre de compilaci
 buida, carpeta de sortida `site`. També pendent: comprovar que `/tests/` i
 `/docs/` donen la pàgina 404 i afegir el domini `htmlcat.step-quiz.net` (D8).
 
-La portada és `site/index.html`: **a l'arrel del repositori no hi ha cap
-`index.html`, expressament**. Si el web publicat no té portada, és que la
-carpeta de sortida de Cloudflare no és `site` (i aleshores també es publicarien
-els tests, les solucions i la documentació: BLUEPRINT A16).
+Des del 2026-10-03 (decisió del propietari, §3), a l'arrel del repositori hi
+ha `index.html`, el simulador, com a PyCat; la portada del curs és
+`site/index.html` i els capítols, `site/curs/`. Cloudflare publica l'arrel del
+repositori: tot el que s'hi puja és públic (també `tests/solutions/` i `docs/`).
+Mai no s'hi han de posar dades privades.
 
 `site/_headers` afegeix `X-Content-Type-Options`, `Referrer-Policy` i
 `Permissions-Policy`. **No** s'hi han de posar COOP/COEP (BLUEPRINT §3.2, A15)

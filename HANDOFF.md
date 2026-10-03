@@ -79,6 +79,11 @@ progress export/import (phase 6).
 
 ## 6. Lessons learned in phases 0–2 (avoid repeating)
 
+- **The root `index.html` is the owner's** (the free simulator, like PyCat; STATE §3). The owner
+  created it through the GitHub web editor by pasting a whole shell heredoc, so the file began
+  with `cat > index.html <<'EOF'` and ended with `EOF`. When you give the owner a file to paste,
+  give the file content and the shell command separately. `course-static.mjs` now checks it.
+
 - **Never move or update files through the GitHub web UI** (BLUEPRINT A2). Moving the
   project to `htmlcat2` by web upload silently dropped `.github/workflows/ci.yml`,
   `.editorconfig` and `.gitignore`, so CI stopped running and STATE.md was wrong.
