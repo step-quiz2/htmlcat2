@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capítol 6 — Estructura de la pàgina | HTMLCat</title>
+  <link rel="icon" href="../img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/course.css">
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link rel="stylesheet" href="../css/simulador.css">
+  <script type="module" src="../js/pages/course-page.js"></script>
+</head>
+<body data-pagina="capitol" data-num="6">
+
+<main class="curs-content">
+  <header class="chapter-header">
+    <h1>Estructura de la pàgina</h1>
+    <p class="chapter-lead">En acabar aquest capítol sabràs dividir una pàgina en parts amb significat (la capçalera, el menú, el contingut principal, el peu…), com fan totes les webs, abans de pensar en com es veuen.</p>
+  </header>
+
+  <section class="chapter-section">
+    <h2>Les parts d'una pàgina</h2>
+    <p>
+      Mira qualsevol web: a dalt hi ha el nom i un menú; al mig, el contingut; a baix de tot, un peu amb l'adreça o el
+      contacte. L'HTML té un element per a cadascuna d'aquestes parts:
+    </p>
+    <pre class="code-example" tabindex="0">┌────────────────────────┐
+│ header                 │
+│   h1, nav              │
+├────────────────────────┤
+│ main                   │
+│                        │
+├────────────────────────┤
+│ footer                 │
+└────────────────────────┘</pre>
+    <p>A partir d'aquest capítol escriuràs sempre la pàgina sencera, amb l'esquelet del capítol 1:</p>
+    <div class="simulador" data-id="c06-parts" data-mode="document" data-height="600">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>Refugi de gats Mixa</title>
+          </head>
+          <body>
+            <header>
+              <h1>Refugi de gats Mixa</h1>
+              <nav>
+                <ul>
+                  <li><a href="index.html">Inici</a></li>
+                  <li><a href="gats.html">Els gats</a></li>
+                  <li><a href="contacte.html">Contacte</a></li>
+                </ul>
+              </nav>
+            </header>
+            <main>
+              <h2>Benvinguts!</h2>
+              <p>Cuidem els gats abandonats del barri fins que troben una casa.</p>
+              <p>Vine a conèixer-los: obrim de dilluns a dissabte, de 10 a 14 h.</p>
+            </main>
+            <footer>
+              <p>Refugi de gats Mixa · Carrer del Parc, 21</p>
+            </footer>
+          </body>
+        </html>
+      </script>
+    </div>
+    <ul>
+      <li><code>&lt;header&gt;</code>: la <strong>capçalera</strong> que es veu a dalt de la pàgina, amb el nom del web, el logotip i, sovint, el menú.</li>
+      <li><code>&lt;nav&gt;</code> (de l'anglès <em>navigation</em>): el <strong>menú</strong>, amb els enllaços principals per moure's pel web.</li>
+      <li><code>&lt;main&gt;</code>: el <strong>contingut principal</strong>, el que fa diferent aquesta pàgina de les altres del web. N'hi ha un de sol, i va directament dins del <code>&lt;body&gt;</code>.</li>
+      <li><code>&lt;footer&gt;</code>: el <strong>peu</strong>, amb l'adreça, el contacte, qui ha fet la pàgina…</li>
+    </ul>
+    <p>
+      Fixa't en el resultat: es veu igual que si aquests elements no hi fossin! No canvien l'aspecte de la pàgina: diuen
+      <strong>què és</strong> cada part. Com es veu, ho decidiràs amb CSS a la part B del curs. Mentrestant, ja hi surten
+      guanyant els lectors de pantalla (poden saltar directament al menú o al contingut principal), els cercadors i tu
+      mateix, que entendràs el teu codi d'un cop d'ull.
+    </p>
+    <p class="nota">
+      Compte amb els noms. <code>&lt;head&gt;</code> (capítol 1) és la informació <em>sobre</em> la pàgina, que no es
+      veu, i n'hi ha un de sol, abans del <code>&lt;body&gt;</code>. <code>&lt;header&gt;</code> és la capçalera que es
+      veu, dins del <code>&lt;body&gt;</code>. En català totes dues es diuen «capçalera»: per això és tan fàcil confondre-les.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Articles, seccions i notes al marge</h2>
+    <p>Dins del contingut principal també hi ha parts amb significat:</p>
+    <div class="simulador" data-id="c06-noticies" data-height="520">
+      <script type="text/plain" data-file="index.html">
+        <main>
+          <h1>Notícies del refugi</h1>
+          <article>
+            <h2>La Mixa ja té casa!</h2>
+            <p>Després de tres mesos al refugi, una família de Banyoles ha adoptat la Mixa.</p>
+          </article>
+          <article>
+            <h2>Necessitem mantes</h2>
+            <p>Arriba el fred: si tens mantes velles, porta-les al refugi.</p>
+          </article>
+          <aside>
+            <h2>Sabies que…?</h2>
+            <p>Els gats dormen entre 12 i 16 hores al dia.</p>
+          </aside>
+        </main>
+      </script>
+    </div>
+    <ul>
+      <li><code>&lt;article&gt;</code>: un contingut que <strong>s'entén tot sol</strong> i que es podria publicar a part: una notícia, una entrada d'un blog, un comentari, la fitxa d'un producte.</li>
+      <li><code>&lt;aside&gt;</code> («a part»): contingut relacionat però <strong>secundari</strong>, com una nota al marge: un «Sabies que…?», enllaços relacionats…</li>
+    </ul>
+    <p>I quan una cosa té diverses parts, cadascuna amb el seu tema, cada part és una <code>&lt;section&gt;</code>:</p>
+    <div class="simulador" data-id="c06-seccions" data-height="480">
+      <script type="text/plain" data-file="index.html">
+        <article>
+          <h2>Com cuidar un gat</h2>
+          <section>
+            <h3>El menjar</h3>
+            <p>Pinso de qualitat i aigua fresca cada dia.</p>
+          </section>
+          <section>
+            <h3>El joc</h3>
+            <p>Una estona de joc cada dia el manté actiu i content.</p>
+          </section>
+        </article>
+      </script>
+    </div>
+    <p>Cada <code>&lt;section&gt;</code> i cada <code>&lt;article&gt;</code> comencen amb el seu títol, i els nivells dels títols van en ordre (<code>&lt;h2&gt;</code>, i a dins, <code>&lt;h3&gt;</code>).</p>
+    <p>Quin element fas servir? Pregunta-t'ho així:</p>
+    <ul>
+      <li>S'entén tot sol i es podria publicar a part? → <code>&lt;article&gt;</code>.</li>
+      <li>És una part d'una cosa més gran, amb el seu títol? → <code>&lt;section&gt;</code>.</li>
+      <li>És secundari, com una nota al marge? → <code>&lt;aside&gt;</code>.</li>
+      <li>Res d'això, i només vols agrupar coses? → <code>&lt;div&gt;</code>, que veuràs ara mateix.</li>
+    </ul>
+  </section>
+
+  <section class="chapter-section">
+    <h2>I el div?</h2>
+    <p>
+      <code>&lt;div&gt;</code> (de <em>division</em>) és una caixa sense significat: agrupa elements, però no diu què són.
+      Abans que existissin <code>&lt;header&gt;</code>, <code>&lt;main&gt;</code> i companyia, les pàgines eren plenes de
+      <code>&lt;div&gt;</code>. Compara aquestes dues versions de la mateixa pàgina:
+    </p>
+    <pre class="code-example" data-lang="html" tabindex="0">&lt;div class="capcalera"&gt;
+  &lt;h1&gt;Refugi de gats Mixa&lt;/h1&gt;
+&lt;/div&gt;
+&lt;div class="contingut"&gt;
+  &lt;p&gt;Benvinguts!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="peu"&gt;
+  &lt;p&gt;Carrer del Parc, 21&lt;/p&gt;
+&lt;/div&gt;</pre>
+    <pre class="code-example" data-lang="html" tabindex="0">&lt;header&gt;
+  &lt;h1&gt;Refugi de gats Mixa&lt;/h1&gt;
+&lt;/header&gt;
+&lt;main&gt;
+  &lt;p&gt;Benvinguts!&lt;/p&gt;
+&lt;/main&gt;
+&lt;footer&gt;
+  &lt;p&gt;Carrer del Parc, 21&lt;/p&gt;
+&lt;/footer&gt;</pre>
+    <p>
+      Es veuen igual, però la segona diu què és cada part, i ho entén tothom: el navegador, els lectors de pantalla, els
+      cercadors i qualsevol persona que llegeixi el codi. Fes servir <code>&lt;div&gt;</code> només quan cap altre element
+      no hi encaixa: normalment, per agrupar coses i donar-los estil amb CSS.
+    </p>
+    <aside class="codi-net">
+      <p class="codi-net__titol">🧹 Codi net: l'estructura, abans de l'estil</p>
+      <ul>
+        <li>Primer decideix què és cada part (<code>header</code>, <code>nav</code>, <code>main</code>, <code>footer</code>…); com es veu, ja ho decidiràs amb CSS.</li>
+        <li>Un sol <code>&lt;main&gt;</code> per pàgina, directament dins del <code>&lt;body&gt;</code>.</li>
+        <li>Cada <code>&lt;section&gt;</code> i cada <code>&lt;article&gt;</code> comencen amb un títol.</li>
+        <li><code>&lt;div&gt;</code>, només quan cap altre element no hi encaixa.</li>
+        <li>La indentació mostra l'estructura: cada part, 2 espais més a la dreta que la que la conté.</li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Errors típics</h2>
+    <p>Aquests exemples tenen errors. Mira el resultat i després llegeix el panell ⚠ Problemes.</p>
+
+    <h3>&lt;head&gt; en lloc de &lt;header&gt;</h3>
+    <div class="simulador" data-mode="document" data-readonly data-height="520">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>Refugi de gats Mixa</title>
+          </head>
+          <body>
+            <head>
+              <h1>Refugi de gats Mixa</h1>
+            </head>
+            <main>
+              <p>Benvinguts al refugi!</p>
+            </main>
+          </body>
+        </html>
+      </script>
+    </div>
+    <p>
+      El títol es veu, però el navegador ha llençat aquest segon <code>&lt;head&gt;</code> sense dir res: el
+      <code>&lt;h1&gt;</code> ha quedat solt dins del <code>&lt;body&gt;</code>. La capçalera que es veu és
+      <code>&lt;header&gt;</code>.
+    </p>
+
+    <h3>Dos main</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <main>
+          <h1>Refugi de gats Mixa</h1>
+          <p>Benvinguts!</p>
+        </main>
+        <main>
+          <h2>Horari</h2>
+          <p>De dilluns a dissabte, de 10 a 14 h.</p>
+        </main>
+      </script>
+    </div>
+    <p>Una pàgina només té un contingut principal. Posa-ho tot dins del mateix <code>&lt;main&gt;</code> i, si vols separar les parts, cadascuna en una <code>&lt;section&gt;</code>.</p>
+
+    <h3>Un div que és un menú</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <div class="menu">
+          <a href="index.html">Inici</a> · <a href="gats.html">Els gats</a>
+        </div>
+      </script>
+    </div>
+    <p>Funciona i es veu bé, però és un menú, i per als menús hi ha <code>&lt;nav&gt;</code>.</p>
+
+    <h3>Una section sense títol</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <section>
+          <p>Obrim de dilluns a dissabte, de 10 a 14 h.</p>
+        </section>
+      </script>
+    </div>
+    <p>Una <code>&lt;section&gt;</code> és una part amb el seu tema, i el tema el diu el títol. Posa-hi un <code>&lt;h2&gt;</code> o, si només volies agrupar, fes servir <code>&lt;div&gt;</code>.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Exercici: el blog de la classe</h2>
+    <p>
+      La pàgina del blog de 3r B té tot el contingut, però cap estructura. Afegeix-l'hi, sense canviar els textos:
+    </p>
+    <ul>
+      <li>una capçalera <code>&lt;header&gt;</code> amb el títol i, a dins, el menú en un <code>&lt;nav&gt;</code>;</li>
+      <li>un <code>&lt;main&gt;</code> amb cada entrada del blog dins d'un <code>&lt;article&gt;</code>, i el «Sabies que…?» dins d'un <code>&lt;aside&gt;</code>;</li>
+      <li>un peu <code>&lt;footer&gt;</code> amb l'última línia;</li>
+      <li>cap error ni cap avís al panell ⚠ Problemes (vigila la indentació).</li>
+    </ul>
+    <p class="nota">
+      Truc: selecciona unes quantes línies i prem Tab per indentar-les totes alhora (Maj+Tab les desindenta).
+    </p>
+    <p>Quan acabis, prem <strong>✓ Comprova</strong>.</p>
+    <div class="simulador" data-id="c06-exercici" data-goal-id="cap-6-ex" data-mode="document" data-height="600">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>El blog de 3r B</title>
+          </head>
+          <body>
+            <h1>El blog de 3r B</h1>
+            <ul>
+              <li><a href="index.html">Inici</a></li>
+              <li><a href="excursions.html">Excursions</a></li>
+              <li><a href="projectes.html">Projectes</a></li>
+            </ul>
+            <h2>L'excursió al delta de l'Ebre</h2>
+            <p>Dimarts vam anar a veure els flamencs. N'hi havia centenars!</p>
+            <h2>El projecte de robòtica</h2>
+            <p>Hem construït un robot que segueix una línia negra.</p>
+            <h2>Sabies que…?</h2>
+            <p>Els flamencs són rosats pel que mengen: unes gambetes petitíssimes.</p>
+            <p>Fet per 3r B de l'Institut del Parc</p>
+          </body>
+        </html>
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "exists", "selector": "body > header h1",
+            "msg": "Hi ha una capçalera <header> amb el títol <h1>." },
+          { "type": "count", "selector": "header nav a", "min": 3,
+            "msg": "Els enllaços del menú són dins d'un <nav>, a la capçalera." },
+          { "type": "count", "selector": "body > main", "eq": 1,
+            "msg": "Hi ha un <main>, directament dins del <body>." },
+          { "type": "count", "selector": "main article", "min": 2,
+            "msg": "Cada entrada del blog és un <article> dins del <main>." },
+          { "type": "count", "selector": "article > h2", "min": 2,
+            "msg": "Cada <article> comença amb el seu títol <h2>." },
+          { "type": "text", "selector": "aside", "includes": "Sabies que",
+            "msg": "El «Sabies que…?» és dins d'un <aside>." },
+          { "type": "text", "selector": "body > footer", "includes": "3r B",
+            "msg": "L'última línia és dins d'un peu <footer>." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís (com una indentació que no mostra l'estructura)." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Troba l'error</h2>
+    <p>
+      La pàgina de la botiga de bicis té quatre problemes d'estructura. Arregla'ls amb l'ajuda del panell ⚠ Problemes.
+      El títol que li falta a la secció del taller l'has de triar tu (per exemple, «El taller»). Quan acabis, prem
+      <strong>✓ Comprova</strong>.
+    </p>
+    <div class="simulador" data-id="c06-troba-error" data-goal-id="cap-6-bug" data-mode="document" data-height="600">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>Bicis Roda</title>
+          </head>
+          <body>
+            <head>
+              <h1>Bicis Roda</h1>
+            </head>
+            <div class="menu">
+              <a href="bicis.html">Bicis</a> · <a href="taller.html">Taller</a>
+            </div>
+            <main>
+              <section>
+                <p>Reparem qualsevol bici en 24 hores.</p>
+              </section>
+            </main>
+            <main>
+              <h2>Horari</h2>
+              <p>De dilluns a dissabte, de 9 a 20 h.</p>
+            </main>
+            <footer>
+              <p>Bicis Roda · Carrer Major, 5</p>
+            </footer>
+          </body>
+        </html>
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "exists", "selector": "body > header h1",
+            "msg": "El títol és dins d'una capçalera <header> (no <head>)." },
+          { "type": "count", "selector": "nav a", "min": 2,
+            "msg": "Els enllaços del menú són dins d'un <nav>." },
+          { "type": "count", "selector": "main", "eq": 1,
+            "msg": "Només hi ha un <main>." },
+          { "type": "text", "selector": "main", "includes": "Horari",
+            "msg": "L'horari és dins del <main>." },
+          { "type": "count", "selector": "section > h2", "min": 1,
+            "msg": "La secció del taller té un títol." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Resum</h2>
+    <div class="resum">
+      <ul>
+        <li>Les parts d'una pàgina: <code>&lt;header&gt;</code> (la capçalera), <code>&lt;nav&gt;</code> (el menú), <code>&lt;main&gt;</code> (el contingut principal, només un) i <code>&lt;footer&gt;</code> (el peu).</li>
+        <li><code>&lt;article&gt;</code> s'entén tot sol; <code>&lt;section&gt;</code> és una part d'una cosa més gran, amb el seu títol; <code>&lt;aside&gt;</code> és secundari, com una nota al marge.</li>
+        <li><code>&lt;div&gt;</code> és una caixa sense significat: fes-la servir només quan cap altre element no hi encaixa.</li>
+        <li>Aquests elements no canvien l'aspecte de la pàgina: diuen què és cada part. L'aspecte, amb CSS.</li>
+        <li><code>&lt;head&gt;</code> és la informació sobre la pàgina; <code>&lt;header&gt;</code>, la capçalera que es veu.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>
