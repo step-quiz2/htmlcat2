@@ -7,6 +7,20 @@ import { lintCase, rulesOf, css, doc, documentCase } from './lint-helpers.mjs';
 
 const GOOD_CSS = 'h1 {\n  color: red;\n  font-size: 2em;\n}\n';
 
+/** Un formulari ben fet: cada camp amb la seva etiqueta (de les dues maneres) i el seu name. */
+const FORM = `<form method="post">
+  <label for="nom">Nom</label>
+  <input type="text" id="nom" name="nom" required>
+  <label>Curs
+    <select name="curs">
+      <option value="3">3r</option>
+    </select>
+  </label>
+  <input type="hidden" name="origen" value="web">
+  <button type="submit">Envia</button>
+</form>
+`;
+
 /** Una taula ben feta: títol, capçaleres de columna i de fila, files completes. */
 const TABLE = `<table>
   <caption>Els gats del refugi</caption>
@@ -79,6 +93,9 @@ const CASES = {
   'html/table-headers': ['<table>\n  <tr>\n    <td>A</td>\n  </tr>\n</table>\n', TABLE],
   'html/invalid-attribute-value': ['<table>\n  <tr>\n    <th scope="column">A</th>\n  </tr>\n</table>\n', TABLE],
   'html/th-scope': ['<table>\n  <tr>\n    <th>A</th>\n  </tr>\n</table>\n', TABLE],
+  // HTML: formularis
+  'html/control-label': ['<form>\n  <input type="text" name="nom">\n</form>\n', FORM],
+  'html/control-name': ['<form>\n  <label for="nom">Nom</label>\n  <input type="text" id="nom">\n</form>\n', FORM],
   'html/inline-style': ['<p style="color: red">x</p>\n', '<p class="avis">x</p>\n'],
   // CSS: errors
   'css/unbalanced-braces': [css('h1 {\n  color: red;\n'), css(GOOD_CSS)],
@@ -340,4 +357,38 @@ test('taules: detalls de les regles del capítol 7', () => {
   assert.equal(first(table(row(['<th>a</th>'])), 'html/th-scope').severity, 'info');
   // Abans del capítol 7, cap d'aquestes regles
   assert.deepEqual(rulesOf({ files: { 'index.html': '<table>\n  <td>a</td>\n  Hola\n</table>\n<tr>x</tr>\n' }, chapter: 6 }), []);
+});
+
+test('formularis: detalls de les regles del capítol 8', () => {
+  const labels = (src) => lintCase(src).filter((p) => p.rule === 'html/control-label').map((p) => p.data.kind);
+  const form = (body) => `<form>\n${body}</form>\n`;
+  // Etiqueta amb for, embolcallant el camp, o aria-label; els botons i els camps ocults no en necessiten
+  assert.deepEqual(labels(form('  <label>Edat <input type="number" name="edat"></label>\n')), []);
+  assert.deepEqual(labels(form('  <input type="search" name="q" aria-label="Cerca">\n')), []);
+  assert.deepEqual(labels(form('  <input type="submit">\n  <input type="hidden" name="a">\n  <button>Envia</button>\n')), []);
+  // Només placeholder; textarea i select sense etiqueta
+  assert.deepEqual(labels(form('  <input type="email" name="c" placeholder="Correu">\n')), ['placeholder']);
+  assert.deepEqual(labels(form('  <textarea name="m"></textarea>\n  <select name="s"></select>\n')), ['missing', 'missing']);
+  // for que no apunta enlloc (amb suggeriment) o que apunta a un element que no és un camp
+  const wrongFor = first(form('  <label for="correu">Correu</label>\n  <input type="email" id="corre" name="c">\n'), 'html/control-label');
+  assert.deepEqual([wrongFor.data.kind, wrongFor.data.suggestion], ['for-missing', 'corre']);
+  assert.deepEqual(labels(form('  <label for="t">Títol</label>\n  <p id="t">x</p>\n')), ['for-not-control']);
+  // Amb for, el camp de dins no queda etiquetat (el navegador fa cas del for)
+  assert.deepEqual(labels(form('  <label for="x">A <input type="text" name="a"></label>\n  <input type="text" id="x" name="b">\n')), ['missing']);
+  // name: només dins d'un formulari; els botons no en necessiten; els botons d'opció tenen pista pròpia
+  const names = (src) => lintCase(src).filter((p) => p.rule === 'html/control-name').map((p) => p.data.radio);
+  assert.deepEqual(names('<label for="a">A</label>\n<input type="text" id="a">\n'), []);
+  assert.deepEqual(names(form('  <input type="submit">\n  <button>Envia</button>\n')), []);
+  assert.deepEqual(names(form('  <input type="radio" id="r" aria-label="Sí">\n  <input type="hidden">\n')), [true, false]);
+  // Valors de type i method: majúscules, confusions habituals, i suggeriments que l'atribut admet
+  const value = (src) => first(src, 'html/invalid-attribute-value')?.data;
+  assert.equal(value('<form method="POST">\n</form>\n'), undefined);
+  assert.equal(value('<input type="EMAIL" aria-label="c">\n'), undefined);
+  assert.equal(value('<input type="data" aria-label="d">\n').suggestion, 'date');
+  assert.equal(value('<input type="contrasenya" aria-label="p">\n').suggestion, 'password');
+  assert.equal(value('<button type="enviar">Envia</button>\n').suggestion, 'submit');
+  assert.equal(value('<button type="mail">Envia</button>\n').suggestion, null);
+  assert.match(first('<input type="txt" aria-label="t">\n', 'html/invalid-attribute-value').hint, /camp de text normal/);
+  // Abans del capítol 8, cap d'aquestes regles (els valors de type ja es miren des del 7)
+  assert.deepEqual(rulesOf({ files: { 'index.html': '<form>\n  <input type="text">\n</form>\n' }, chapter: 7 }), []);
 });
