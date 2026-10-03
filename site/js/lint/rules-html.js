@@ -66,6 +66,14 @@ const firstStartTag = (tokens, name) => tokens.find((t) => t.type === 'startTag'
 
 const attrOf = (tag, name) => tag.attrs.find((a) => a.name === name);
 
+// Un text sense els espais i salts de línia dels extrems (perquè el problema
+// s'assenyali a la línia on hi ha el text, no a la de l'etiqueta d'abans)
+function trimmedRange(src, token) {
+  const text = src.slice(token.start, token.end);
+  const start = token.start + text.search(/\S/);
+  return { start, end: start + text.trim().length };
+}
+
 // On es diu que falta alguna cosa del <head>: al nom del <head>, o del <html>,
 // o al principi del codi
 function headAnchor(tokens) {
@@ -315,7 +323,7 @@ const listStructure = {
         if (isElement(child) && child.name !== 'li' && child.name !== 'template' && child.name !== 'script') {
           report(nameRange(child.startTag), { kind: 'not-li', tag: child.name, list: el.name });
         } else if (child.type === 'text' && !isBlankText(ctx.src, child)) {
-          report(child.token, { kind: 'text', list: el.name });
+          report(trimmedRange(ctx.src, child.token), { kind: 'text', list: el.name });
         }
       }
     }

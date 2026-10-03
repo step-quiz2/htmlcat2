@@ -152,6 +152,9 @@ test('html/list-structure: text i elements dins de la llista', () => {
   const kinds = lintCase('<ul>\n  text\n  <p>x</p>\n  <li>ok</li>\n</ul>\n')
     .filter((p) => p.rule === 'html/list-structure').map((p) => p.data.kind);
   assert.deepEqual(kinds, ['text', 'not-li']);
+  // El text solt s'assenyala a la seva línia, no a la del <ul>
+  const text = lintCase('<ul>\n  Coses que he de comprar:\n  <li>Pomes</li>\n</ul>\n').find((p) => p.data.kind === 'text');
+  assert.deepEqual([text.line, text.col], [2, 3]);
   assert.ok(!rulesOf('<ol>\n  <li>a\n    <ul>\n      <li>b</li>\n    </ul>\n  </li>\n</ol>\n').includes('html/list-structure'));
 });
 
