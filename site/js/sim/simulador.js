@@ -15,12 +15,17 @@
 //
 // Atributs: data-id (obligatori si és editable: clau per desar el codi),
 // data-mode (fragment | document), data-readonly (tot l'exemple),
-// data-forms (permet formularis). Les comprovacions (data-goal-id)
-// arribaran a la fase 4.
+// data-forms (permet formularis), data-height (alçada en px),
+// data-goal-id (exercici validat, amb un <script type="application/json"
+// data-checks> a dins: docs/STATE.md §2.7).
 //
 // Sota l'editor i el resultat, el panell ⚠ Problemes (sim/problems-panel.js)
 // mostra el que troba el revisor de codi (lint/lint.js) quan l'alumne
 // s'atura d'escriure, i les línies amb problemes es marquen a l'editor.
+// Els exercicis tenen, a més, el botó «✓ Comprova» i el panell
+// ✓ Comprovacions (sim/checks-panel.js): les comprovacions s'avaluen en
+// un iframe ocult (sim/check-frame.js) i, si se superen totes, l'exercici
+// queda superat (course/progress.js).
 //
 // API pública:
 //   mountSimulator(el, { fileActions, chapter }) → { getFiles() }
@@ -36,7 +41,12 @@ import { createEditor } from '../editor/editor.js';
 import { buildSrcdoc } from '../preview/srcdoc.js';
 import { createPreview } from '../preview/preview.js';
 import { lintStatic } from '../lint/lint.js';
+import { runChecks } from '../checks/checks.js';
+import { isGoalCompleted, saveGoalCompleted } from '../course/progress.js';
+import { createTabList } from './tabs.js';
 import { createProblemsPanel } from './problems-panel.js';
+import { createChecksPanel } from './checks-panel.js';
+import { renderForChecks } from './check-frame.js';
 
 const ASSET_BASE = new URL('../../recursos/', import.meta.url).href;
 const PREVIEW_DELAY = 300;
@@ -65,12 +75,27 @@ export function readDefinition(el) {
   }
   return {
     id: el.dataset.id || null,
+    goalId: el.dataset.goalId || null,
     mode: el.dataset.mode === 'document' ? 'document' : 'fragment',
     readonly: el.hasAttribute('data-readonly'),
     forms: el.hasAttribute('data-forms'),
+    height: Number(el.dataset.height) || null,
     files,
     readonlyFiles,
+    checks: readChecks(el),
   };
+}
+
+// Les comprovacions de l'exercici, o null (si el JSON està mal escrit,
+// l'exercici no es pot comprovar; el test estàtic ho detecta abans)
+function readChecks(el) {
+  const block = el.querySelector(':scope > script[type="application/json"][data-checks]');
+  if (!block) return null;
+  try {
+    return JSON.parse(block.textContent);
+  } catch {
+    return null;
+  }
 }
 
 function el(tag, className, text) {
@@ -107,15 +132,15 @@ export function mountSimulator(host, { fileActions = false, chapter = Infinity }
   const names = Object.keys(files);
   const idPrefix = `sim${++mountedCount}`;
 
+  const hasChecks = Boolean(def.goalId && Array.isArray(def.checks));
+  let checksPanel = null;   // només als exercicis (més avall)
+
   // ── Estructura ──
   host.textContent = '';
   host.classList.add('sim');
+  if (def.height) host.style.setProperty('--sim-height', `${def.height}px`);
   const toolbar = el('div', 'sim-toolbar');
-  const tablist = el('div', 'sim-tabs');
-  tablist.setAttribute('role', 'tablist');
-  tablist.setAttribute('aria-label', t('sim.files'));
   const actions = el('div', 'sim-actions');
-  toolbar.append(tablist, actions);
 
   const main = el('div', 'sim-main');
   const code = el('div', 'sim-code');
@@ -125,11 +150,11 @@ export function mountSimulator(host, { fileActions = false, chapter = Infinity }
   result.append(resultHeader, previewBox);
   main.append(code, result);
 
-  const problemsBox = el('div', 'sim-problems-box');
+  const panels = el('div', 'sim-panels');
   const message = el('div', 'sim-message');
   message.setAttribute('role', 'status');
   message.setAttribute('aria-live', 'polite');
-  host.append(toolbar, main, problemsBox, message);
+  host.append(toolbar, main, panels, message);
 
   // ── Missatges breus (enllaços, formularis, desar…) ──
   let messageTimer = null;
@@ -188,20 +213,22 @@ export function mountSimulator(host, { fileActions = false, chapter = Infinity }
   }
 
   // ── Pestanyes i editors (un editor per fitxer) ──
-  const tabs = [];
+  const filePanels = names.map(() => el('div', 'sim-code__panel'));
+  const fileTabs = createTabList({
+    label: t('sim.files'),
+    idPrefix: `${idPrefix}-file`,
+    tabClass: 'sim-tab',
+    items: names.map((name, i) => ({ label: name, panel: filePanels[i] })),
+  });
+  fileTabs.element.className = 'sim-tabs';
+  toolbar.append(fileTabs.element, actions);
+  code.append(...filePanels);
+  const selectTab = (index) => fileTabs.select(index);
+  const activeName = () => names[fileTabs.selected()];
+
   const editors = {};
   names.forEach((name, i) => {
-    const tab = button('sim-tab', name);
-    tab.id = `${idPrefix}-tab-${i}`;
-    tab.setAttribute('role', 'tab');
-    const panel = el('div', 'sim-code__panel');
-    panel.setAttribute('role', 'tabpanel');
-    panel.setAttribute('aria-labelledby', tab.id);
-    code.append(panel);
-    tablist.append(tab);
-    tabs.push({ tab, panel, name });
-
-    editors[name] = createEditor(panel, {
+    editors[name] = createEditor(filePanels[i], {
       value: files[name],
       lang: langOf(name),
       readonly: def.readonly || def.readonlyFiles.has(name),
@@ -212,33 +239,11 @@ export function mountSimulator(host, { fileActions = false, chapter = Infinity }
         previewTimer = setTimeout(updatePreview, PREVIEW_DELAY);
         clearTimeout(lintTimer);
         lintTimer = setTimeout(updateProblems, LINT_DELAY);
+        checksPanel?.stale();
         scheduleSave();
       },
     });
-    tab.addEventListener('click', () => selectTab(i));
   });
-
-  function selectTab(index, { focus = false } = {}) {
-    tabs.forEach(({ tab, panel }, i) => {
-      const active = i === index;
-      tab.setAttribute('aria-selected', String(active));
-      tab.tabIndex = active ? 0 : -1;
-      panel.hidden = !active;
-    });
-    if (focus) tabs[index].tab.focus();
-  }
-
-  // Fletxes per canviar de pestanya (patró ARIA de pestanyes)
-  tablist.addEventListener('keydown', (e) => {
-    const current = tabs.findIndex(({ tab }) => tab === document.activeElement);
-    if (current === -1) return;
-    const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
-    if (!step) return;
-    e.preventDefault();
-    selectTab((current + step + tabs.length) % tabs.length, { focus: true });
-  });
-
-  const activeName = () => tabs.find(({ tab }) => tab.getAttribute('aria-selected') === 'true')?.name;
 
   // ── Botons ──
   const editable = !def.readonly && names.some((name) => !def.readonlyFiles.has(name));
@@ -291,13 +296,56 @@ export function mountSimulator(host, { fileActions = false, chapter = Infinity }
     return [input, open, download];
   }
 
-  // ── Panell ⚠ Problemes i marques a l'editor ──
+  // ── Panells: ⚠ Problemes (i, als exercicis, ✓ Comprovacions) ──
+  const problemsBox = el('div', 'sim-panels__panel');
+  let panelTabs = null;
+  if (hasChecks) {
+    const checksBox = el('div', 'sim-panels__panel');
+    panelTabs = createTabList({
+      label: t('sim.panels'),
+      idPrefix: `${idPrefix}-panels`,
+      tabClass: 'sim-panel-tab',
+      items: [{ label: t('sim.problems'), panel: problemsBox }, { label: t('sim.checks'), panel: checksBox }],
+    });
+    panelTabs.element.className = 'sim-panels__tabs';
+    panels.append(panelTabs.element, problemsBox, checksBox);
+    checksPanel = createChecksPanel(checksBox);
+    checksPanel.idle(isGoalCompleted(def.goalId));
+    actions.prepend(createCheckButton());
+  } else {
+    panels.append(problemsBox);
+  }
+
   const problemsPanel = createProblemsPanel(problemsBox, {
+    showTitle: !hasChecks,
     onSelect(problem) {
       selectTab(names.indexOf(problem.file));
       editors[problem.file].goTo(problem.start);
     },
   });
+
+  // «✓ Comprova»: les comprovacions s'avaluen en un iframe ocult amb una
+  // còpia del codi d'aquest moment
+  function createCheckButton() {
+    const check = button('sim-button sim-button--check', t('sim.check'), t('sim.check.title'));
+    check.addEventListener('click', async () => {
+      check.disabled = true;
+      panelTabs.select(1);
+      checksPanel.running();
+      const snapshot = { ...files };
+      const { html } = buildSrcdoc({ files: snapshot, mode: def.mode, assetBase: ASSET_BASE });
+      const { doc, dispose } = await renderForChecks(html, { forms: def.forms });
+      try {
+        const results = runChecks({ doc, files: snapshot, mode: def.mode, chapter, checks: def.checks, env: { supports: cssSupports } });
+        if (results.every((r) => r.passed)) saveGoalCompleted(def.goalId);
+        checksPanel.show(results);
+      } finally {
+        dispose();
+        check.disabled = false;
+      }
+    });
+    return check;
+  }
 
   function updateProblems() {
     const problems = lintStatic({ files, mode: def.mode, chapter, env: { supports: cssSupports } });
@@ -312,7 +360,6 @@ export function mountSimulator(host, { fileActions = false, chapter = Infinity }
     }
   }
 
-  selectTab(0);
   updatePreview();
   updateProblems();
 

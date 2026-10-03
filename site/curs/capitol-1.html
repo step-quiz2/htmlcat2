@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capítol 1 — Hola, HTML! | HTMLCat</title>
+  <link rel="icon" href="../img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/course.css">
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link rel="stylesheet" href="../css/simulador.css">
+  <script type="module" src="../js/pages/course-page.js"></script>
+</head>
+<body data-pagina="capitol" data-num="1">
+
+<main class="curs-content">
+  <header class="chapter-header">
+    <h1>Hola, HTML!</h1>
+    <p class="chapter-lead">En acabar aquest capítol sabràs escriure una pàgina web sencera, amb títol i paràgrafs, i entendràs per què tot el que obres s'ha de tancar.</p>
+  </header>
+
+  <section class="chapter-section">
+    <h2>La teva primera etiqueta</h2>
+    <p>
+      Una pàgina web és un fitxer de text escrit en <strong>HTML</strong>. Comencem pel més petit.
+      En aquest simulador hi ha el codi i, al costat o a sota, el resultat. Canvia el text i mira què passa.
+    </p>
+    <div class="simulador" data-id="c01-primer-titol">
+      <script type="text/plain" data-file="index.html">
+        <h1>Hola, món!</h1>
+      </script>
+    </div>
+    <p>Acabes d'escriure un <strong>element</strong>. Té tres parts:</p>
+    <ul>
+      <li><code>&lt;h1&gt;</code> és l'<strong>etiqueta d'obertura</strong>: diu on comença l'element i de quin tipus és.</li>
+      <li><code>Hola, món!</code> és el <strong>contingut</strong>: el que es veu a la pàgina.</li>
+      <li><code>&lt;/h1&gt;</code> és l'<strong>etiqueta de tancament</strong>: és com la d'obertura, però amb una barra <code>/</code>. Diu on acaba l'element.</li>
+    </ul>
+    <p>
+      <code>h1</code> vol dir <em>heading 1</em>, «títol de nivell 1»: el títol principal de la pàgina.
+      Per això el navegador el mostra gros i en negreta.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Títols i paràgrafs</h2>
+    <p>
+      El text normal va dins de <strong>paràgrafs</strong>, amb l'element <code>&lt;p&gt;</code>.
+      Cada paràgraf comença en una línia nova, i el navegador hi deixa una mica d'espai al voltant.
+    </p>
+    <div class="simulador" data-id="c01-paragrafs">
+      <script type="text/plain" data-file="index.html">
+        <h1>El meu gat</h1>
+        <p>Es diu Mixa i té tres anys.</p>
+        <p>Li agrada dormir al sol i perseguir boles de paper.</p>
+      </script>
+    </div>
+    <p>
+      Afegeix-hi un tercer paràgraf: escriu <code>&lt;p&gt;</code>, el text i <code>&lt;/p&gt;</code>.
+      Fixa't que l'editor no tanca les etiquetes per tu: és un hàbit que has d'aprendre ara.
+      Si te n'oblides, el panell <strong>⚠ Problemes</strong>, a sota del resultat, t'avisarà.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Una pàgina sencera</h2>
+    <p>
+      Fins ara has escrit només el contingut i HTMLCat afegia la resta per tu.
+      Una pàgina de debò sempre té aquesta estructura:
+    </p>
+    <div class="simulador" data-id="c01-pagina" data-mode="document" data-height="520">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>El meu gat</title>
+          </head>
+          <body>
+            <h1>El meu gat</h1>
+            <p>Es diu Mixa i té tres anys.</p>
+          </body>
+        </html>
+      </script>
+    </div>
+    <ul>
+      <li><code>&lt;!DOCTYPE html&gt;</code> avisa el navegador que és una pàgina d'HTML actual. Va sempre a la primera línia i no es tanca: no és un element.</li>
+      <li><code>&lt;html lang="ca"&gt;</code> … <code>&lt;/html&gt;</code>: tota la pàgina va a dins. <code>lang="ca"</code> diu que la pàgina està escrita en català.</li>
+      <li><code>&lt;head&gt;</code> … <code>&lt;/head&gt;</code>: la <strong>capçalera</strong>, amb informació sobre la pàgina que no es veu dins de la pàgina.</li>
+      <li><code>&lt;meta charset="UTF-8"&gt;</code>: perquè les lletres com à, ç o l·l es vegin bé.</li>
+      <li><code>&lt;title&gt;</code> … <code>&lt;/title&gt;</code>: el títol que surt a la pestanya del navegador. Per això no el veus al resultat.</li>
+      <li><code>&lt;body&gt;</code> … <code>&lt;/body&gt;</code>: el <strong>cos</strong>, tot el que es veu a la pàgina.</li>
+    </ul>
+    <p>
+      <code>lang="ca"</code> i <code>charset="UTF-8"</code> són <strong>atributs</strong>: informació extra que va
+      dins de l'etiqueta d'obertura, amb la forma <code>nom="valor"</code>.
+    </p>
+    <p class="nota">
+      <code>&lt;meta&gt;</code> és un element <strong>buit</strong>: no té contingut i, per tant, tampoc no té
+      etiqueta de tancament. <code>&lt;/meta&gt;</code> no existeix.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Elements dins d'elements</h2>
+    <p>
+      A la pàgina d'abans, <code>&lt;title&gt;</code> és dins de <code>&lt;head&gt;</code>, que és dins de
+      <code>&lt;html&gt;</code>. Quan un element és dins d'un altre, diem que està <strong>niat</strong>.
+      Les etiquetes es tanquen en l'ordre invers al que s'obren: l'últim element que obres és el primer que tanques.
+    </p>
+    <pre class="code-example" data-lang="html" tabindex="0">&lt;html lang="ca"&gt;
+  &lt;body&gt;
+    &lt;p&gt;Hola&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</pre>
+    <p>
+      Mira també els espais de l'esquerra: cada element que és dins d'un altre va <strong>2 espais més a la dreta</strong>.
+      Aquesta <strong>indentació</strong> no canvia el resultat, però fa que es vegi d'un cop d'ull què hi ha dins de què.
+      A l'editor, la tecla Tab escriu 2 espais i Retorn ja indenta la línia nova.
+    </p>
+    <p>Aquesta pàgina es veu exactament igual que l'anterior, però és molt més difícil de llegir. Mira què en diu el panell ⚠ Problemes:</p>
+    <div class="simulador" data-mode="document" data-readonly data-height="520">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+        <head>
+        <meta charset="UTF-8">
+        <title>El meu gat</title>
+        </head>
+        <body>
+        <h1>El meu gat</h1>
+        <p>Es diu Mixa i té tres anys.</p>
+        </body>
+        </html>
+      </script>
+    </div>
+    <aside class="codi-net">
+      <p class="codi-net__titol">🧹 Codi net</p>
+      <ul>
+        <li><strong>Tanca el que obres</strong>, i en l'ordre invers: l'últim que obres és el primer que tanques.</li>
+        <li><strong>La indentació reflecteix el niuament:</strong> 2 espais més per a cada element que és dins d'un altre.</li>
+        <li>Escriu les etiquetes en <strong>minúscules</strong> i els valors dels atributs entre <strong>cometes dobles</strong>.</li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Errors típics</h2>
+    <p>
+      El navegador mai no et diu que t'has equivocat: arregla el codi com pot i continua.
+      Per això el resultat sovint es veu <em>gairebé</em> bé. Aquests exemples tenen errors:
+      mira el resultat i després llegeix el panell ⚠ Problemes.
+    </p>
+
+    <h3>T'oblides de tancar el títol</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <h1>El meu gat
+        <p>Es diu Mixa i té tres anys.</p>
+      </script>
+    </div>
+    <p>Com que el <code>&lt;h1&gt;</code> no està tancat, el navegador posa el paràgraf a dins del títol: tot surt gros i en negreta.</p>
+
+    <h3>Tanques amb una etiqueta que no toca</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <h1>El meu gat</h2>
+        <p>Es diu Mixa i té tres anys.</p>
+      </script>
+    </div>
+    <p>
+      Aquí el resultat es veu bé: el navegador ha endevinat que <code>&lt;/h2&gt;</code> volia tancar el <code>&lt;h1&gt;</code>.
+      Però el codi està malament, i no sempre tindràs tanta sort.
+    </p>
+
+    <h3>Un títol dins d'un paràgraf</h3>
+    <div class="simulador" data-readonly>
+      <script type="text/plain" data-file="index.html">
+        <p>
+          <h1>El meu gat</h1>
+          Es diu Mixa i té tres anys.
+        </p>
+      </script>
+    </div>
+    <p>
+      Un paràgraf només pot contenir text (i, com veuràs més endavant, elements de text com la negreta).
+      En trobar el <code>&lt;h1&gt;</code>, el navegador tanca el paràgraf: el títol i el text queden fora,
+      i el <code>&lt;/p&gt;</code> del final crea un paràgraf nou i buit.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Exercici: la teva pàgina</h2>
+    <p>Fes una pàgina sencera que et presenti. Ha de tenir:</p>
+    <ul>
+      <li>dins del <code>&lt;head&gt;</code>, <code>&lt;meta charset="UTF-8"&gt;</code> i el títol de la pestanya <strong>Qui soc</strong>;</li>
+      <li>dins del <code>&lt;body&gt;</code>, un títol <code>&lt;h1&gt;</code> amb el teu nom i almenys dos paràgrafs que parlin de tu: què t'agrada, què vols aprendre…;</li>
+      <li>cap error al panell ⚠ Problemes, i la indentació ben feta.</li>
+    </ul>
+    <p>Quan acabis, prem <strong>✓ Comprova</strong>.</p>
+    <div class="simulador" data-id="c01-exercici" data-goal-id="cap-1-ex" data-mode="document" data-height="560">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+
+          </head>
+          <body>
+
+          </body>
+        </html>
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "attr", "selector": "head > meta[charset]", "name": "charset", "matches": "^utf-8$", "ci": true,
+            "msg": "Dins del <head> hi ha <meta charset=\"UTF-8\">." },
+          { "type": "text", "selector": "head > title", "matches": "^qui s[oó]c$", "ci": true,
+            "msg": "El títol de la pestanya (<title>, dins del <head>) és «Qui soc»." },
+          { "type": "attr", "selector": "html", "name": "lang", "equals": "ca",
+            "msg": "La pàgina diu que està escrita en català: <html lang=\"ca\">." },
+          { "type": "count", "selector": "body > h1", "eq": 1,
+            "msg": "Dins del <body> hi ha un títol <h1>, i només un." },
+          { "type": "text", "selector": "h1", "matches": "\\S",
+            "msg": "El <h1> té text: el teu nom." },
+          { "type": "count", "selector": "body > p", "min": 2,
+            "msg": "Dins del <body> hi ha almenys dos paràgrafs <p>." },
+          { "type": "text", "selector": "body > p", "matches": "\\S", "all": true,
+            "msg": "Cap paràgraf no és buit." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "rules": ["html/indentation"], "maxWarnings": 0,
+            "msg": "La indentació reflecteix el niuament (2 espais per nivell)." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Troba l'error</h2>
+    <p>
+      Aquesta pàgina té tres problemes. El resultat es veu gairebé bé, però el panell ⚠ Problemes
+      et diu on són. Arregla'ls tots (sense canviar els textos) i prem <strong>✓ Comprova</strong>.
+    </p>
+    <div class="simulador" data-id="c01-troba-error" data-goal-id="cap-1-bug" data-mode="document" data-height="560">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>Receptes de l'àvia</title>
+          </head>
+          <body>
+            <h1>Receptes de l'àvia</h2>
+            <p>La millor recepta és el pa amb tomàquet.
+            <p>Cal pa, tomàquet, oli i sal.</p>
+            <P>Bon profit!</P>
+          </body>
+        </html>
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "El panell ⚠ Problemes tampoc no mostra cap avís." },
+          { "type": "text", "selector": "h1", "equals": "Receptes de l'àvia",
+            "msg": "El títol <h1> continua dient «Receptes de l'àvia»." },
+          { "type": "count", "selector": "body > p", "eq": 3,
+            "msg": "Continua havent-hi tres paràgrafs." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Resum</h2>
+    <div class="resum">
+      <ul>
+        <li>Un element té una etiqueta d'obertura, un contingut i una etiqueta de tancament: <code>&lt;p&gt;Hola&lt;/p&gt;</code>.</li>
+        <li><code>&lt;h1&gt;</code> és el títol principal de la pàgina; <code>&lt;p&gt;</code>, un paràgraf.</li>
+        <li>Una pàgina sencera té <code>&lt;!DOCTYPE html&gt;</code>, <code>&lt;html lang="ca"&gt;</code>, un <code>&lt;head&gt;</code> (amb <code>&lt;meta charset="UTF-8"&gt;</code> i <code>&lt;title&gt;</code>) i un <code>&lt;body&gt;</code> amb el que es veu.</li>
+        <li>Els atributs donen informació extra dins de l'etiqueta d'obertura: <code>nom="valor"</code>.</li>
+        <li>Els elements es poden niar: l'últim que obres és el primer que tanques, i la indentació ho fa visible.</li>
+        <li>El navegador arregla els errors en silenci; el panell ⚠ Problemes te'ls explica.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>

@@ -4,7 +4,7 @@ Curs interactiu per aprendre a escriure **HTML i CSS** al navegador, en català,
 i a fer-ho amb **codi net i ben estructurat**. Forma part de la mateixa sèrie que
 [KarelCat](https://karelcat.step-quiz.net) i [PyCat](https://pycat.step-quiz.net).
 
-> **Estat:** en construcció. Encara no hi ha cap pàgina publicada.
+> **Estat:** en construcció. Ja hi ha el capítol 1 i l'editor lliure; els altres capítols arribaran un a un.
 > L'estat real del projecte és a [`docs/STATE.md`](docs/STATE.md).
 
 ---

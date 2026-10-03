@@ -11,8 +11,9 @@
 // Tot el text que ve del codi de l'alumne es posa amb textContent.
 //
 // API pública:
-//   createProblemsPanel(container, { onSelect }) → { update(problems) }
+//   createProblemsPanel(container, { onSelect, showTitle }) → { update(problems) }
 //   problems: com els retorna lintStatic (ordenats)
+//   showTitle: false si el títol ja surt en una pestanya
 // ════════════════════════════════════════════════════════
 
 import { summarize } from '../lint/lint.js';
@@ -46,17 +47,17 @@ const SEVERITY_LABEL = {
 
 /**
  * @param {HTMLElement} container
- * @param {{ onSelect: (problem: Object) => void }} options
+ * @param {{ onSelect: (problem: Object) => void, showTitle?: boolean }} options
  */
-export function createProblemsPanel(container, { onSelect }) {
+export function createProblemsPanel(container, { onSelect, showTitle = true }) {
   const root = el('section', 'sim-problems');
   root.setAttribute('aria-label', t('sim.problems.label'));
   const header = el('div', 'sim-problems__header');
-  const title = el('span', 'sim-problems__title', t('sim.problems'));
   const status = el('span', 'sim-problems__status');
   status.setAttribute('role', 'status');
   status.setAttribute('aria-live', 'polite');
-  header.append(title, status);
+  if (showTitle) header.append(el('span', 'sim-problems__title', t('sim.problems')));
+  header.append(status);
   const list = el('ol', 'sim-problems__list');
   root.append(header, list);
   container.append(root);

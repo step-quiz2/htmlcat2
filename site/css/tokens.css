@@ -19,10 +19,12 @@
   --color-accent: #c2410c;
   --color-accent-text: #ffffff;
 
-  /* Gravetat dels problemes del revisor de codi (contrast AA sobre --color-surface) */
+  /* Gravetat dels problemes del revisor de codi i comprovació superada
+     (contrast AA sobre --color-surface) */
   --color-error: #b91c1c;
   --color-warning: #92400e;
   --color-info: #1d4ed8;
+  --color-ok: #166534;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -58,6 +60,7 @@
     --color-error: #fca5a5;
     --color-warning: #fcd34d;
     --color-info: #93c5fd;
+    --color-ok: #86efac;
 
     --hl-tag: #f472b6;
     --hl-attr: #fbbf24;
@@ -84,6 +87,7 @@
   --color-error: #fca5a5;
   --color-warning: #fcd34d;
   --color-info: #93c5fd;
+  --color-ok: #86efac;
 
   --hl-tag: #f472b6;
   --hl-attr: #fbbf24;
