@@ -142,12 +142,16 @@ function customProperties(sheets) {
  * escrites amb puntuació (class=".avis", class="avis, gran") sense la
  * puntuació: d'aquestes ja n'avisa html/class-syntax.
  *
- * @returns {{ classes: Set<string>, ids: Set<string>, misspelt: Set<string> }}
+ * També, per a cada classe, de quins elements és (classElements).
+ *
+ * @returns {{ classes: Set<string>, ids: Set<string>, misspelt: Set<string>,
+ *             classElements: Map<string, Set<string>> }}
  */
 function pageNames(documents) {
   const classes = new Set();
   const ids = new Set();
   const misspelt = new Set();
+  const classElements = new Map();
   for (const { tokens } of documents) {
     for (const token of tokens) {
       if (token.type !== 'startTag') continue;
@@ -157,13 +161,15 @@ function pageNames(documents) {
         if (attr.name !== 'class') continue;
         for (const name of value.split(/\s+/).filter(Boolean)) {
           classes.add(name);
+          if (!classElements.has(name)) classElements.set(name, new Set());
+          classElements.get(name).add(token.name);
           const bare = name.replace(/^[.#]+|,/g, '');
           if (bare !== name && bare) misspelt.add(bare);
         }
       }
     }
   }
-  return { classes, ids, misspelt };
+  return { classes, ids, misspelt, classElements };
 }
 
 /**

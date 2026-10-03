@@ -13,8 +13,8 @@
 //             imitació. Si no n'hi ha, les regles que el necessiten no
 //             fan res.
 //   embedded  true si el CSS és dins d'un <style>
-//   page      { classes, ids, misspelt } de l'HTML del simulador, o null si
-//             no n'hi ha (lint/lint.js)
+//   page      { classes, ids, misspelt, classElements } de l'HTML del
+//             simulador, o null si no n'hi ha (lint/lint.js)
 //   variables Map --nom → [valors] de tot el CSS del simulador (fitxers i
 //             <style>), per saber si una variable existeix i què val
 //   sheets    tots els fulls d'estil del simulador (fitxers i <style>), ja
@@ -521,12 +521,19 @@ const INLINE_ELEMENTS = new Set(['a', 'abbr', 'b', 'bdi', 'bdo', 'cite', 'code',
   'label', 'mark', 'q', 's', 'samp', 'small', 'span', 'strong', 'sub', 'sup', 'time', 'u', 'var']);
 const SIZE_PROPERTIES = new Set(['width', 'height', 'min-width', 'min-height', 'max-width', 'max-height']);
 
-/** L'element que tria un selector (el de l'última part: «nav a» → a), o null. */
-function subjectElement(selector) {
+/**
+ * L'element que tria un selector (el de l'última part: «nav a» → a), o null.
+ * Si l'última part és només una classe (.preu), l'element que té aquesta
+ * classe a l'HTML del simulador, si sempre és el mateix.
+ */
+function subjectElement(selector, page) {
   const text = selector.text.replace(/"[^"]*"|'[^']*'/g, '').replace(/\[[^\]]*\]|\([^)]*\)/g, '');
   const last = text.trim().split(/\s*[\s>+~]\s*/).at(-1);
   const m = /^([a-zA-Z][\w-]*)/.exec(last);
-  return m ? m[1].toLowerCase() : null;
+  if (m) return m[1].toLowerCase();
+  const cls = /^\.([\w\u00a0-\uffff-]+)/.exec(last);
+  const elements = cls && page?.classElements.get(cls[1]);
+  return elements?.size === 1 ? [...elements][0] : null;
 }
 
 /** El valor que una regla dona a una propietat (l'últim), o null. */
@@ -552,11 +559,11 @@ const inlineDimensions = {
         const display = valueOf(rule, 'display');
         const out = (display && display !== 'inline') || (valueOf(rule, 'float') ?? 'none') !== 'none' ||
           /^(absolute|fixed)$/.test(valueOf(rule, 'position') || '');
-        if (out) rule.selectors.forEach((selector) => displayed.add(subjectElement(selector)));
+        if (out) rule.selectors.forEach((selector) => displayed.add(subjectElement(selector, ctx.page)));
       }
     }
     for (const rule of styleRules(ctx.sheet.rules)) {
-      const elements = rule.selectors.map(subjectElement);
+      const elements = rule.selectors.map((selector) => subjectElement(selector, ctx.page));
       if (!elements.length || !elements.every((name) => INLINE_ELEMENTS.has(name) && !displayed.has(name))) continue;
       for (const decl of rule.declarations) {
         const property = propertyName(decl);

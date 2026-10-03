@@ -566,7 +566,12 @@ test('el model de caixa: detalls de les regles del capítol 12', () => {
   assert.deepEqual(inline('a {\n  width: 5rem;\n}\n\nnav a {\n  display: block;\n}\n'), []);
   assert.deepEqual(inline('a {\n  width: 5rem;\n  float: left;\n}\n'), []);
   assert.deepEqual(inline('a,\np {\n  width: 5rem;\n}\n'), []);
-  assert.deepEqual(inline('.boto {\n  width: 5rem;\n}\n'), []);
+  assert.deepEqual(inline('.boto {\n  width: 5rem;\n}\n'), []);   // sense HTML no se sap de quin element és
+  // Amb l'HTML: una classe que només tenen elements en línia
+  const withPage = (html, styles) => lintCase(page(html, styles)).filter((p) => p.rule === 'css/inline-dimensions').map((p) => p.data.element);
+  assert.deepEqual(withPage('<p>Pa <span class="preu">2 €</span></p>\n', '.preu {\n  width: 4rem;\n}\n'), ['span']);
+  assert.deepEqual(withPage('<p>Pa <span class="preu">2 €</span></p>\n<p class="preu">3 €</p>\n', '.preu {\n  width: 4rem;\n}\n'), []);
+  assert.deepEqual(withPage('<p>Pa <span class="preu">2 €</span></p>\n', '.preu {\n  width: 4rem;\n}\n\n.preu {\n  display: inline-block;\n}\n'), []);
   const twoSheets = { files: { 'index.html': '<style>\n  a { display: inline-block; }\n</style>\n<a href="#">x</a>\n', 'estils.css': 'a {\n  width: 5rem;\n}\n' } };
   assert.ok(!rulesOf(twoSheets).includes('css/inline-dimensions'));
 
