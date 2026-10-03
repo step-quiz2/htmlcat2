@@ -1,6 +1,6 @@
 # HTMLCat — Pla del curs
 
-> **Estat:** proposta pendent de confirmar (decisió D9 de [`STATE.md`](STATE.md)).
+> **Estat:** confirmat pel propietari el 2026-10-03 (decisió D9 de [`STATE.md`](STATE.md)).
 > Aquest document és la font de veritat del contingut: s'actualitza en el mateix
 > PR que afegeix o canvia un capítol o un repte.
 >

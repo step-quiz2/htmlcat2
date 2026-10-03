@@ -305,21 +305,21 @@ motiu; si se'n canvia alguna, s'anota aquí amb la data i el motiu.
 | 2026-10-02 | Panell ⚠ Problemes: els errors es mostren tots; els avisos repetits s'agrupen | Cada error és diferent i important; els avisos d'estil (sobretot d'indentació) podrien omplir la llista |
 | 2026-10-02 | El repositori definitiu és `step-quiz2/htmlcat2` | Ho ha confirmat el propietari. L'historial de les fases 0–2 (PR #1–#4) és a l'antic repositori; el codi es va copiar aquí amb una pujada pel web, que va perdre `.github/`, `.editorconfig` i `.gitignore` (restaurats amb Git el mateix dia) |
 
-### Decisions pendents de confirmar amb el propietari
+### Decisions confirmades pel propietari el 2026-10-03
 
-Detall a BLUEPRINT §11. Entre parèntesis, l'opció recomanada.
+El propietari va acceptar totes les opcions recomanades (BLUEPRINT §11).
 
-| Id | Pregunta | Recomanació |
+| Id | Decisió | Estat |
 |---|---|---|
-| D3 | Quan passen els exercicis de fragment a document complet? | Cap. 1 ensenya l'esquelet; caps. 2–5 fragments; des del cap. 6, documents complets |
-| D4 | L'editor tanca les etiquetes sol? | No (cal aprendre a tancar-les); correcció ràpida des del cap. 4 |
-| D6 | Tema de colors | Clar per defecte; fosc segons el sistema i amb botó |
-| D7 | Tipografies | Space Mono per al codi i una sense serifa per al text, servides des del mateix web |
-| D8 | Domini | `htmlcat.step-quiz.net` |
-| D9 | Currículum | Els 15 capítols i ~12 reptes de [`CURRICULUM.md`](CURRICULUM.md) |
-| D10 | Relació amb JSCat | HTMLCat abans de la part B de JSCat; enllaços en tots dos sentits |
-| D11 | Llengua del codi del motor | Identificadors en anglès, comentaris en català |
-| D12 | Noms de classes i ids que s'ensenyen | Català en minúscules, sense accents, amb guions (`menu-principal`) |
+| D3 | El cap. 1 ensenya l'esquelet (exercici en mode `document`); caps. 2–5, fragments; des del cap. 6, documents complets | Aplicada al cap. 1 |
+| D4 | L'editor no tanca les etiquetes sol (cal aprendre a tancar-les); correcció ràpida des del cap. 4 | Correcció ràpida: fase 6 |
+| D6 | Tema clar per defecte; fosc segons el sistema i amb un botó | Fet el tema segons el sistema; el botó, fase 7 |
+| D7 | Space Mono per al codi i una sense serifa per al text, servides des del mateix web | Pendent (fase 7); ara, lletres del sistema |
+| D8 | Domini `htmlcat.step-quiz.net` | Pendent de configurar a Cloudflare (§5) |
+| D9 | Currículum: els 15 capítols i 12 reptes de [`CURRICULUM.md`](CURRICULUM.md) | Confirmat |
+| D10 | HTMLCat abans de la part B de JSCat; enllaços en tots dos sentits | Enllaços quan els dos cursos els tinguin |
+| D11 | Identificadors del motor en anglès, comentaris en català | Aplicada |
+| D12 | Classes i ids que s'ensenyen: català en minúscules, sense accents, amb guions (`menu-principal`) | Aplicada |
 
 ---
 
@@ -370,7 +370,7 @@ Fases del BLUEPRINT §9.1:
       tests i GitHub Action. Falta: comprovar que Cloudflare Pages publica
       `step-quiz2/htmlcat2` (§5), que `/tests/` i `/docs/` donen 404 i el
       domini `htmlcat.step-quiz.net`.
-- [ ] Respondre les decisions pendents (§3): D3, D4, D6–D12.
+- [x] Respondre les decisions pendents (§3): acceptades les recomanades (2026-10-03).
 - [x] **Fase 1 — Nucli del llenguatge:** tokenitzador d'HTML, analitzador de CSS, arbre del codi font, ressaltat.
 - [x] **Fase 2 — Editor, previsualització i editor lliure.**
 - [x] **Fase 3 — Revisor de codi v1 i panell ⚠ Problemes** (35 regles fins al capítol 9, §2.6).
