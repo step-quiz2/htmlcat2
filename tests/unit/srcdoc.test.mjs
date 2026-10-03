@@ -78,10 +78,12 @@ test('<link> just després del doctype: primer la CSP, després el CSS', () => {
   assert.match(html, /^<!DOCTYPE html><meta http-equiv="Content-Security-Policy"[^>]*><base [^>]*><style data-file="estils.css">\na\{\}<\/style>$/);
 });
 
-test('un <link> a un fitxer que no existeix es comunica', () => {
+test('un <link> a un fitxer que no existeix es comunica i es treu', () => {
   const src = '<head><link rel="stylesheet" href="estil.css"></head>';
-  const { missingFiles } = buildSrcdoc({ files: { 'index.html': src, 'estils.css': '' }, mode: 'document', assetBase: BASE });
+  const { html, missingFiles } = buildSrcdoc({ files: { 'index.html': src, 'estils.css': '' }, mode: 'document', assetBase: BASE });
   assert.deepEqual(missingFiles, ['estil.css']);
+  // El <link> es treu: el navegador no anirà a buscar un fitxer que no existeix
+  assert.doesNotMatch(html, /estil\.css/);
 });
 
 test('els <link> externs o d\'un altre tipus no es toquen', () => {

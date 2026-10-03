@@ -26,7 +26,7 @@ aquest document (i el codi).
 
 ## 2. Què hi ha ara
 
-**Fase actual: 5 (continguts, un capítol per PR).** Fets: capítols 1 a 8 (tota la part A, HTML). Fase 4 acabada: hi ha el capítol 1
+**Fase actual: 5 (continguts, un capítol per PR).** Fets: capítols 1 a 9 (tota la part A, HTML, i el primer de la part B, CSS). Fase 4 acabada: hi ha el capítol 1
 («Hola, HTML!») amb l'estructura del curs (menú de capítols, progrés), els
 exercicis amb «✓ Comprova» i el panell ⚠ Problemes, i l'editor lliure a
 `/editor/`. Següent: un capítol per PR (fase 5).
@@ -57,6 +57,7 @@ site/                  ← l'única carpeta que es publica
   curs/capitol-6.html  Capítol 6, «Estructura de la pàgina» (exercicis cap-6-ex i cap-6-bug, en mode document)
   curs/capitol-7.html  Capítol 7, «Taules» (exercicis cap-7-ex i cap-7-bug; un estils.css de només lectura dibuixa les vores)
   curs/capitol-8.html  Capítol 8, «Formularis» (exercicis cap-8-ex i cap-8-bug; tots els simuladors amb data-forms)
+  curs/capitol-9.html  Capítol 9, «Hola, CSS!» (exercicis cap-9-ex i cap-9-bug, amb index.html i estils.css editables)
   editor/index.html    Editor lliure (simulador a pantalla completa, clau code:editor)
   404.html             Pàgina d'error (Cloudflare la fa servir sola)
   _headers             Capçaleres de seguretat per a Cloudflare Pages
@@ -214,7 +215,9 @@ proteccions independents, que el test de navegador comprova per separat:
 També s'hi injecta `<base href=".../recursos/">`: `<img src="gat.svg">`
 funciona igual a l'editor lliure i als capítols. En mode `document`, cada
 `<link rel="stylesheet" href="estils.css">` que apunta a un fitxer virtual es
-substitueix pel seu CSS; si el fitxer no existeix, el simulador ho avisa. Els
+substitueix pel seu CSS; si el fitxer no existeix, el simulador ho avisa i el `<link>` es
+treu del document de la previsualització (el navegador l'aniria a buscar a `recursos/` per
+res). El revisor també ho diu, amb la línia i el nom més semblant (`html/stylesheet-link`). Els
 clics als enllaços i els enviaments de formularis s'intercepten: la
 previsualització no navega mai enlloc. Amb `data-forms` (els exemples de formularis
 i l'editor lliure), el simulador mostra a sota del resultat les dades que s'enviarien.
@@ -310,6 +313,7 @@ Catàleg (E error, A avís, S suggeriment). «Cap.» = capítol a partir del qua
 | `html/th-scope` | 7 | S | `<th>` sense `scope` (el primer suggeriment del catàleg: no compta com a avís a les comprovacions) |
 | `html/control-label` | 8 | E | Camp (`input`, `select`, `textarea`) sense etiqueta: cap `<label for>` ni cap `<label>` que l'embolcalli (o només amb `placeholder`); `for` que no apunta a cap id (suggereix el més semblant) o que apunta a un element que no és un camp |
 | `html/control-name` | 8 | A | Camp d'un formulari sense `name`: la seva dada no s'envia (pista pròpia per als botons d'opció, que sense `name` es poden marcar tots) |
+| `html/stylesheet-link` | 9 | E | Mode document: un fitxer de CSS que cap `<link>` no aplica, un `<link>` cap a un fitxer que no existeix (suggereix el nom), sense `rel="stylesheet"`, sense `href` o cap a Internet (la CSP el bloqueja) |
 | `html/inline-style` | 9 | A | Atribut `style=""` |
 | `css/unbalanced-braces` | 9 | E | Falta `{` o `}`, o sobra una `}` |
 | `css/missing-semicolon` | 9 | E | Falta `;` entre dues declaracions |
@@ -319,12 +323,14 @@ Catàleg (E error, A avís, S suggeriment). «Cap.» = capítol a partir del qua
 | `css/unclosed-string` | 9 | E | Cadena sense la cometa de tancament |
 | `css/unknown-property` | 9 | E | `colr`, `color-de-fons` (suggereix el nom correcte) |
 | `css/invalid-value` | 9 | E | Valor no vàlid; missatges propis per a color en català, coma decimal i número sense unitat |
+| `css/wrong-comment` | 9 | E | Comentaris amb `<!--` o `//` (fora de cadenes i d'`url()`): la regla o la declaració següent deixa de funcionar. Els altres missatges sobre aquest text no surten |
+| `css/unknown-element-selector` | 9 | A | Selector d'un element que no existeix: `paragraf` (suggereix `p`), `spam` (`span`); no mira dins de `[…]` ni `(…)`, ni els `@keyframes` |
 | `css/last-semicolon` | 9 | A | L'última declaració sense `;` |
 | `css/one-declaration-per-line` | 9 | A | Dues declaracions a la mateixa línia |
 | `css/indentation` | 9 | A | Declaracions no indentades 2 espais, `}` mal alineada (no als `<style>`) |
 
 Les regles que necessiten el document ja pintat (selector que no selecciona res,
-contrast) i les dels capítols 9–14 s'afegiran amb cada capítol (BLUEPRINT
+contrast) i les dels capítols 10–14 s'afegiran amb cada capítol (BLUEPRINT
 apèndix C). `html/image-not-found` no el necessita: totes les imatges que pot fer
 servir l'alumne són a `site/recursos/` (la previsualització les hi busca amb el
 `<base>`, §2.4) i `preview/recursos.js` en té la llista; el test estàtic comprova
@@ -438,6 +444,7 @@ motiu; si se'n canvia alguna, s'anota aquí amb la data i el motiu.
 | 2026-10-03 | Revisor, capítol 7: `html/table-structure`, `html/table-columns`, `html/table-headers` i `html/invalid-attribute-value` (el BLUEPRINT en preveia dues, `table-structure` i `th-scope`); `html/th-scope` és un suggeriment, el primer del catàleg | El navegador arregla en silenci els errors d'estructura de les taules, i alguns es veuen molt (un text fora de les cel·les surt a sobre de la taula, comprovat a Chromium); una cel·la oblidada desquadra la taula. `scope` és recomanable però no imprescindible en una taula simple: per això és un suggeriment, que no compta a `maxWarnings` |
 | 2026-10-03 | La CSP de la previsualització inclou `form-action 'none'`, i l'editor lliure permet formularis (`data-forms`, sandbox `allow-same-origin allow-forms`) | Comprovat a Chromium: sense `form-action`, un formulari que no s'aturés enviaria les dades a qualsevol web (la CSP amb `default-src` no ho impedeix). Ara hi ha dues proteccions independents, com amb els scripts. L'editor lliure ha de poder provar el que ensenya el capítol 8 |
 | 2026-10-03 | Revisor, capítol 8: `html/control-label` (com el BLUEPRINT, amb el `for` que no coincideix i el «només placeholder»), regla nova `html/control-name`, i els valors de `<input type>`, `<button type>` i `<form method>` a `html-spec.js` | Un camp sense `name` no s'envia, i uns botons d'opció sense `name` es poden marcar tots alhora (comprovat a Chromium); amb un `type` que no existeix, el navegador en fa un camp de text normal |
+| 2026-10-03 | Revisor, capítol 9: regles noves `css/wrong-comment`, `css/unknown-element-selector` i `html/stylesheet-link`; les regles d'HTML reben els noms dels fitxers del simulador (`ctx.fileNames`) | Comprovat a Chromium: un comentari amb `<!--` o `//` inutilitza la regla següent sense cap avís, i un selector mal escrit no s'aplica a res. En mode document, sense un `<link>` correcte el CSS no s'aplica, i fins ara només ho deia un missatge del simulador, sense línia ni suggeriment |
 | 2026-10-02 | El repositori definitiu és `step-quiz2/htmlcat2` | Ho ha confirmat el propietari. L'historial de les fases 0–2 (PR #1–#4) és a l'antic repositori; el codi es va copiar aquí amb una pujada pel web, que va perdre `.github/`, `.editorconfig` i `.gitignore` (restaurats amb Git el mateix dia) |
 
 ### Decisions confirmades pel propietari el 2026-10-03
@@ -473,7 +480,7 @@ cd tests && npm ci && node course-browser.mjs   # navegador (Playwright + Chromi
 
 | Test | Què comprova |
 |---|---|
-| `unit/` | Cada mòdul pur de `site/js/` (191 tests): tokenitzador, arbre i errors d'estructura, analitzador de CSS, ressaltat (conserva el codi, escapa, una línia per entrada, rendiment), robustesa amb 500 codis aleatoris (també el revisor), edició (Retorn, Tab, Maj+Tab), `localStorage`, document de previsualització, textos de la interfície i revisor de codi: per a cada regla, un codi que la dispara i un que no (un test falla si una regla no en té), missatges sense buits, activació per capítol i mode, ordre, agrupació, rendiment, i que el codi d'exemple de l'editor lliure (també el del simulador de l'arrel) i de la portada no tingui cap problema; dades del curs i progrés; esquema de les comprovacions i les que no necessiten navegador (`uses-html`, `uses-css`, `lint`) |
+| `unit/` | Cada mòdul pur de `site/js/` (195 tests): tokenitzador, arbre i errors d'estructura, analitzador de CSS, ressaltat (conserva el codi, escapa, una línia per entrada, rendiment), robustesa amb 500 codis aleatoris (també el revisor), edició (Retorn, Tab, Maj+Tab), `localStorage`, document de previsualització, textos de la interfície i revisor de codi: per a cada regla, un codi que la dispara i un que no (un test falla si una regla no en té), missatges sense buits, activació per capítol i mode, ordre, agrupació, rendiment, i que el codi d'exemple de l'editor lliure (també el del simulador de l'arrel) i de la portada no tingui cap problema; dades del curs i progrés; esquema de les comprovacions i les que no necessiten navegador (`uses-html`, `uses-css`, `lint`) |
 | `course-static.mjs` | Cada pàgina té `<!DOCTYPE html>`, `lang="ca"`, `charset` i `<title>`; cap `style=""` ni `on…=""`; cap tabulació; tots els enllaços relatius existeixen; sintaxi de cada `.js`; cap menció de CC BY-NC-ND; existeixen `.editorconfig`, `.gitignore` i `.github/workflows/ci.yml` (una pujada pel web no els inclou). Curs: dades (`course/data.js`) ↔ fitxers de `site/curs/`; `<body data-pagina data-num>` d'acord amb el fitxer; l'exercici principal de cada capítol hi és; tot simulador editable té `data-id`; `data-id` i `data-goal-id` únics; blocs de codi amb nom permès i sense `<script`; comprovacions vàlides (`checks/schema.js`); cada exercici té la seva solució a `tests/solutions/`. Imatges: la llista de `preview/recursos.js`, els fitxers de `site/recursos/` i les files de `CREDITS.md` coincideixen |
 | `course-browser.mjs` | Cada pàgina, a 360 i 1280 px: cap error a la consola, cap petició fallida, cap petició a servidors externs, tots els simuladors es munten en arribar-hi, cap desplaçament horitzontal, cap id repetit; a cada simulador, les imatges que el navegador no pot mostrar són tantes com les que el panell ⚠ Problemes diu que no es troben (`html/image-not-found`), i només n'hi pot haver als exemples no editables i als exercicis (les peticions d'aquestes imatges, un 404 a `recursos/` o una imatge d'Internet que bloqueja la CSP, no compten com a errors de la pàgina). Cada exercici dels capítols, en un mòbil: el codi inicial no el supera, la solució sí (i sense errors al panell ⚠ Problemes), el menú hi posa ✓ i es manté després de recarregar. Dos exemples no editables a la mateixa pàgina no repeteixen els ids de les pestanyes. A més, prova l'editor lliure de punta a punta: escriure, indentació automàtica, resultat en directe, Ctrl+Z, `sandbox` i CSP correctes (també amb text abans de `<html>`), cap script ni imatge externa, enllaços interceptats, un formulari amb `action` cap a un altre web que no envia res i mostra les dades a sota, CSS aplicat i codi desat després de recarregar. I el panell ⚠ Problemes: «Cap problema» amb el codi inicial, el `<p>` del codi inicial sense tancar surt amb la seva línia i es marca, el clic i el teclat porten el cursor a la línia (i canvien de pestanya), i una propietat CSS mal escrita es detecta amb el `CSS.supports` del navegador |
 
@@ -522,12 +529,13 @@ Fases del BLUEPRINT §9.1:
       amb dos exercicis i solucions, tests del curs). Queda per a més endavant: exportar/importar
       el progrés i les activitats (fase 6), pantalla completa, glossari i la portada amb targetes
       (fase 7).
-- [ ] **Fase 5 — Continguts:** un capítol per PR. Fets: 1 a 8 (la part A sencera). Els capítols 2 i 3 no han
+- [ ] **Fase 5 — Continguts:** un capítol per PR. Fets: 1 a 9 (la part A sencera i el capítol 9). Els capítols 2 i 3 no han
       necessitat regles noves; amb el 3, `html/list-structure` assenyala el text solt d'una llista a
       la seva línia. El 4 n'ha afegit sis (enllaços); el 5, sis més (imatges i atributs), a més de
       quatre imatges noves a `site/recursos/`; el 6, quatre (estructura de la pàgina); el 7, cinc
-      (taules), i el 8, dues (formularis, §2.6), a més de `form-action 'none'` a la CSP. Des del capítol 6, els exercicis són documents sencers (D3). Al 7, els
+      (taules); el 8, dues (formularis), a més de `form-action 'none'` a la CSP, i el 9, tres (CSS:
+      comentaris mal escrits, selectors d'elements que no existeixen i el `<link>`, §2.6). Des del capítol 6, els exercicis són documents sencers (D3). Al 7, els
       simuladors porten un `estils.css` de només lectura perquè es vegin les vores de les taules
-      (el CSS s'ensenya a la part B). Següent: capítol 9, «Hola, CSS!» (comença la part B).
+      (el CSS s'ensenya a la part B). Següent: capítol 10, «Selectors i cascada».
 - [ ] **Fase 6 — Activitats i eines:** Parsons, qüestionaris, 🌳 Arbre, exportar/importar el progrés.
 - [ ] **Fase 7 — Acabats:** portada amb progrés, glossari, accessibilitat, guia del professorat.

@@ -9,7 +9,8 @@
 //     s'embolcalla amb un esquelet i s'hi afegeixen tots els CSS.
 //   · mode 'document': l'alumne escriu el document sencer; cada
 //     <link rel="stylesheet" href="estils.css"> que apunta a un fitxer
-//     virtual es substitueix pel seu contingut dins d'un <style>.
+//     virtual es substitueix pel seu contingut dins d'un <style> (i, si el
+//     fitxer no existeix, es treu: missingFiles).
 // En tots dos casos s'injecta al principi del <head>:
 //   · <meta http-equiv="Content-Security-Policy"> (cap petició externa ni
 //     cap enviament de formulari)
@@ -71,8 +72,14 @@ export function buildSrcdoc({ files, mode = 'fragment', assetBase, csp = DEFAULT
     const href = attr('href').trim();
     if (!href || /^(?:[a-z][a-z0-9+.-]*:|\/\/|\/)/i.test(href)) continue;   // externs: els bloqueja la CSP
     const name = href.replace(/^\.\//, '');
-    if (name in files) edits.push({ from: token.start, to: token.end, insert: styleTag(name, files[name]) });
-    else missingFiles.push(href);
+    if (name in files) {
+      edits.push({ from: token.start, to: token.end, insert: styleTag(name, files[name]) });
+    } else {
+      // Un fitxer que no existeix: el navegador l'aniria a buscar a recursos/ (el
+      // <base>) per res. Es treu el <link>, i el simulador avisa (missingFiles)
+      missingFiles.push(href);
+      edits.push({ from: token.start, to: token.end, insert: '' });
+    }
   }
 
   edits.push({ ...headInsertionPoint(htmlFile, tokens), insert: head });

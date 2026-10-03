@@ -56,7 +56,7 @@ test('esquema: errors típics', () => {
 // ── Comprovacions sobre el codi font (sense navegador) ──
 
 const files = {
-  'index.html': '<!DOCTYPE html>\n<html lang="ca">\n  <head>\n    <meta charset="UTF-8">\n    <title>X</title>\n' +
+  'index.html': '<!DOCTYPE html>\n<html lang="ca">\n  <head>\n    <meta charset="UTF-8">\n    <title>X</title>\n    <link rel="stylesheet" href="estils.css">\n' +
     '    <style>\n      p { margin: 0; }\n    </style>\n  </head>\n  <body>\n    <h1>Hola</h1>\n  </body>\n</html>\n',
   'estils.css': 'h1,\nh2 {\n  color:   teal;\n}\n\n@media (min-width: 40em) {\n  .avis {\n    display: flex;\n  }\n}\n',
 };

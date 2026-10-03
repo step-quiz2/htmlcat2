@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { RULES, SEVERITIES, activeRules, summarize } from '../../site/js/lint/lint.js';
 import { MESSAGES } from '../../site/js/lint/messages.ca.js';
 import { dedent } from '../../site/js/util/text.js';
-import { lintCase, rulesOf, css } from './lint-helpers.mjs';
+import { lintCase, rulesOf } from './lint-helpers.mjs';
 
 test('catàleg: ids únics, amb missatge i ben descrits', () => {
   const ids = RULES.map((r) => r.id);
@@ -98,14 +98,12 @@ test('el codi inicial de l\'editor lliure (site/editor i el simulador de l\'arre
   }
 });
 
-test('els exemples de la portada no tenen cap problema', () => {
+test('els exemples de la portada (una pàgina i el seu estils.css) no tenen cap problema', () => {
   const unescape = (text) => text.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&amp;/g, '&');
   const examples = [...site('index.html').matchAll(/<pre class="code-example" data-lang="(\w+)"[^>]*>([\s\S]*?)<\/pre>/g)];
-  assert.equal(examples.length, 2);
-  for (const [, lang, code] of examples) {
-    const input = lang === 'css' ? css(unescape(code) + '\n') : { files: { 'index.html': unescape(code) + '\n' }, mode: 'document' };
-    assert.deepEqual(rulesOf(input), [], lang);
-  }
+  assert.deepEqual(examples.map(([, lang]) => lang), ['html', 'css']);
+  const [html, styles] = examples.map(([, , code]) => unescape(code) + '\n');
+  assert.deepEqual(rulesOf({ files: { 'index.html': html, 'estils.css': styles }, mode: 'document' }), []);
 });
 
 test('rendiment: revisar 300 línies d\'HTML en menys de 50 ms (objectiu: 5 ms)', () => {

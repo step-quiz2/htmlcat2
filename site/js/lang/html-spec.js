@@ -200,3 +200,19 @@ export const ENUMERATED_ATTRIBUTES = {
   button: { type: ['submit', 'reset', 'button'] },
   form: { method: ['get', 'post', 'dialog'] },
 };
+
+/** Noms en català que els alumnes escriuen a vegades com a etiqueta (o com a selector). */
+export const CATALAN_TAGS = {
+  paragraf: 'p', parragraf: 'p', 'paràgraf': 'p', titol: 'h1', 'títol': 'h1',
+  llista: 'ul', enllac: 'a', 'enllaç': 'a', imatge: 'img', negreta: 'strong',
+  cursiva: 'em', taula: 'table', fila: 'tr', cos: 'body', capcalera: 'header',
+  'capçalera': 'header', peu: 'footer', seccio: 'section', 'secció': 'section',
+  boto: 'button', 'botó': 'button', formulari: 'form',
+};
+
+/** Elements de l'SVG que es poden fer servir com a selectors (no són d'HTML, però existeixen). */
+export const SVG_ELEMENTS = new Set([
+  'circle', 'clippath', 'defs', 'ellipse', 'foreignobject', 'g', 'image', 'line',
+  'lineargradient', 'marker', 'mask', 'path', 'pattern', 'polygon', 'polyline',
+  'radialgradient', 'rect', 'stop', 'symbol', 'text', 'textpath', 'tspan', 'use',
+]);

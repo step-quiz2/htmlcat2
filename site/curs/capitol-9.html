@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capítol 9 — Hola, CSS! | HTMLCat</title>
+  <link rel="icon" href="../img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/course.css">
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link rel="stylesheet" href="../css/simulador.css">
+  <script type="module" src="../js/pages/course-page.js"></script>
+</head>
+<body data-pagina="capitol" data-num="9">
+
+<main class="curs-content">
+  <header class="chapter-header">
+    <h1>Hola, CSS!</h1>
+    <p class="chapter-lead">En acabar aquest capítol sabràs donar color i mida a les teves pàgines amb CSS, escrit en un fitxer a part de l'HTML.</p>
+  </header>
+
+  <section class="chapter-section">
+    <h2>Què és el CSS?</h2>
+    <p>
+      Fins ara, l'HTML deia <strong>què és</strong> cada cosa: un títol, un paràgraf, una llista… <strong>Com es veu</strong>
+      (els colors, les mides, les lletres) ho decideix el CSS (de l'anglès <em>Cascading Style Sheets</em>, «fulls d'estil
+      en cascada»). El CSS s'escriu en un fitxer a part, que la pàgina enllaça:
+    </p>
+    <div class="simulador" data-id="c09-primer" data-mode="document" data-height="520">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>El meu gat</title>
+            <link rel="stylesheet" href="estils.css">
+          </head>
+          <body>
+            <main>
+              <h1>El meu gat</h1>
+              <p>Es diu Mixa i té tres anys.</p>
+            </main>
+          </body>
+        </html>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        h1 {
+          color: teal;
+        }
+
+        p {
+          font-size: 20px;
+        }
+      </script>
+    </div>
+    <ul>
+      <li>El simulador té dues pestanyes: <code>index.html</code>, amb el contingut, i <code>estils.css</code>, amb l'aspecte.</li>
+      <li><code>&lt;link rel="stylesheet" href="estils.css"&gt;</code>, dins del <code>&lt;head&gt;</code>, connecta la pàgina amb el fitxer de CSS: <code>rel</code> diu quina relació hi té (és el seu full d'estil, <em>stylesheet</em>) i <code>href</code>, quin fitxer és. És un element buit.</li>
+    </ul>
+    <p>Prova-ho: a la pestanya <code>estils.css</code>, canvia <code>teal</code> per <code>tomato</code>.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Com s'escriu una regla</h2>
+    <p>El CSS és una llista de <strong>regles</strong>. Cada regla diu a quins elements s'aplica i què hi canvia:</p>
+    <pre class="code-example" data-lang="css" tabindex="0">h1 {
+  color: teal;
+}</pre>
+    <ul>
+      <li><code>h1</code> és el <strong>selector</strong>: diu a quins elements s'aplica la regla. Aquí, a tots els <code>&lt;h1&gt;</code> de la pàgina.</li>
+      <li>Entre les claus <code>{</code> i <code>}</code> hi ha les <strong>declaracions</strong>: què es canvia.</li>
+      <li>Cada declaració és <code>propietat: valor;</code>. La propietat (<code>color</code>) i el valor (<code>teal</code>) van separats per dos punts, i el punt i coma acaba la declaració.</li>
+    </ul>
+    <p>Una regla pot tenir tantes declaracions com vulguis, una per línia:</p>
+    <div class="simulador" data-id="c09-regla" data-height="460">
+      <script type="text/plain" data-file="index.html">
+        <h1>Refugi de gats Mixa</h1>
+        <p>Cuidem els gats del barri fins que troben una casa.</p>
+        <p>Obrim de dilluns a dissabte, de 10 a 14 h.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        h1 {
+          color: white;
+          background-color: teal;
+        }
+
+        p {
+          color: darkslategray;
+          font-size: 18px;
+        }
+      </script>
+    </div>
+    <p>La regla de <code>p</code> s'aplica als dos paràgrafs: un selector amb el nom d'un element tria tots els elements d'aquest tipus.</p>
+    <p class="nota">
+      En aquest exemple curt només hi ha el contingut del <code>&lt;body&gt;</code>, i el simulador hi aplica el CSS sol.
+      En una pàgina sencera, cal el <code>&lt;link&gt;</code>.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Colors i mida de la lletra</h2>
+    <div class="simulador" data-id="c09-colors" data-height="520">
+      <script type="text/plain" data-file="index.html">
+        <h1>Refugi de gats Mixa</h1>
+        <p>Text fosc sobre un fons clar: es llegeix bé.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        body {
+          background-color: lightyellow;
+        }
+
+        h1 {
+          color: darkred;
+          font-size: 40px;
+        }
+
+        p {
+          color: navy;
+          font-size: 20px;
+        }
+      </script>
+    </div>
+    <ul>
+      <li><code>color</code> és el color del text, i <code>background-color</code>, el color del fons. Amb el selector <code>body</code>, el fons és el de tota la pàgina.</li>
+      <li>Els noms dels colors són en anglès: <code>red</code>, <code>blue</code>, <code>gold</code>, <code>tomato</code>, <code>teal</code>, <code>navy</code>… N'hi ha 140, i <code>vermell</code> no n'és cap. Al capítol 11 veuràs com es pot escriure qualsevol color amb números.</li>
+      <li><code>font-size</code> és la mida de la lletra, en píxels (<code>px</code>): la mida normal és <code>16px</code>. El número porta sempre la unitat al darrere, sense espai.</li>
+    </ul>
+    <p>Tria colors que facin que el text es llegeixi bé: fosc sobre clar, o clar sobre fosc.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Comentaris</h2>
+    <p>Al CSS, els comentaris van entre <code>/*</code> i <code>*/</code>:</p>
+    <div class="simulador" data-id="c09-comentaris" data-height="420">
+      <script type="text/plain" data-file="index.html">
+        <h1>Refugi de gats Mixa</h1>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        /* Estils del refugi de gats */
+
+        h1 {
+          color: teal;
+          /* background-color: gold; */
+        }
+      </script>
+    </div>
+    <ul>
+      <li>El navegador no fa cas del que hi ha dins d'un comentari. Serveixen per explicar el codi… i per «apagar» una declaració una estona.</li>
+      <li>Prova-ho: treu el <code>/*</code> i el <code>*/</code> de la segona declaració, i el fons del títol es tornarà daurat.</li>
+      <li>Al CSS no valen ni els comentaris de l'HTML (<code>&lt;!-- --&gt;</code>) ni els de molts altres llenguatges (<code>//</code>).</li>
+    </ul>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Separa el contingut de la presentació</h2>
+    <p>També es pot escriure CSS dins d'una etiqueta, amb l'atribut <code>style</code>:</p>
+    <pre class="code-example" data-lang="html" tabindex="0">&lt;p style="color: red"&gt;Atenció!&lt;/p&gt;</pre>
+    <p>
+      Funciona, però barreja l'aspecte amb el contingut. Amb un fitxer de CSS a part, totes les pàgines del web fan servir
+      el mateix fitxer (canvies un color en un sol lloc i canvia a tot el web), l'HTML queda net i es veu d'un cop d'ull
+      com és cada cosa. Per això el panell ⚠ Problemes avisa quan troba un <code>style</code>. També hi ha l'element
+      <code>&lt;style&gt;</code>, per escriure CSS dins del <code>&lt;head&gt;</code> d'una sola pàgina, però el fitxer a part és millor.
+    </p>
+    <aside class="codi-net">
+      <p class="codi-net__titol">🧹 Codi net: separa el contingut de la presentació</p>
+      <ul>
+        <li>L'HTML diu què és cada cosa; el CSS, com es veu. Res d'atributs <code>style</code>.</li>
+        <li>Una declaració per línia, indentada 2 espais; la <code>}</code>, alineada amb el selector.</li>
+        <li>Punt i coma al final de cada declaració, també de l'última.</li>
+        <li>Una línia en blanc entre regla i regla.</li>
+        <li>Comentaris <code>/* */</code> per explicar les parts del full d'estil.</li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Errors típics</h2>
+    <p>Aquests exemples tenen errors. Mira el resultat i llegeix el panell ⚠ Problemes (els errors són a la pestanya <code>estils.css</code>).</p>
+
+    <h3>Falta un punt i coma</h3>
+    <div class="simulador" data-readonly data-height="360">
+      <script type="text/plain" data-file="index.html">
+        <p>Obrim de dilluns a dissabte.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        p {
+          color: navy
+          font-size: 24px;
+        }
+      </script>
+    </div>
+    <p>No funciona cap de les dues declaracions: sense el <code>;</code>, el navegador llegeix «navy font-size: 24px» com un sol valor, i no l'entén.</p>
+
+    <h3>Una propietat mal escrita</h3>
+    <div class="simulador" data-readonly data-height="320">
+      <script type="text/plain" data-file="index.html">
+        <p>Obrim de dilluns a dissabte.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        p {
+          colr: tomato;
+        }
+      </script>
+    </div>
+    <p>El navegador no coneix la propietat <code>colr</code> i no en fa cas, sense dir res.</p>
+
+    <h3>Un color en català</h3>
+    <div class="simulador" data-readonly data-height="320">
+      <script type="text/plain" data-file="index.html">
+        <p>Obrim de dilluns a dissabte.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        p {
+          color: vermell;
+        }
+      </script>
+    </div>
+    <p>Els noms dels colors són en anglès: <code>red</code>.</p>
+
+    <h3>Un número sense unitat</h3>
+    <div class="simulador" data-readonly data-height="320">
+      <script type="text/plain" data-file="index.html">
+        <p>Obrim de dilluns a dissabte.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        p {
+          font-size: 24;
+        }
+      </script>
+    </div>
+    <p>Sense <code>px</code>, el navegador no sap quina mida vols i deixa la que hi havia.</p>
+
+    <h3>Falta una clau</h3>
+    <div class="simulador" data-readonly data-height="380">
+      <script type="text/plain" data-file="index.html">
+        <h1>Refugi de gats Mixa</h1>
+        <p>Obrim de dilluns a dissabte.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        h1 {
+          color: teal;
+
+        p {
+          font-size: 24px;
+        }
+      </script>
+    </div>
+    <p>El títol sí que agafa el color, però la regla de <code>p</code> s'ha perdut: sense la <code>}</code>, el navegador s'ha empassat la regla següent.</p>
+
+    <h3>Un comentari d'HTML</h3>
+    <div class="simulador" data-readonly data-height="360">
+      <script type="text/plain" data-file="index.html">
+        <h1>Refugi de gats Mixa</h1>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        <!-- Títols -->
+        h1 {
+          color: teal;
+        }
+      </script>
+    </div>
+    <p>El títol no agafa el color: el navegador no entén <code>&lt;!--</code>, i el text del comentari s'ha enganxat al selector de la regla.</p>
+
+    <h3>Sense &lt;link&gt;</h3>
+    <div class="simulador" data-mode="document" data-readonly data-height="460">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>Refugi de gats Mixa</title>
+          </head>
+          <body>
+            <main>
+              <h1>Refugi de gats Mixa</h1>
+            </main>
+          </body>
+        </html>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        h1 {
+          color: teal;
+        }
+      </script>
+    </div>
+    <p>El fitxer <code>estils.css</code> és correcte, però la pàgina no el fa servir: li falta el <code>&lt;link&gt;</code> al <code>&lt;head&gt;</code>.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Exercici: dona estil a la recepta</h2>
+    <p>La pàgina de la recepta encara no té estils. Fes que tingui:</p>
+    <ul>
+      <li>el fitxer <code>estils.css</code> connectat a la pàgina, amb un <code>&lt;link&gt;</code> al <code>&lt;head&gt;</code>;</li>
+      <li>un color de fons per a tota la pàgina (<code>body</code>);</li>
+      <li>un color per al títol <code>h1</code>, i un altre per als títols <code>h2</code>;</li>
+      <li>una mida de lletra en píxels per als paràgrafs (<code>p</code>);</li>
+      <li>cap error ni cap avís al panell ⚠ Problemes.</li>
+    </ul>
+    <p>Quan acabis, prem <strong>✓ Comprova</strong>.</p>
+    <div class="simulador" data-id="c09-exercici" data-goal-id="cap-9-ex" data-mode="document" data-height="600">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>Pa amb tomàquet</title>
+          </head>
+          <body>
+            <main>
+              <h1>Pa amb tomàquet</h1>
+              <p>La recepta més fàcil de la cuina catalana.</p>
+              <h2>Ingredients</h2>
+              <ul>
+                <li>Pa de pagès</li>
+                <li>Tomàquets madurs</li>
+                <li>Oli d'oliva i sal</li>
+              </ul>
+              <h2>Com es fa</h2>
+              <p>Talla el pa a llesques, frega-hi el tomàquet i posa-hi oli i sal.</p>
+            </main>
+          </body>
+        </html>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        /* Estils de la recepta */
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "exists", "selector": "style[data-file='estils.css']",
+            "msg": "La pàgina fa servir estils.css (amb <link rel=\"stylesheet\" href=\"estils.css\"> al <head>)." },
+          { "type": "uses-css", "selector": "body", "prop": "background-color",
+            "msg": "Tota la pàgina (body) té un color de fons." },
+          { "type": "uses-css", "selector": "h1", "prop": "color",
+            "msg": "El títol <h1> té un color." },
+          { "type": "uses-css", "selector": "h2", "prop": "color",
+            "msg": "Els títols <h2> tenen un color." },
+          { "type": "uses-css", "selector": "p", "prop": "font-size",
+            "msg": "Els paràgrafs (p) tenen una mida de lletra." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error (com un color o una mida que el navegador no entén)." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís (com una declaració sense ; al final)." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Troba l'error</h2>
+    <p>
+      La pàgina del club d'escacs no té cap estil, i hauria de tenir-ne. Hi ha cinc errors: un a <code>index.html</code> i
+      quatre a <code>estils.css</code>. El títol <code>h2</code> ha de ser vermell (<code>red</code>). Quan acabis, prem
+      <strong>✓ Comprova</strong>.
+    </p>
+    <div class="simulador" data-id="c09-troba-error" data-goal-id="cap-9-bug" data-mode="document" data-height="600">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>Club d'escacs</title>
+            <link rel="stylesheet" href="estil.css">
+          </head>
+          <body>
+            <main>
+              <h1>Club d'escacs</h1>
+              <p>Juguem cada dimecres a la biblioteca, de 17 a 19 h.</p>
+              <h2>Com apuntar-s'hi</h2>
+              <p>Només cal que vinguis un dimecres i ho diguis al Jordi.</p>
+            </main>
+          </body>
+        </html>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        /* Estils del club d'escacs */
+
+        body {
+          background-color: lightyellow
+          color: darkslategray;
+        }
+
+        h1 {
+          colr: darkred;
+        }
+
+        h2 {
+          color: vermell;
+        }
+
+        p {
+          font-size: 18;
+        }
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "style", "selector": "body", "prop": "background-color", "equals": "lightyellow",
+            "msg": "El fons de la pàgina és lightyellow." },
+          { "type": "style", "selector": "body", "prop": "color", "equals": "darkslategray",
+            "msg": "El text de la pàgina és darkslategray." },
+          { "type": "style", "selector": "h1", "prop": "color", "equals": "darkred",
+            "msg": "El títol <h1> és darkred." },
+          { "type": "style", "selector": "h2", "prop": "color", "equals": "red",
+            "msg": "El títol <h2> és vermell (red)." },
+          { "type": "style", "selector": "p", "prop": "font-size", "equals": "18px",
+            "msg": "Els paràgrafs tenen una lletra de 18 píxels." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Resum</h2>
+    <div class="resum">
+      <ul>
+        <li>El CSS diu com es veu la pàgina. Va en un fitxer a part, que la pàgina enllaça amb <code>&lt;link rel="stylesheet" href="estils.css"&gt;</code> al <code>&lt;head&gt;</code>.</li>
+        <li>Una regla és <code>selector { propietat: valor; }</code>. Un selector amb el nom d'un element (<code>h1</code>, <code>p</code>, <code>body</code>) tria tots els elements d'aquest tipus.</li>
+        <li><code>color</code> (el text), <code>background-color</code> (el fons) i <code>font-size</code> (la mida, amb unitat: <code>18px</code>). Els noms dels colors, en anglès.</li>
+        <li>Els comentaris de CSS van entre <code>/*</code> i <code>*/</code>.</li>
+        <li>Res d'atributs <code>style</code>: l'HTML per al contingut, el CSS per a la presentació.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>

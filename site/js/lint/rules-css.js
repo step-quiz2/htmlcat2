@@ -19,6 +19,7 @@
 // ════════════════════════════════════════════════════════
 
 import { CSS_PROPERTIES } from '../lang/css-spec.js';
+import { KNOWN_ELEMENTS, DEPRECATED_ELEMENTS, CATALAN_TAGS, SVG_ELEMENTS } from '../lang/html-spec.js';
 import { closest } from './suggest.js';
 import { indentChecker } from './lines.js';
 
@@ -59,6 +60,26 @@ function* styleDeclarations(sheet) {
 
 const propertyName = (decl) => decl.property.text.toLowerCase().replace(/\s+/g, ' ');
 
+// Un comentari mal escrit (// o <!--) fa que el navegador llegeixi el text com a
+// codi: ja ho explica css/wrong-comment, i els altres missatges confondrien
+const WRONG_COMMENT = /\/\/|<!--/;
+
+/** El CSS amb els comentaris, les cadenes i els url(…) canviats per espais (mateixes posicions). */
+function maskCss(src, sheet) {
+  const blank = (text) => text.replace(/[^\n]/g, ' ');
+  let masked = src;
+  for (const c of sheet.comments) masked = masked.slice(0, c.start) + blank(masked.slice(c.start, c.end)) + masked.slice(c.end);
+  return masked.replace(/"[^"\n]*"?|'[^'\n]*'?/g, blank).replace(/url\(\s*[^)]*\)?/gi, blank);
+}
+
+/** Regles d'estil (també les de dins d'un @media), sense els passos dels @keyframes (from, to, 50%). */
+function* styleRules(list) {
+  for (const rule of list) {
+    if (rule.type === 'style') yield rule;
+    if (rule.rules && !/keyframes$/i.test(rule.name || '')) yield* styleRules(rule.rules);
+  }
+}
+
 // ── Errors de lang/css-parser.js ──
 
 function fromParser(id, codes) {
@@ -86,7 +107,7 @@ const unknownProperty = {
     if (!ctx.supports) return;
     for (const decl of styleDeclarations(ctx.sheet)) {
       const property = propertyName(decl);
-      if (!decl.value || !property || property.startsWith('-')) continue;   // --variables i -webkit-…
+      if (!decl.value || !property || property.startsWith('-') || WRONG_COMMENT.test(property)) continue;   // --variables i -webkit-…
       if (ctx.supports(property, 'initial')) continue;
       const suggestion = CATALAN_PROPERTIES[property] || closest(property, CSS_PROPERTIES);
       report(decl.property, { property, suggestion });
@@ -126,6 +147,45 @@ const invalidValue = {
   },
 };
 
+// ── Comentaris i selectors (capítol 9) ──
+
+const wrongComment = {
+  id: 'css/wrong-comment',
+  lang: 'css',
+  since: 9,
+  severity: 'error',
+  check(ctx, report) {
+    const masked = maskCss(ctx.src, ctx.sheet);
+    for (const match of masked.matchAll(/<!--|\/\//g)) {
+      report({ start: match.index, end: match.index + match[0].length }, { kind: match[0] === '//' ? 'slash' : 'html' });
+    }
+  },
+};
+
+const unknownElementSelector = {
+  id: 'css/unknown-element-selector',
+  lang: 'css',
+  since: 9,
+  severity: 'warning',
+  check(ctx, report) {
+    for (const rule of styleRules(ctx.sheet.rules)) {
+      for (const selector of rule.selectors) {
+        if (WRONG_COMMENT.test(selector.text)) continue;
+        // Fora el contingut de [...], (...) i les cadenes: hi pot haver noms que no són elements
+        const blank = (text) => ' '.repeat(text.length);
+        const text = selector.text.replace(/"[^"]*"|'[^']*'/g, blank).replace(/\[[^\]]*\]|\([^)]*\)/g, blank);
+        // Un nom d'element va al començament d'un selector compost (no després de . # : ni d'un altre nom)
+        for (const match of text.matchAll(/(^|[\s>+~])([a-zA-Z][\w-]*)/g)) {
+          const name = match[2].toLowerCase();
+          if (KNOWN_ELEMENTS.has(name) || DEPRECATED_ELEMENTS.has(name) || SVG_ELEMENTS.has(name) || name.includes('-')) continue;
+          const start = selector.start + match.index + match[1].length;
+          report({ start, end: start + name.length }, { name, suggestion: CATALAN_TAGS[name] || closest(name, KNOWN_ELEMENTS) });
+        }
+      }
+    }
+  },
+};
+
 // ── Codi net ──
 
 const lastSemicolon = {
@@ -153,6 +213,7 @@ const oneDeclarationPerLine = {
     for (const rule of containers(ctx.sheet.rules)) {
       rule.declarations.forEach((decl, i) => {
         const previous = rule.declarations[i - 1];
+        if (WRONG_COMMENT.test(decl.property.text)) return;
         if (previous && ctx.lineOf(previous.property.start) === ctx.lineOf(decl.property.start)) {
           report(decl.property, { property: propertyName(decl) });
         }
@@ -201,6 +262,8 @@ export const CSS_RULES = [
   fromParser('css/unclosed-string', ['unclosed-string']),
   unknownProperty,
   invalidValue,
+  wrongComment,
+  unknownElementSelector,
   lastSemicolon,
   oneDeclarationPerLine,
   indentation,
