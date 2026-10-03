@@ -26,11 +26,10 @@ aquest document (i el codi).
 
 ## 2. Què hi ha ara
 
-**Fase actual: 3 (revisor de codi i panell ⚠ Problemes) acabada.** Hi ha
-l'editor lliure a `/editor/` amb previsualització en directe i el panell
-⚠ Problemes, que explica en català els errors i els hàbits poc nets del codi,
-sobre els analitzadors d'HTML i CSS de la fase 1. Encara no hi ha cap capítol
-(fase 4).
+**Fase actual: 4 (primer capítol complet) acabada.** Hi ha el capítol 1
+(«Hola, HTML!») amb l'estructura del curs (menú de capítols, progrés), els
+exercicis amb «✓ Comprova» i el panell ⚠ Problemes, i l'editor lliure a
+`/editor/`. Següent: un capítol per PR (fase 5).
 
 ```
 README.md              Presentació del projecte (per a persones)
@@ -47,8 +46,9 @@ docs/BLUEPRINT.md      Disseny inicial i lliçons apreses de PyCat i JSCat (en a
 docs/CURRICULUM.md     Pla de capítols i reptes (proposta)
 
 site/                  ← l'única carpeta que es publica
-  index.html           Portada provisional «En construcció»: dos exemples ressaltats
-                       i un botó cap a l'editor lliure
+  index.html           Portada: dos exemples ressaltats, «Comença el curs», la llista de
+                       capítols (de course/data.js, amb ✓) i l'editor lliure
+  curs/capitol-1.html  Capítol 1, «Hola, HTML!» (exercicis cap-1-ex i cap-1-bug)
   editor/index.html    Editor lliure (simulador a pantalla completa, clau code:editor)
   404.html             Pàgina d'error (Cloudflare la fa servir sola)
   _headers             Capçaleres de seguretat per a Cloudflare Pages
@@ -99,7 +99,8 @@ tests/
   package-lock.json
   unit/*.test.mjs      Tests unitaris dels mòduls purs (node:test)
   course-static.mjs    Comprovacions estàtiques de site/ (sense dependències)
-  course-browser.mjs   Comprovacions amb Chromium a 360 i 1280 px + editor de punta a punta
+  course-browser.mjs   Comprovacions amb Chromium a 360 i 1280 px, editor i exercicis de punta a punta
+  solutions/<goal-id>/ Solució de referència de cada exercici (no es publica)
 ```
 
 Estructura completa prevista: BLUEPRINT §4.1.
@@ -426,9 +427,9 @@ cd tests && npm ci && node course-browser.mjs   # navegador (Playwright + Chromi
 
 | Test | Què comprova |
 |---|---|
-| `unit/` | Cada mòdul pur de `site/js/` (152 tests): tokenitzador, arbre i errors d'estructura, analitzador de CSS, ressaltat (conserva el codi, escapa, una línia per entrada, rendiment), robustesa amb 500 codis aleatoris (també el revisor), edició (Retorn, Tab, Maj+Tab), `localStorage`, document de previsualització, textos de la interfície i revisor de codi: per a cada regla, un codi que la dispara i un que no (un test falla si una regla no en té), missatges sense buits, activació per capítol i mode, ordre, agrupació, rendiment, i que el codi d'exemple de l'editor lliure i de la portada no tingui cap problema |
-| `course-static.mjs` | Cada pàgina té `<!DOCTYPE html>`, `lang="ca"`, `charset` i `<title>`; cap `style=""` ni `on…=""`; cap tabulació; tots els enllaços relatius existeixen; sintaxi de cada `.js`; cap menció de CC BY-NC-ND; existeixen `.editorconfig`, `.gitignore` i `.github/workflows/ci.yml` (una pujada pel web no els inclou) |
-| `course-browser.mjs` | Cada pàgina, a 360 i 1280 px: cap error a la consola, cap petició fallida, cap petició a servidors externs, cap desplaçament horitzontal, cap id repetit. Dos exemples no editables a la mateixa pàgina no repeteixen els ids de les pestanyes. A més, prova l'editor lliure de punta a punta: escriure, indentació automàtica, resultat en directe, Ctrl+Z, `sandbox` i CSP correctes (també amb text abans de `<html>`), cap script ni imatge externa, enllaços interceptats, CSS aplicat i codi desat després de recarregar. I el panell ⚠ Problemes: «Cap problema» amb el codi inicial, un `<p>` sense tancar surt amb la seva línia i es marca, el clic i el teclat porten el cursor a la línia (i canvien de pestanya), i una propietat CSS mal escrita es detecta amb el `CSS.supports` del navegador |
+| `unit/` | Cada mòdul pur de `site/js/` (163 tests): tokenitzador, arbre i errors d'estructura, analitzador de CSS, ressaltat (conserva el codi, escapa, una línia per entrada, rendiment), robustesa amb 500 codis aleatoris (també el revisor), edició (Retorn, Tab, Maj+Tab), `localStorage`, document de previsualització, textos de la interfície i revisor de codi: per a cada regla, un codi que la dispara i un que no (un test falla si una regla no en té), missatges sense buits, activació per capítol i mode, ordre, agrupació, rendiment, i que el codi d'exemple de l'editor lliure i de la portada no tingui cap problema; dades del curs i progrés; esquema de les comprovacions i les que no necessiten navegador (`uses-html`, `uses-css`, `lint`) |
+| `course-static.mjs` | Cada pàgina té `<!DOCTYPE html>`, `lang="ca"`, `charset` i `<title>`; cap `style=""` ni `on…=""`; cap tabulació; tots els enllaços relatius existeixen; sintaxi de cada `.js`; cap menció de CC BY-NC-ND; existeixen `.editorconfig`, `.gitignore` i `.github/workflows/ci.yml` (una pujada pel web no els inclou). Curs: dades (`course/data.js`) ↔ fitxers de `site/curs/`; `<body data-pagina data-num>` d'acord amb el fitxer; l'exercici principal de cada capítol hi és; tot simulador editable té `data-id`; `data-id` i `data-goal-id` únics; blocs de codi amb nom permès i sense `<script`; comprovacions vàlides (`checks/schema.js`); cada exercici té la seva solució a `tests/solutions/` |
+| `course-browser.mjs` | Cada pàgina, a 360 i 1280 px: cap error a la consola, cap petició fallida, cap petició a servidors externs, tots els simuladors es munten en arribar-hi, cap desplaçament horitzontal, cap id repetit. Cada exercici dels capítols, en un mòbil: el codi inicial no el supera, la solució sí (i sense errors al panell ⚠ Problemes), el menú hi posa ✓ i es manté després de recarregar. Dos exemples no editables a la mateixa pàgina no repeteixen els ids de les pestanyes. A més, prova l'editor lliure de punta a punta: escriure, indentació automàtica, resultat en directe, Ctrl+Z, `sandbox` i CSP correctes (també amb text abans de `<html>`), cap script ni imatge externa, enllaços interceptats, CSS aplicat i codi desat després de recarregar. I el panell ⚠ Problemes: «Cap problema» amb el codi inicial, un `<p>` sense tancar surt amb la seva línia i es marca, el clic i el teclat porten el cursor a la línia (i canvien de pestanya), i una propietat CSS mal escrita es detecta amb el `CSS.supports` del navegador |
 
 La GitHub Action `.github/workflows/ci.yml` executa els tres a cada push i a
 cada pull request (pestanya «Actions» de GitHub).
@@ -443,6 +444,11 @@ connectat a l'antic repositori. **Pendent:** comprovar que publica aquest
 cada PR. Configuració esperada: *framework preset* «None», ordre de compilació
 buida, carpeta de sortida `site`. També pendent: comprovar que `/tests/` i
 `/docs/` donen la pàgina 404 i afegir el domini `htmlcat.step-quiz.net` (D8).
+
+La portada és `site/index.html`: **a l'arrel del repositori no hi ha cap
+`index.html`, expressament**. Si el web publicat no té portada, és que la
+carpeta de sortida de Cloudflare no és `site` (i aleshores també es publicarien
+els tests, les solucions i la documentació: BLUEPRINT A16).
 
 `site/_headers` afegeix `X-Content-Type-Options`, `Referrer-Policy` i
 `Permissions-Policy`. **No** s'hi han de posar COOP/COEP (BLUEPRINT §3.2, A15)
@@ -465,7 +471,10 @@ Fases del BLUEPRINT §9.1:
       Queda per a més endavant: les regles que necessiten el document pintat (fase 4 i
       capítols 4, 5, 10 i 11), les dels capítols 4–14 (amb cada capítol) i les correccions
       ràpides (fase 6). L'arbre del codi font encara no entén `<circle />` dins d'`<svg>`.
-- [ ] **Fase 4 — Primer capítol complet** (esquelet del curs, progrés, comprovacions, tests).
+- [x] **Fase 4 — Primer capítol complet** (esquelet del curs, progrés, comprovacions, capítol 1
+      amb dos exercicis i solucions, tests del curs). Queda per a més endavant: exportar/importar
+      el progrés i les activitats (fase 6), pantalla completa, glossari i la portada amb targetes
+      (fase 7).
 - [ ] **Fase 5 — Continguts:** un capítol per PR.
 - [ ] **Fase 6 — Activitats i eines:** Parsons, qüestionaris, 🌳 Arbre, exportar/importar el progrés.
 - [ ] **Fase 7 — Acabats:** portada amb progrés, glossari, accessibilitat, guia del professorat.

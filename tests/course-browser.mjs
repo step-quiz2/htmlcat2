@@ -11,8 +11,14 @@
 //   1. escriu errors a la consola del navegador o llança excepcions;
 //   2. té peticions que fallen (recurs inexistent, error de xarxa);
 //   3. fa una petició a un servidor extern (privacitat dels alumnes);
-//   4. té desplaçament horitzontal (no cap a l'amplada de la pantalla);
-//   5. té ids repetits.
+//   4. no munta tots els simuladors en arribar-hi (es munten en acostar-s'hi);
+//   5. té desplaçament horitzontal (no cap a l'amplada de la pantalla);
+//   6. té ids repetits.
+//
+// Per a cada exercici (data-goal-id) dels capítols, en un mòbil
+// (checkExercise, docs/BLUEPRINT.md §8.3): el codi inicial NO el supera; la
+// solució de tests/solutions/<goal-id>/ sí, sense cap error al panell
+// ⚠ Problemes; queda desat (✓ al menú) i es manté després de recarregar.
 //
 // A més, prova de punta a punta l'editor lliure (checkFreeEditor):
 // escriure, indentació, resultat en directe, seguretat (també amb text
@@ -29,11 +35,13 @@
 
 import { createServer } from 'node:http';
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
+import { findPage } from '../site/js/course/data.js';
 import { join, dirname, extname, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..', 'site');
+const SOLUTIONS = join(dirname(fileURLToPath(import.meta.url)), 'solutions');
 const VIEWPORTS = [
   { name: 'mòbil', width: 360, height: 740 },
   { name: 'escriptori', width: 1280, height: 800 },
@@ -101,6 +109,13 @@ for (const file of listPages(SITE)) {
     });
 
     await page.goto(url, { waitUntil: 'networkidle' });
+    // Els simuladors es munten quan s'hi acosta la pantalla
+    for (const host of await page.locator('.simulador').all()) await host.scrollIntoViewIfNeeded();
+    const mounted = await page.waitForFunction(
+      () => [...document.querySelectorAll('.simulador')].every((host) => host.classList.contains('sim')),
+      null, { timeout: 5000 }).then(() => true, () => false);
+    if (!mounted) problems.push(`${where}: no s'han muntat tots els simuladors`);
+    await page.waitForLoadState('networkidle');
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     if (overflow > 0) problems.push(`${where}: desplaçament horitzontal de ${overflow} px`);
     const repeated = await page.evaluate(duplicateIds);
@@ -114,6 +129,9 @@ for (const file of listPages(SITE)) {
 await checkFreeEditor();
 await checkProblemsPanel();
 await checkSeveralSimulators();
+for (const file of listPages(join(SITE, 'curs'))) {
+  for (const [, goal] of readFileSync(file, 'utf8').matchAll(/data-goal-id="([^"]+)"/g)) await checkExercise(file, goal);
+}
 
 await browser.close();
 server.close();
@@ -323,6 +341,59 @@ async function checkProblemsPanel() {
   if (activeTab !== 'estils.css') fail('l\'entrada del CSS no ha obert la pestanya estils.css');
   if (await caretLine() !== 2) fail(`el teclat ha portat el cursor a la línia ${await caretLine()}, no a la 2`);
 
+  await page.evaluate(() => localStorage.clear());
+  await page.close();
+}
+
+// Un exercici d'un capítol, de punta a punta, en un mòbil
+async function checkExercise(file, goal) {
+  const where = `${relative(SITE, file)} (${goal})`;
+  const fail = (msg) => problems.push(`${where}: ${msg}`);
+  const page = await browser.newPage({ viewport: { width: 360, height: 740 } });
+  page.on('pageerror', (err) => fail(`excepció: ${err.message}`));
+  page.on('dialog', (dialog) => { fail(`diàleg inesperat: ${dialog.message()}`); dialog.dismiss(); });
+  const url = origin + '/' + relative(SITE, file).split(sep).join('/');
+  await page.goto(url, { waitUntil: 'networkidle' });
+  await page.evaluate(() => localStorage.clear());
+  await page.reload({ waitUntil: 'networkidle' });
+
+  const sim = page.locator(`[data-goal-id="${goal}"]`);
+  const check = sim.locator('.sim-button--check');
+  await sim.scrollIntoViewIfNeeded();
+  await check.waitFor();
+  const failing = () => sim.locator('.sim-check--fail').allInnerTexts();
+
+  // 1. El codi inicial no supera l'exercici (si no, l'exercici es resol sol)
+  await check.click();
+  await sim.locator('.sim-check').first().waitFor();
+  if (!(await failing()).length) fail('el codi inicial ja supera totes les comprovacions');
+
+  // 2. La solució les supera totes, sense cap error al panell ⚠ Problemes
+  for (const name of readdirSync(join(SOLUTIONS, goal))) {
+    await sim.locator('.sim-tab', { hasText: name }).click();
+    await sim.locator('.sim-code__panel:not([hidden]) textarea').fill(readFileSync(join(SOLUTIONS, goal, name), 'utf8'));
+  }
+  await page.waitForTimeout(600);
+  await sim.locator('.sim-panel-tab', { hasText: 'Problemes' }).click();
+  const lintStatus = await sim.locator('.sim-problems__status').innerText();
+  if (/error/.test(lintStatus)) fail(`la solució té errors al panell ⚠ Problemes: ${lintStatus}`);
+  await check.click();
+  const passed = await sim.locator('.sim-checks__status--pass').waitFor({ timeout: 5000 }).then(() => true, () => false);
+  if (!passed) {
+    fail('la solució no supera: ' + (await failing()).join(' | '));
+    await page.close();
+    return;
+  }
+
+  // 3. Queda desat: ✓ al menú (si és l'exercici principal) i després de recarregar
+  const [, pagina, num] = /(capitol|repte)-(\d+)\.html$/.exec(file);
+  const isMain = findPage(pagina, Number(num))?.goalId === goal;
+  if (isMain && !(await page.locator('.course-menu__item--done').count())) fail('el menú no marca el capítol com a superat');
+  await page.reload({ waitUntil: 'networkidle' });
+  await sim.scrollIntoViewIfNeeded();
+  const status = sim.locator('.sim-checks__status');   // (pot ser a la pestanya no visible)
+  await status.waitFor({ state: 'attached' });
+  if (!(await status.textContent()).includes('Ja has superat')) fail('després de recarregar no diu que ja està superat');
   await page.evaluate(() => localStorage.clear());
   await page.close();
 }

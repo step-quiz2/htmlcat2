@@ -1,6 +1,6 @@
 # HANDOFF — start here (for a Claude session with no prior context)
 
-Last updated: 2026-10-02, after phase 3 (linter + "⚠ Problemes" panel).
+Last updated: 2026-10-03, after phase 4 (course shell, checks, chapter 1).
 Keep it short and current: when you finish a phase, rewrite the "Where we are" and
 "Next task" sections.
 
@@ -33,32 +33,35 @@ copied here by a GitHub web upload, which dropped every dot-file (see §6).
   free editor at `site/editor/`, asset pack `site/recursos/`.
 - Phase 3 ✅ linter (`site/js/lint/`: 35 rules up to chapter 9, Catalan messages, STATE §2.6)
   and the "⚠ Problemes" panel (`sim/problems-panel.js`, STATE §2.4).
-- 152 unit tests + static checks + browser checks (end-to-end editor and panel tests), all green.
+- Phase 4 ✅ course shell (`site/js/course/`: data, progress, shell; STATE §2.8), checks DSL v1
+  (`site/js/checks/`, "✓ Comprova", hidden 800×600 check frame; STATE §2.7) and chapter 1
+  (`site/curs/capitol-1.html`, exercises `cap-1-ex` and `cap-1-bug`, solutions in `tests/solutions/`).
+- Decisions D3, D4, D6–D12: the owner accepted all recommended options (STATE §3).
+- 163 unit tests + static checks + browser checks (editor, panel and every exercise end-to-end), all green.
 - Still pending from phase 0 (owner's job): confirm Cloudflare Pages deploys
   `step-quiz2/htmlcat2` (it was connected to the old repo); confirm `/tests/` and `/docs/`
   return 404 on the deployed site; add custom domain `htmlcat.step-quiz.net`.
 
-## 4. Next task: phase 4 — course vertical slice (chapter 1 end-to-end)
+## 4. Next task: phase 5 — content, one chapter per PR
 
-Follow BLUEPRINT §9.1 (phase 4), §4.8–4.12, §5 and §8. Before writing chapter 1,
-ask the owner to confirm D3 (fragment vs document), D9 (curriculum) and D12
-(class/id naming): STATE §3. Concretely:
+Follow BLUEPRINT §9.3 (per-chapter workflow) and §5.5 (content rules); read
+`docs/CURRICULUM.md` and `site/curs/capitol-1.html` (tone, structure, how examples,
+"Errors típics", exercises and "Troba l'error" are written). For chapter N:
 
-1. `site/js/course/data.js` (`CAPITOLS`, `REPTES`) and `course/shell.js`
-   (`initCoursePage()`: topbar, sidebar with ✓, prev/next, footer) reading
-   `body[data-pagina][data-num]` — never `location` (A9).
-2. `course/progress.js` (`progress` key, STATE §2.5) and the checks DSL v1:
-   `checks/schema.js` (pure) + `checks/checks.js`, evaluated in a hidden 800×600
-   check frame; "✓ Comprova" button and "✓ Comprovacions" panel (`data-goal-id`,
-   `data-checks`). The `lint` check type can reuse `lintStatic` (STATE §2.6).
-3. Mount simulators with `mountSimulator(el, { chapter })` (page `data-num`) so the
-   linter only applies what has been taught; lazy mount with `IntersectionObserver`.
-4. `site/curs/capitol-1.html` + `tests/solutions/cap-1-ex/`; static checks of §8.2 and
-   browser checks of §8.3 (solution passes, starter fails, every simulator mounts).
+1. Add the entry to `CAPITOLS` (`site/js/course/data.js`) and write
+   `site/curs/capitol-N.html` (STATE §2.8): examples, "Errors típics" (read-only
+   simulators that look almost right while the Problems panel explains), the exercise
+   `cap-N-ex` (+ optional `cap-N-bug`) with `data-checks` (STATE §2.7), "Codi net", "Resum".
+2. Solutions in `tests/solutions/<goal-id>/`. The tests already check every exercise:
+   starter fails, solution passes with no lint errors, progress persists.
+3. Add the lint rules the chapter introduces (BLUEPRINT Appendix C; STATE §2.6), each
+   with a positive and a negative case in `tests/unit/lint-rules.test.mjs`.
+4. Chapters 2–5: fragment mode; from chapter 6, full documents (D3).
+5. Update `docs/CURRICULUM.md` (status) and STATE; proofread the Catalan.
 
-Linter follow-ups (later): rendered rules (`html/missing-anchor`, `image-not-found`,
-`css/selector-matches-nothing`, `low-contrast`), rules for chapters 4–14 (one chapter
-at a time), quick-fixes (phase 6).
+Still open: rendered lint rules (`html/missing-anchor` ch. 4, `image-not-found` ch. 5, …),
+`layout`/`viewport` checks before chapters 13–14, vocabulary/glossary/autocomplete,
+progress export/import (phase 6).
 
 ## 5. How to work (owner's rules — see also CLAUDE.md)
 
