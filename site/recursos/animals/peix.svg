@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Un peix vermell">
+  <rect width="200" height="200" rx="24" fill="#cffafe"/>
+  <circle cx="150" cy="46" r="8" fill="none" stroke="#0e7490" stroke-width="3"/>
+  <circle cx="166" cy="26" r="5" fill="none" stroke="#0e7490" stroke-width="3"/>
+  <path d="M60 100 22 68v64z" fill="#dc2626"/>
+  <path d="M96 66q14-22 34-4l-10 10z" fill="#dc2626"/>
+  <ellipse cx="106" cy="100" rx="56" ry="38" fill="#ef4444"/>
+  <path d="M86 92q8 8 0 16M102 88q8 10 0 20" fill="none" stroke="#fca5a5" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="134" cy="92" r="9" fill="#fff"/>
+  <circle cx="137" cy="92" r="5" fill="#1c1917"/>
+  <path d="M156 108q-6 5-12 2" fill="none" stroke="#1c1917" stroke-width="3" stroke-linecap="round"/>
+</svg>

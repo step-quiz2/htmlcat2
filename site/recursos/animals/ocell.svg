@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Un ocell blau sobre una branca">
+  <rect width="200" height="200" rx="24" fill="#dcfce7"/>
+  <path d="M20 162h160" stroke="#78350f" stroke-width="8" stroke-linecap="round"/>
+  <path d="M60 120 22 104l14 30z" fill="#1d4ed8"/>
+  <ellipse cx="100" cy="118" rx="48" ry="38" fill="#3b82f6"/>
+  <circle cx="132" cy="78" r="28" fill="#3b82f6"/>
+  <ellipse cx="108" cy="134" rx="26" ry="16" fill="#bfdbfe"/>
+  <path d="M74 112q26-22 52 0q-26 26-52 0z" fill="#1d4ed8"/>
+  <circle cx="140" cy="72" r="6" fill="#1c1917"/>
+  <circle cx="142" cy="70" r="2" fill="#fff"/>
+  <path d="M158 78l22 6-22 8z" fill="#f59e0b"/>
+  <path d="M92 154v8M112 154v8" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
+</svg>
