@@ -123,6 +123,13 @@ const CASES = {
   'css/important': [css('h1 {\n  color: red !important;\n}\n'), css(GOOD_CSS)],
   'css/duplicate-declaration': [css('h1 {\n  color: red;\n  color: blue;\n}\n'), css('h1 {\n  color: red;\n}\n\nh2 {\n  color: red;\n}\n')],
   'css/presentational-class': [css('.vermell {\n  color: red;\n}\n'), css('.avis {\n  color: red;\n}\n')],
+  // CSS: colors, lletra i variables
+  'css/generic-font-family': [css('p {\n  font-family: Georgia;\n}\n'), css('p {\n  font-family: Georgia, serif;\n}\n\nh1 {\n  font-family: inherit;\n}\n')],
+  'css/undefined-variable': [css('h1 {\n  color: var(--principal);\n}\n'),
+    css(':root {\n  --principal: teal;\n}\n\nh1 {\n  color: var(--principal);\n  background-color: var(--fons, white);\n}\n')],
+  'css/low-contrast': [css('p {\n  color: #777;\n  background-color: white;\n}\n'), css('p {\n  color: #767676;\n  background-color: white;\n}\n')],
+  'css/repeated-color': [css('h1 {\n  color: #2a9d8f;\n}\n\nh2 {\n  color: #2a9d8f;\n}\n\na {\n  color: #2a9d8f;\n}\n'),
+    css(':root {\n  --principal: #2a9d8f;\n}\n\nh1 {\n  color: var(--principal);\n}\n\nh2 {\n  color: #2a9d8f;\n}\n')],
   'css/last-semicolon': [css('h1 {\n  color: red\n}\n'), css(GOOD_CSS)],
   'css/one-declaration-per-line': [css('h1 {\n  color: red; font-size: 2em;\n}\n'), css('h1 { color: red; }\n')],
   'css/indentation': [css('h1 {\ncolor: red;\n}\n'), css(GOOD_CSS)],
@@ -166,8 +173,20 @@ test('css/invalid-value explica els errors típics', () => {
   assert.equal(kind('font-size: 1,5em').fix, '1.5em');
   assert.equal(kind('margin: 10').kind, 'unit');
   assert.equal(kind('margin: 0 10').fix, '0 10px');
-  assert.equal(kind('text-align: centre').kind, 'generic');
   assert.equal(kind('margin: 0'), undefined);
+  // Capítol 11: paraules en català, unitats separades, colors hexadecimals i variables
+  assert.deepEqual(kind('text-align: centre'), { property: 'text-align', value: 'centre', kind: 'catalan-keyword', fix: 'center' });
+  assert.equal(kind('font-weight: negreta').fix, 'bold');
+  assert.equal(kind('border-left: 2px solid vermell').fix, '2px solid red');
+  assert.equal(kind('text-align: esquerre').kind, 'generic');
+  assert.deepEqual([kind('font-size: 1.5 rem').kind, kind('font-size: 1.5 rem').fix], ['unit-space', '1.5rem']);
+  assert.deepEqual([kind('color: 2a9d8f').kind, kind('color: 2a9d8f').fix], ['hash', '#2a9d8f']);
+  assert.equal(kind('color: fff').fix, '#fff');
+  assert.deepEqual(kind('color: #2a9d8'), { property: 'color', value: '#2a9d8', kind: 'hex', hex: '#2a9d8', digits: 5, letters: false });
+  assert.equal(kind('color: #ggg').letters, true);
+  assert.deepEqual([kind('color: --principal').kind, kind('color: --principal').fix], ['var', 'var(--principal)']);
+  assert.deepEqual([kind('color: var(principal)').kind, kind('color: var(principal)').fix], ['var-dashes', 'var(--principal)']);
+  assert.match(first(css('h1 {\n  color: #2a9d8;\n}\n'), 'css/invalid-value').hint, /3 o 6 xifres.*en té 5/);
 });
 
 test('si falta un «;», no es diu també que el valor és invàlid', () => {
@@ -468,4 +487,49 @@ test('selectors i cascada: detalls de les regles del capítol 10', () => {
   assert.equal(first(css('.vermell {\n  color: red;\n}\n'), 'css/presentational-class').severity, 'info');
   // Abans del capítol 10, cap d'aquestes regles
   assert.deepEqual(rulesOf({ files: { 'index.html': '<p class=".x">a</p>\n', 'estils.css': '#y {\n  color: red !important;\n  color: blue;\n}\n' }, chapter: 9 }), []);
+});
+
+test('colors, lletra i variables: detalls de les regles del capítol 11', () => {
+  // Família genèrica: proposa la que s'assembla a la lletra; entre cometes no és la genèrica
+  assert.equal(first(css('p {\n  font-family: "Courier New", Courier;\n}\n'), 'css/generic-font-family').data.suggestion, 'monospace');
+  assert.equal(first(css('p {\n  font-family: Verdana;\n}\n'), 'css/generic-font-family').data.suggestion, 'sans-serif');
+  const quoted = first(css('p {\n  font-family: Georgia, "serif";\n}\n'), 'css/generic-font-family');
+  assert.deepEqual(quoted.data, { family: 'serif', quoted: true, fix: 'Georgia, serif' });
+  assert.match(quoted.hint, /sense cometes: font-family: Georgia, serif;/);
+  for (const value of ['system-ui', 'Arial, sans-serif', 'var(--lletra)', 'inherit', 'MONOSPACE']) {
+    assert.ok(!rulesOf(css(`p {\n  font-family: ${value};\n}\n`)).includes('css/generic-font-family'), value);
+  }
+
+  // Variables: es poden definir en un altre fitxer o en un <style>; els noms distingeixen majúscules
+  const styled = (styles) => ({ files: { 'index.html': '<style>\n  :root { --fons: #f4f1de; }\n</style>\n<h1>Hola</h1>\n', 'estils.css': styles } });
+  assert.ok(!rulesOf(styled('h1 {\n  background-color: var(--fons);\n}\n')).includes('css/undefined-variable'));
+  const typo = first(css(':root {\n  --color-principal: teal;\n}\n\nh1 {\n  color: var(--color-principl);\n}\n'), 'css/undefined-variable');
+  assert.deepEqual([typo.data, typo.line, typo.col], [{ name: '--color-principl', suggestion: '--color-principal' }, 6, 14]);
+  assert.equal(first(css(':root {\n  --Fons: teal;\n}\n\nh1 {\n  color: var(--FONS);\n}\n'), 'css/undefined-variable').data.suggestion, '--Fons');
+  assert.ok(first(css(':root {\n  --a: var(--b);\n}\n'), 'css/undefined-variable'));
+  assert.match(first(css('h1 {\n  color: var(--x);\n}\n'), 'css/undefined-variable').hint, /:root \{ --x: #2a9d8f; \}/);
+
+  // Contrast: amb variables (si se sap què valen), arrodonit cap avall, i el fons que guanya és l'últim
+  const contrast = (src) => first(css(src), 'css/low-contrast')?.data;
+  assert.deepEqual(contrast(':root {\n  --groc: #ffd166;\n}\n\n.avis {\n  color: var(--groc);\n  background-color: white;\n}\n'),
+    { ratio: '1,4', color: '#ffd166', background: 'white' });
+  assert.equal(contrast('p {\n  color: #777;\n  background: #fff;\n}\n').ratio, '4,4');
+  assert.equal(contrast('p {\n  color: white;\n  background-color: black;\n  background: #eee;\n}\n').ratio, '1,1');
+  assert.equal(contrast('p {\n  color: rgb(255 255 255);\n  background-color: hsl(0, 0%, 90%);\n}\n').ratio, '1,2');
+  // ...però no si no se sap segur: variable amb dos valors, color transparent, fons amb imatge o en una altra regla
+  assert.equal(contrast(':root {\n  --c: #eee;\n}\n\n.fosc {\n  --c: #111;\n}\n\np {\n  color: var(--c);\n  background-color: white;\n}\n'), undefined);
+  assert.equal(contrast('p {\n  color: rgba(238, 238, 238, 0.5);\n  background-color: white;\n}\n'), undefined);
+  assert.equal(contrast('p {\n  color: #eee;\n  background: url(fons.png);\n}\n'), undefined);
+  assert.equal(contrast('body {\n  background-color: white;\n}\n\np {\n  color: #eee;\n}\n'), undefined);
+
+  // Color repetit: el mateix color escrit de maneres diferents compta igual; definir la variable no compta
+  const repeated = (src) => lintCase(css(src)).filter((p) => p.rule === 'css/repeated-color').map((p) => [p.line, p.data]);
+  assert.deepEqual(repeated('h1 {\n  color: #fff;\n  background-color: #FFFFFF;\n  border-left: 1px solid rgb(255, 255, 255);\n}\n\np {\n  color: #fff;\n}\n'),
+    [[4, { color: '#fff', count: 4, firstLine: 2 }]]);
+  assert.deepEqual(repeated(':root {\n  --a: #fff;\n  --b: #fff;\n}\n\nh1 {\n  color: #fff;\n  background-color: #fff;\n}\n'), []);
+  assert.deepEqual(repeated('h1 {\n  color: white;\n}\n\nh2 {\n  color: white;\n}\n\nh3 {\n  color: white;\n}\n'), []);
+
+  // Abans del capítol 11, cap d'aquestes regles ni de les pistes noves
+  const before = { files: { 'estils.css': 'p {\n  font-family: Georgia;\n  color: var(--x);\n}\n' }, chapter: 10 };
+  assert.deepEqual(rulesOf(before), []);
 });

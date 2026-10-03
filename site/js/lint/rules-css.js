@@ -15,6 +15,8 @@
 //   embedded  true si el CSS és dins d'un <style>
 //   page      { classes, ids, misspelt } de l'HTML del simulador, o null si
 //             no n'hi ha (lint/lint.js)
+//   variables Map --nom → [valors] de tot el CSS del simulador (fitxers i
+//             <style>), per saber si una variable existeix i què val
 //
 // API pública:
 //   CSS_RULES
@@ -22,6 +24,7 @@
 
 import { CSS_PROPERTIES } from '../lang/css-spec.js';
 import { KNOWN_ELEMENTS, DEPRECATED_ELEMENTS, CATALAN_TAGS, SVG_ELEMENTS } from '../lang/html-spec.js';
+import { parseColor, contrastRatio } from '../lang/css-colors.js';
 import { closest } from './suggest.js';
 import { indentChecker } from './lines.js';
 
@@ -39,6 +42,15 @@ const CATALAN_COLOURS = {
   blanc: 'white', gris: 'gray', taronja: 'orange', rosa: 'pink', lila: 'violet',
   morat: 'purple', 'marró': 'brown', marro: 'brown', daurat: 'gold',
   platejat: 'silver', granat: 'maroon', turquesa: 'turquoise', beix: 'beige',
+};
+
+/** Paraules clau en català (o mig en anglès) → la paraula del CSS. */
+const CATALAN_KEYWORDS = {
+  centre: 'center', centrat: 'center', centrada: 'center', centrar: 'center', esquerra: 'left',
+  dreta: 'right', justificat: 'justify', justificar: 'justify', negreta: 'bold', cursiva: 'italic',
+  subratllat: 'underline', 'majúscules': 'uppercase', majuscules: 'uppercase',
+  'minúscules': 'lowercase', minuscules: 'lowercase', 'sòlid': 'solid', solida: 'solid',
+  'sòlida': 'solid', discontinu: 'dashed', puntejat: 'dotted', cap: 'none', bloc: 'block',
 };
 
 const BRACE_PROBLEMS = ['unclosed-block', 'unexpected-close-brace', 'missing-open-brace'];
@@ -119,13 +131,28 @@ const unknownProperty = {
 
 // Per què no és vàlid? Els errors típics tenen un missatge propi.
 function diagnoseValue(supports, property, value) {
+  const works = (fix) => fix !== value && supports(property, fix);
   const colour = CATALAN_COLOURS[value.toLowerCase()];
   if (colour && supports(property, colour)) return { kind: 'catalan-colour', fix: colour };
+  const english = value.replace(/[\p{L}-]+/gu, (word) => CATALAN_KEYWORDS[word.toLowerCase()] || CATALAN_COLOURS[word.toLowerCase()] || word);
+  if (works(english)) return { kind: 'catalan-keyword', fix: english };
   const dot = value.replace(/(\d),(\d)/g, '$1.$2');
-  if (dot !== value && supports(property, dot)) return { kind: 'comma', fix: dot };
+  if (works(dot)) return { kind: 'comma', fix: dot };
+  const joined = dot.replace(/(\d)\s+(px|r?em|%|vw|vh|pt|ch|deg)(?![\w-])/gi, '$1$2');
+  if (works(joined)) return { kind: 'unit-space', fix: joined };
   const withUnits = dot.replace(/(^|\s)(-?(?:\d+\.?\d*|\.\d+))(?=\s|$)/g,
     (match, space, number) => space + (Number(number) === 0 ? number : number + 'px'));
-  if (withUnits !== dot && supports(property, withUnits)) return { kind: 'unit', fix: withUnits };
+  if (works(withUnits)) return { kind: 'unit', fix: withUnits };
+  const hashed = value.replace(/(^|[\s,(])((?:[0-9a-f]{3}){1,2}|(?:[0-9a-f]{4}){1,2})(?=$|[\s,)])/gi, '$1#$2');
+  if (works(hashed)) return { kind: 'hash', fix: hashed };
+  const hex = /#([0-9a-z]*)/i.exec(value);
+  if (hex && !(/^[0-9a-f]+$/i.test(hex[1]) && [3, 4, 6, 8].includes(hex[1].length))) {
+    return { kind: 'hex', hex: hex[0], digits: hex[1].length, letters: !/^[0-9a-f]*$/i.test(hex[1]) };
+  }
+  const wrapped = value.replace(/(var\(\s*)?(--[\w-]+)/g, (match, inside, name) => inside ? match : `var(${name})`);
+  if (works(wrapped)) return { kind: 'var', fix: wrapped };
+  const dashed = value.replace(/var\(\s*(?=[a-z])/gi, 'var(--');
+  if (works(dashed)) return { kind: 'var-dashes', fix: dashed };
   return { kind: 'generic' };
 }
 
@@ -309,6 +336,142 @@ const presentationalClass = {
   },
 };
 
+// ── Colors, lletra i variables (capítol 11) ──
+
+const GENERIC_FAMILIES = new Set(['serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui',
+  'ui-serif', 'ui-sans-serif', 'ui-monospace', 'ui-rounded', 'math', 'emoji', 'fangsong']);
+const CSS_WIDE_KEYWORDS = new Set(['inherit', 'initial', 'unset', 'revert', 'revert-layer']);
+
+/** Lletres conegudes que no són de pal sec (sans-serif): la genèrica que s'hi assembla. */
+const FONT_GENERIC = {
+  georgia: 'serif', times: 'serif', 'times new roman': 'serif', garamond: 'serif', palatino: 'serif',
+  'palatino linotype': 'serif', 'book antiqua': 'serif', cambria: 'serif', baskerville: 'serif',
+  courier: 'monospace', 'courier new': 'monospace', consolas: 'monospace', monaco: 'monospace',
+  menlo: 'monospace', 'lucida console': 'monospace', 'comic sans ms': 'cursive',
+};
+
+const unquote = (name) => name.trim().replace(/^(["'])(.*)\1$/, '$2');
+
+const genericFontFamily = {
+  id: 'css/generic-font-family',
+  lang: 'css',
+  since: 11,
+  severity: 'warning',
+  check(ctx, report) {
+    for (const decl of styleDeclarations(ctx.sheet)) {
+      if (propertyName(decl) !== 'font-family' || !decl.value || !decl.value.text.trim()) continue;
+      const value = decl.value.text.trim();
+      if (CSS_WIDE_KEYWORDS.has(value.toLowerCase()) || /var\(/i.test(value) || WRONG_COMMENT.test(value)) continue;
+      const families = value.split(',');
+      const last = families.at(-1).trim();
+      if (GENERIC_FAMILIES.has(last.toLowerCase())) continue;
+      const family = unquote(last);
+      if (GENERIC_FAMILIES.has(family.toLowerCase())) {   // entre cometes ("serif") ja no és la genèrica
+        report(decl.value, { family, quoted: true, fix: [...families.slice(0, -1), ` ${family}`].join(',').trim() });
+        continue;
+      }
+      const suggestion = FONT_GENERIC[unquote(families[0]).toLowerCase()] || 'sans-serif';
+      report(decl.value, { family, value, suggestion });
+    }
+  },
+};
+
+const VAR_CALL = /var\(\s*(--[\w-]+)\s*([,)]?)/gi;
+
+/**
+ * El valor d'una variable, si se sap segur: definida un sol cop (o sempre
+ * amb el mateix valor) o, si no existeix, el valor de reserva. Si no, null.
+ */
+function resolveVariables(value, variables, depth = 0) {
+  const m = /^var\(\s*(--[\w-]+)\s*(?:,\s*(.+?))?\s*\)$/i.exec(value.trim());
+  if (!m) return value.trim();
+  if (depth > 5) return null;
+  const values = variables.get(m[1]);
+  if (values && new Set(values).size === 1) return resolveVariables(values[0], variables, depth + 1);
+  if (!values && m[2]) return resolveVariables(m[2], variables, depth + 1);
+  return null;
+}
+
+const undefinedVariable = {
+  id: 'css/undefined-variable',
+  lang: 'css',
+  since: 11,
+  severity: 'error',
+  check(ctx, report) {
+    for (const rule of containers(ctx.sheet.rules)) {
+      for (const decl of rule.declarations) {
+        if (!decl.value) continue;
+        for (const match of decl.value.text.matchAll(VAR_CALL)) {
+          const name = match[1];
+          if (match[2] === ',' || ctx.variables.has(name)) continue;   // amb valor de reserva, no cal que existeixi
+          const known = [...ctx.variables.keys()];
+          const suggestion = known.find((other) => other.toLowerCase() === name.toLowerCase()) || closest(name, known);
+          const start = decl.value.start + match.index + match[0].indexOf(name);
+          report({ start, end: start + name.length }, { name, suggestion });
+        }
+      }
+    }
+  },
+};
+
+// Es fa sobre el codi font (el BLUEPRINT la preveia sobre la pàgina pintada):
+// només quan el color del text i el del fons són a la mateixa regla, que és
+// quan se sap segur que van junts
+const lowContrast = {
+  id: 'css/low-contrast',
+  lang: 'css',
+  since: 11,
+  severity: 'warning',
+  check(ctx, report) {
+    for (const rule of styleRules(ctx.sheet.rules)) {
+      let text = null;
+      let background = null;
+      for (const decl of rule.declarations) {
+        const property = propertyName(decl);
+        if (!decl.value) continue;
+        if (property === 'color') text = decl;
+        if (property === 'background-color' || property === 'background') background = decl;
+      }
+      if (!text || !background) continue;
+      const values = [text, background].map((decl) => resolveVariables(decl.value.text, ctx.variables));
+      const colors = values.map((value) => value && parseColor(value));
+      if (colors.includes(null) || colors.some((c) => c[3] < 1)) continue;   // transparent: depèn del que hi ha a sota
+      const ratio = contrastRatio(colors[0], colors[1]);
+      if (ratio >= 4.5) continue;
+      // (arrodonit cap avall: 4,48 és «4,4», que no arriba a 4,5)
+      report(text.value, { ratio: (Math.floor(ratio * 10) / 10).toFixed(1).replace('.', ','), color: values[0], background: values[1] });
+    }
+  },
+};
+
+/** Colors escrits amb #, rgb() o hsl() (els noms, com white, no compten). */
+const COLOR_LITERAL = /#[0-9a-f]{3,8}(?![\w-])|\b(?:rgba?|hsla?)\([^)]*\)/gi;
+
+const repeatedColor = {
+  id: 'css/repeated-color',
+  lang: 'css',
+  since: 11,
+  severity: 'warning',
+  check(ctx, report) {
+    const seen = new Map();   // color (r,g,b,a) → aparicions
+    for (const decl of styleDeclarations(ctx.sheet)) {
+      if (!decl.value || propertyName(decl).startsWith('--')) continue;   // definir la variable és el que cal fer
+      for (const match of decl.value.text.matchAll(COLOR_LITERAL)) {
+        const color = parseColor(match[0]);
+        if (!color) continue;
+        const key = color.join();
+        if (!seen.has(key)) seen.set(key, []);
+        const start = decl.value.start + match.index;
+        seen.get(key).push({ start, end: start + match[0].length, text: match[0] });
+      }
+    }
+    for (const places of seen.values()) {
+      if (places.length < 3) continue;
+      report(places[2], { color: places[0].text, count: places.length, firstLine: ctx.lineOf(places[0].start) });
+    }
+  },
+};
+
 // ── Codi net ──
 
 const lastSemicolon = {
@@ -392,6 +555,10 @@ export const CSS_RULES = [
   important,
   duplicateDeclaration,
   presentationalClass,
+  genericFontFamily,
+  undefinedVariable,
+  lowContrast,
+  repeatedColor,
   lastSemicolon,
   oneDeclarationPerLine,
   indentation,

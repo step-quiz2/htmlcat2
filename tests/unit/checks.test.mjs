@@ -80,6 +80,17 @@ test('uses-css: fitxers CSS, <style> i @media; el selector i el valor es normali
   assert.equal(passed({ type: 'uses-css', selector: 'p', prop: 'color' }), false);
 });
 
+test('uses-css: valueIncludes busca un tros del valor (sense espais)', () => {
+  const withVars = { 'estils.css': ':root {\n  --principal: #2a9d8f;\n}\n\nh1 {\n  border: 2px solid var( --principal );\n}\n' };
+  const ok = (check) => runChecks({ doc: null, files: withVars, checks: [{ msg: 'x', type: 'uses-css', ...check }] })[0].passed;
+  assert.equal(ok({ selector: 'h1', prop: 'border', valueIncludes: 'var(--principal)' }), true);
+  assert.equal(ok({ selector: 'h1', prop: 'border', valueIncludes: 'solid var(--principal)' }), true);
+  assert.equal(ok({ selector: 'h1', prop: 'border', valueIncludes: 'var(--fons)' }), false);
+  assert.equal(ok({ selector: 'h1', prop: 'border', value: '2px solid var( --principal )', valueIncludes: '2px' }), true);
+  assert.deepEqual(validate([{ type: 'uses-css', prop: 'color', valueIncludes: 'var(--x)', msg: 'x' }]), []);
+  assert.match(validate([{ type: 'uses-css', prop: 'color', valueIncludes: '', msg: 'x' }]).join(), /text no buit/);
+});
+
 test('lint: errors i avisos al nivell del capítol', () => {
   assert.equal(passed({ type: 'lint', maxErrors: 0 }), true);
   const broken = { 'index.html': '<p>sense tancar\n<ul>\n<li>x</li>\n</ul>\n' };

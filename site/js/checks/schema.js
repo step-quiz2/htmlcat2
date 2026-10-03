@@ -23,13 +23,13 @@ const SPEC = {
   attr: { required: ['selector', 'name'], optional: ['all', 'ci'], oneOf: ['present', 'nonEmpty', 'equals', 'includes', 'matches'] },
   style: { required: ['selector', 'prop', 'equals'], optional: ['all'] },
   'uses-html': { required: [], optional: [], atLeastOne: ['tag', 'attr'] },
-  'uses-css': { required: ['prop'], optional: ['selector', 'matches', 'value'] },
+  'uses-css': { required: ['prop'], optional: ['selector', 'matches', 'value', 'valueIncludes'] },
   lint: { required: [], optional: ['maxErrors', 'maxWarnings', 'rules'] },
 };
 
 export const CHECK_TYPES = Object.keys(SPEC);
 
-const STRING_FIELDS = new Set(['selector', 'equals', 'includes', 'matches', 'name', 'prop', 'value', 'tag', 'attr', 'msg']);
+const STRING_FIELDS = new Set(['selector', 'equals', 'includes', 'matches', 'name', 'prop', 'value', 'valueIncludes', 'tag', 'attr', 'msg']);
 const TRUE_FIELDS = new Set(['present', 'nonEmpty']);   // només tenen sentit a true
 const BOOLEAN_FIELDS = new Set(['all', 'ci']);
 const COUNT_FIELDS = new Set(['eq', 'min', 'max', 'maxErrors', 'maxWarnings']);
