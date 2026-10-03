@@ -54,7 +54,12 @@ const OBSOLETE_ATTRIBUTE_INSTEAD = {
   name: 'Per marcar un lloc on porti un enllaç, fes servir id.',
   type: 'Per canviar el pic o el número de la llista, fes servir CSS (list-style-type).',
   compact: 'Per a una llista més atapeïda, fes servir CSS (margin, padding).',
+  scope: 'L\'atribut scope és per a les capçaleres <th>: si aquesta cel·la és una capçalera, canvia <td> per <th>.',
 };
+
+const columnes = (n) => (n === 1 ? '1 columna' : `${n} columnes`);
+
+const FOSTER_HINT = 'El navegador l\'ha tret de la taula i l\'ha posat just abans. Dins d\'una taula, tot el contingut va dins de les cel·les <td> o <th>, o al títol, <caption>.';
 
 const IMAGE_REASONS = {
   case: ({ src, suggestion }) => `Als noms dels fitxers, les majúscules compten: «${src}» i «${suggestion}» són fitxers diferents.`,
@@ -306,6 +311,42 @@ export const MESSAGES = {
   'html/semantic-div': ({ attr, name, element }) => ({
     text: `Aquest <div ${attr}="${name}"> hauria de ser un ${tag(element)}.`,
     hint: `Fes servir ${tag(element)} en lloc de <div> (si vols, amb ${attr === 'class' ? 'la mateixa classe' : 'el mateix id'}). El navegador, els lectors de pantalla i els cercadors saben què és un ${tag(element)}; d'un <div>, no en saben res.`,
+  }),
+  // ── HTML: taules ──
+  'html/table-structure': ({ kind, tag: name }) => ({
+    text: {
+      'row-outside': 'Aquesta fila <tr> no és dins de cap taula <table>.',
+      'cell-no-row': `Aquesta cel·la ${tag(name)} no és dins de cap fila <tr>.`,
+      'cell-outside': `Aquesta cel·la ${tag(name)} no és dins de cap taula.`,
+      foster: `Aquest ${tag(name)} és dins de la taula, però fora de cap cel·la.`,
+      'foster-text': 'Aquest text és dins de la taula, però fora de cap cel·la.',
+    }[kind],
+    hint: {
+      'row-outside': 'Fora d\'una taula, el navegador no fa cas de les etiquetes <tr>, <td> i <th>: només en queda el text, tot seguit, com si fos un paràgraf. Posa les files dins de <table>…</table>.',
+      'cell-no-row': 'Les cel·les van sempre dins d\'una fila: <tr><td>…</td></tr>. El navegador hi ha posat una fila pel seu compte, i potser no on volies.',
+      'cell-outside': 'Fora d\'una taula, el navegador no fa cas de les etiquetes de les cel·les i el text queda solt. Posa-la dins d\'una fila <tr> d\'una taula <table>.',
+      foster: FOSTER_HINT,
+      'foster-text': FOSTER_HINT,
+    }[kind],
+  }),
+  'html/table-columns': ({ columns, expected, firstLine }) => ({
+    text: `Aquesta fila té ${columnes(columns)}, i la primera (línia ${firstLine}) en té ${expected}.`,
+    hint: 'Totes les files d\'una taula han de tenir les mateixes columnes; si no, la taula queda desquadrada. Si una cel·la no té res, escriu-la igualment, buida: <td></td>.',
+  }),
+  'html/table-headers': () => ({
+    text: 'Aquesta taula no té cap cel·la de capçalera <th>.',
+    hint: 'Les capçaleres diuen què hi ha a cada columna (o a cada fila): escriu-les amb <th> en lloc de <td>. Si la taula només serveix per col·locar coses a la pàgina, no és una taula de dades: això es fa amb CSS.',
+  }),
+  'html/invalid-attribute-value': ({ attr, value, values, suggestion }) => ({
+    text: value
+      ? `«${value}» no és un valor vàlid per a l'atribut ${attr}.`
+      : `L'atribut ${attr} és buit.`,
+    hint: (suggestion ? `Potser volies escriure ${attr}="${suggestion}"? ` : '') +
+      `Els valors possibles són ${values.join(', ')}. El navegador no entén cap altre valor i no en fa cas.`,
+  }),
+  'html/th-scope': () => ({
+    text: 'Aquesta capçalera <th> no diu si és d\'una columna o d\'una fila.',
+    hint: 'Afegeix-hi scope="col" (capçalera d\'una columna) o scope="row" (capçalera d\'una fila): així els lectors de pantalla saben a quina capçalera pertany cada cel·la.',
   }),
   'html/inline-style': ({ tag: name }) => ({
     text: `L'atribut style de ${tag(name)} barreja l'estil amb el contingut.`,
