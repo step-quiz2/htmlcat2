@@ -80,6 +80,10 @@ const VALUE_HINTS = {
   hex: ({ hex, digits, letters }) => letters
     ? `A «${hex}» hi ha lletres que no són xifres hexadecimals: només valen les xifres del 0 al 9 i les lletres de la a a la f.`
     : `Un color hexadecimal té 3 o 6 xifres després del # (#f60 o #ff6600), i «${hex}» en té ${digits}.`,
+  'list-comma': ({ fix }) => `Els valors se separen amb espais, no amb comes: ${fix}.`,
+  negative: ({ property, fix }) => `${property} no pot ser negatiu: ${fix}.` +
+    (property.startsWith('padding') ? ' Si vols acostar dos elements, fes servir un margin negatiu.' : ''),
+  'too-many': ({ property, count }) => `${property} admet com a molt 4 valors (dalt, dreta, baix i esquerra), i n'hi ha ${count}.`,
   var: ({ fix }) => `Per fer servir una variable, escriu-la dins de var(): ${fix}.`,
   'var-dashes': ({ fix }) => `Els noms de les variables comencen amb dos guions: ${fix}.`,
   generic: () => 'El navegador ignora tota la declaració. Revisa com s\'escriu el valor.',
@@ -521,6 +525,26 @@ export const MESSAGES = {
   'css/repeated-color': ({ color, count, firstLine }) => ({
     text: `El color ${color} surt ${count} vegades en aquest full d'estil (la primera, a la línia ${firstLine}).`,
     hint: `Guarda'l en una variable, per exemple :root { --color-principal: ${color}; }, i fes servir var(--color-principal) a tot arreu. Si un dia el vols canviar, només l'hauràs de canviar en un lloc.`,
+  }),
+
+  // ── CSS: el model de caixa ──
+  'css/border-without-style': ({ property, value, fix }) => ({
+    text: `Aquesta vora no es veurà: a «${property}: ${value}» li falta l'estil.`,
+    hint: `Sense estil (solid, dashed, dotted…), el navegador no dibuixa la vora. Escriu, per exemple: ${property}: ${fix};`,
+  }),
+  'css/inline-dimensions': ({ property, element, kind }) => ({
+    text: kind === 'size'
+      ? `${property} no fa res en un <${element}>: és un element en línia.`
+      : `El marge de dalt i de baix no aparta res en un <${element}>: és un element en línia.`,
+    hint: 'Els elements en línia (a, span, strong, em…) són un tros de text: no tenen amplada ni alçada, i els marges de dalt i de baix no aparten res. Perquè en tinguin, posa-hi display: inline-block (o display: block, si ha d\'ocupar tota l\'amplada).',
+  }),
+  'css/shorthand-override': ({ property, shorthand, line }) => ({
+    text: `${shorthand}, a la línia ${line}, esborra aquest ${property}.`,
+    hint: `Una drecera com ${shorthand} dona valor a totes les seves parts, també a les que no escrius: el ${property} d'abans es perd. Posa ${property} després de ${shorthand}, o escriu-ho tot dins de ${shorthand}.`,
+  }),
+  'css/spacing-scale': ({ count, sizes }) => ({
+    text: `Fas servir ${count} mides d'espai diferents (${sizes}).`,
+    hint: 'Una pàgina queda més endreçada amb poques mides d\'espai que es repeteixen, per exemple 0.5rem, 1rem i 2rem. Guarda-les en variables (--espai-petit, --espai, --espai-gran) i fes servir sempre aquestes.',
   }),
 
   // ── CSS: codi net ──

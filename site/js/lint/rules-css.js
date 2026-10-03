@@ -17,6 +17,8 @@
 //             no n'hi ha (lint/lint.js)
 //   variables Map --nom → [valors] de tot el CSS del simulador (fitxers i
 //             <style>), per saber si una variable existeix i què val
+//   sheets    tots els fulls d'estil del simulador (fitxers i <style>), ja
+//             analitzats, per a les regles que han de mirar més enllà del full
 //
 // API pública:
 //   CSS_RULES
@@ -52,6 +54,9 @@ const CATALAN_KEYWORDS = {
   'minúscules': 'lowercase', minuscules: 'lowercase', 'sòlid': 'solid', solida: 'solid',
   'sòlida': 'solid', discontinu: 'dashed', puntejat: 'dotted', cap: 'none', bloc: 'block',
 };
+
+/** Propietats que admeten 1, 2, 3 o 4 valors (dalt, dreta, baix, esquerra). */
+const FOUR_SIDES = new Set(['margin', 'padding', 'border-width', 'border-style', 'border-color', 'inset']);
 
 const BRACE_PROBLEMS = ['unclosed-block', 'unexpected-close-brace', 'missing-open-brace'];
 
@@ -138,11 +143,17 @@ function diagnoseValue(supports, property, value) {
   if (works(english)) return { kind: 'catalan-keyword', fix: english };
   const dot = value.replace(/(\d),(\d)/g, '$1.$2');
   if (works(dot)) return { kind: 'comma', fix: dot };
+  const spaced = dot.replace(/\s*,\s*/g, ' ');
+  if (works(spaced)) return { kind: 'list-comma', fix: spaced };
   const joined = dot.replace(/(\d)\s+(px|r?em|%|vw|vh|pt|ch|deg)(?![\w-])/gi, '$1$2');
   if (works(joined)) return { kind: 'unit-space', fix: joined };
   const withUnits = dot.replace(/(^|\s)(-?(?:\d+\.?\d*|\.\d+))(?=\s|$)/g,
     (match, space, number) => space + (Number(number) === 0 ? number : number + 'px'));
   if (works(withUnits)) return { kind: 'unit', fix: withUnits };
+  const positive = dot.replace(/(^|\s)-(?=[\d.])/g, '$1');
+  if (works(positive)) return { kind: 'negative', fix: positive };
+  const parts = dot.split(/\s+/).filter(Boolean);
+  if (FOUR_SIDES.has(property) && parts.length > 4) return { kind: 'too-many', count: parts.length };
   const hashed = value.replace(/(^|[\s,(])((?:[0-9a-f]{3}){1,2}|(?:[0-9a-f]{4}){1,2})(?=$|[\s,)])/gi, '$1#$2');
   if (works(hashed)) return { kind: 'hash', fix: hashed };
   const hex = /#([0-9a-z]*)/i.exec(value);
@@ -472,6 +483,170 @@ const repeatedColor = {
   },
 };
 
+// ── El model de caixa (capítol 12) ──
+
+const BORDER_STYLES = new Set(['none', 'hidden', 'dotted', 'dashed', 'solid', 'double', 'groove', 'ridge', 'inset', 'outset']);
+const BORDER_SHORTHANDS = new Set(['border', 'border-top', 'border-right', 'border-bottom', 'border-left']);
+const isWidthWord = (word) => /^(thin|medium|thick|-?(\d+\.?\d*|\.\d+)[a-z%]*)$/i.test(word);
+
+// border: 2px red és vàlid, però sense estil (solid, dashed…) el navegador no dibuixa la vora
+const borderWithoutStyle = {
+  id: 'css/border-without-style',
+  lang: 'css',
+  since: 12,
+  severity: 'warning',
+  check(ctx, report) {
+    for (const rule of containers(ctx.sheet.rules)) {
+      rule.declarations.forEach((decl, i) => {
+        const property = propertyName(decl);
+        if (!BORDER_SHORTHANDS.has(property) || !decl.value) return;
+        const value = decl.value.text.trim();
+        const words = value.toLowerCase().split(/\s+/).filter(Boolean);
+        if (!words.length || words.some((word) => BORDER_STYLES.has(word)) || value === '0') return;
+        if (CSS_WIDE_KEYWORDS.has(value.toLowerCase()) || /var\(/i.test(value) || WRONG_COMMENT.test(value)) return;
+        if (ctx.supports && !ctx.supports(property, value)) return;   // ja ho diu css/invalid-value
+        // (si més avall, a la mateixa regla, es posa l'estil, sí que es veu)
+        if (rule.declarations.slice(i + 1).some((later) => /^border(-(top|right|bottom|left))?-style$/.test(propertyName(later)))) return;
+        const at = value.split(/\s+/).findIndex(isWidthWord);
+        const fixWords = value.split(/\s+/);
+        fixWords.splice(at + 1, 0, 'solid');
+        report(decl.value, { property, value, fix: fixWords.join(' ') });
+      });
+    }
+  },
+};
+
+/** Elements en línia que no són imatges ni camps: no tenen amplada ni alçada. */
+const INLINE_ELEMENTS = new Set(['a', 'abbr', 'b', 'bdi', 'bdo', 'cite', 'code', 'data', 'dfn', 'em', 'i', 'kbd',
+  'label', 'mark', 'q', 's', 'samp', 'small', 'span', 'strong', 'sub', 'sup', 'time', 'u', 'var']);
+const SIZE_PROPERTIES = new Set(['width', 'height', 'min-width', 'min-height', 'max-width', 'max-height']);
+
+/** L'element que tria un selector (el de l'última part: «nav a» → a), o null. */
+function subjectElement(selector) {
+  const text = selector.text.replace(/"[^"]*"|'[^']*'/g, '').replace(/\[[^\]]*\]|\([^)]*\)/g, '');
+  const last = text.trim().split(/\s*[\s>+~]\s*/).at(-1);
+  const m = /^([a-zA-Z][\w-]*)/.exec(last);
+  return m ? m[1].toLowerCase() : null;
+}
+
+/** El valor que una regla dona a una propietat (l'últim), o null. */
+const valueOf = (rule, property) => rule.declarations.filter((d) => propertyName(d) === property && d.value).at(-1)?.value.text.trim().toLowerCase() ?? null;
+
+// Els marges de dalt i de baix d'un «margin» (1 a 4 valors: dalt, dreta, baix, esquerra)
+function verticalMargins(value) {
+  const parts = value.trim().split(/\s+/);
+  return [parts[0], parts[parts.length > 2 ? 2 : 0]];
+}
+const isZero = (word) => /^-?(0+\.?0*|\.0+)[a-z%]*$/i.test(word);
+
+const inlineDimensions = {
+  id: 'css/inline-dimensions',
+  lang: 'css',
+  since: 12,
+  severity: 'warning',
+  check(ctx, report) {
+    // Elements que alguna regla (de qualsevol full) ja treu de la línia: no es pot saber segur
+    const displayed = new Set();
+    for (const sheet of ctx.sheets) {
+      for (const rule of styleRules(sheet.rules)) {
+        const display = valueOf(rule, 'display');
+        const out = (display && display !== 'inline') || (valueOf(rule, 'float') ?? 'none') !== 'none' ||
+          /^(absolute|fixed)$/.test(valueOf(rule, 'position') || '');
+        if (out) rule.selectors.forEach((selector) => displayed.add(subjectElement(selector)));
+      }
+    }
+    for (const rule of styleRules(ctx.sheet.rules)) {
+      const elements = rule.selectors.map(subjectElement);
+      if (!elements.length || !elements.every((name) => INLINE_ELEMENTS.has(name) && !displayed.has(name))) continue;
+      for (const decl of rule.declarations) {
+        const property = propertyName(decl);
+        if (!decl.value || /var\(/i.test(decl.value.text)) continue;
+        const value = decl.value.text.trim();
+        const element = elements[0];
+        if (SIZE_PROPERTIES.has(property) && !/^(auto|none|initial|inherit|unset)$/i.test(value)) {
+          report(decl.property, { property, element, kind: 'size' });
+        } else if ((property === 'margin-top' || property === 'margin-bottom') && !isZero(value)) {
+          report(decl.property, { property, element, kind: 'margin' });
+        } else if (property === 'margin' && verticalMargins(value).some((word) => !isZero(word) && word !== 'auto')) {
+          report(decl.property, { property, element, kind: 'margin' });
+        }
+      }
+    }
+  },
+};
+
+/** Si una drecera (margin, border, font…) dona valor a una propietat. */
+function covers(shorthand, property) {
+  if (property === shorthand || property.includes('radius')) return false;
+  switch (shorthand) {
+    case 'margin':
+    case 'padding': return new RegExp(`^${shorthand}-(top|right|bottom|left)$`).test(property);
+    case 'border': return property.startsWith('border-') && !/^border-(collapse|spacing)$/.test(property);
+    case 'border-top':
+    case 'border-right':
+    case 'border-bottom':
+    case 'border-left': return property.startsWith(shorthand + '-');
+    case 'border-width':
+    case 'border-style':
+    case 'border-color': return new RegExp(`^border-(top|right|bottom|left)-${shorthand.slice(7)}$`).test(property);
+    case 'background':
+    case 'list-style':
+    case 'text-decoration': return property.startsWith(shorthand + '-');
+    case 'font': return /^(font-(size|family|weight|style|variant|stretch)|line-height)$/.test(property);
+    case 'flex': return /^flex-(grow|shrink|basis)$/.test(property);
+    case 'gap': return property === 'row-gap' || property === 'column-gap';
+    case 'outline': return /^outline-(width|style|color)$/.test(property);
+    default: return false;
+  }
+}
+
+const shorthandOverride = {
+  id: 'css/shorthand-override',
+  lang: 'css',
+  since: 12,
+  severity: 'warning',
+  check(ctx, report) {
+    for (const rule of containers(ctx.sheet.rules)) {
+      rule.declarations.forEach((decl, i) => {
+        const property = propertyName(decl);
+        if (!decl.value || WRONG_COMMENT.test(property)) return;
+        const later = rule.declarations.slice(i + 1).find((other) => other.value && covers(propertyName(other), property));
+        if (!later || (decl.important && !later.important)) return;   // amb !important guanya la primera
+        report(decl.property, { property, shorthand: propertyName(later), line: ctx.lineOf(later.property.start) });
+      });
+    }
+  },
+};
+
+const SPACING_PROPERTIES = /^(margin|padding)(-(top|right|bottom|left))?$|^(row-|column-)?gap$/;
+const LENGTH = /^-?(\d+\.?\d*|\.\d+)(px|r?em)$/i;
+
+// L'hàbit del capítol: poques mides d'espai, que es repeteixen
+const spacingScale = {
+  id: 'css/spacing-scale',
+  lang: 'css',
+  since: 12,
+  severity: 'info',
+  check(ctx, report) {
+    const seen = [];
+    let fifth = null;
+    for (const decl of styleDeclarations(ctx.sheet)) {
+      if (!decl.value || !SPACING_PROPERTIES.test(propertyName(decl))) continue;
+      if (ctx.supports && !ctx.supports(propertyName(decl), decl.value.text.trim())) continue;   // no compta: el navegador la ignora
+      let offset = 0;
+      for (const word of decl.value.text.split(/(\s+)/)) {
+        const size = word.toLowerCase();
+        if (LENGTH.test(size) && !isZero(size) && !seen.includes(size)) {
+          seen.push(size);
+          if (seen.length === 5) fifth = { start: decl.value.start + offset, end: decl.value.start + offset + word.length };
+        }
+        offset += word.length;
+      }
+    }
+    if (fifth) report(fifth, { count: seen.length, sizes: seen.join(', ') });
+  },
+};
+
 // ── Codi net ──
 
 const lastSemicolon = {
@@ -559,6 +734,10 @@ export const CSS_RULES = [
   undefinedVariable,
   lowContrast,
   repeatedColor,
+  borderWithoutStyle,
+  inlineDimensions,
+  shorthandOverride,
+  spacingScale,
   lastSemicolon,
   oneDeclarationPerLine,
   indentation,

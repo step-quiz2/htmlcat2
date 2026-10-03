@@ -128,6 +128,11 @@ const CASES = {
   'css/undefined-variable': [css('h1 {\n  color: var(--principal);\n}\n'),
     css(':root {\n  --principal: teal;\n}\n\nh1 {\n  color: var(--principal);\n  background-color: var(--fons, white);\n}\n')],
   'css/low-contrast': [css('p {\n  color: #777;\n  background-color: white;\n}\n'), css('p {\n  color: #767676;\n  background-color: white;\n}\n')],
+  // CSS: el model de caixa
+  'css/border-without-style': [css('.targeta {\n  border: 2px red;\n}\n'), css('.targeta {\n  border: 2px solid red;\n}\n\n.avis {\n  border: 0;\n}\n')],
+  'css/inline-dimensions': [css('a {\n  width: 10rem;\n}\n'), css('a {\n  display: inline-block;\n  width: 10rem;\n}\n\nimg {\n  width: 10rem;\n}\n')],
+  'css/shorthand-override': [css('.targeta {\n  margin-top: 1rem;\n  margin: 0;\n}\n'), css('.targeta {\n  margin: 0;\n  margin-top: 1rem;\n}\n')],
+  'css/spacing-scale': [css('.a {\n  margin: 4px 8px;\n  padding: 12px 13px 1rem;\n}\n'), css('.a {\n  margin: 0.5rem 1rem;\n  padding: 1rem 2rem;\n}\n')],
   'css/repeated-color': [css('h1 {\n  color: #2a9d8f;\n}\n\nh2 {\n  color: #2a9d8f;\n}\n\na {\n  color: #2a9d8f;\n}\n'),
     css(':root {\n  --principal: #2a9d8f;\n}\n\nh1 {\n  color: var(--principal);\n}\n\nh2 {\n  color: #2a9d8f;\n}\n')],
   'css/last-semicolon': [css('h1 {\n  color: red\n}\n'), css(GOOD_CSS)],
@@ -187,6 +192,12 @@ test('css/invalid-value explica els errors típics', () => {
   assert.deepEqual([kind('color: --principal').kind, kind('color: --principal').fix], ['var', 'var(--principal)']);
   assert.deepEqual([kind('color: var(principal)').kind, kind('color: var(principal)').fix], ['var-dashes', 'var(--principal)']);
   assert.match(first(css('h1 {\n  color: #2a9d8;\n}\n'), 'css/invalid-value').hint, /3 o 6 xifres.*en té 5/);
+  // Capítol 12: comes entre valors, padding negatiu, massa valors
+  assert.deepEqual([kind('margin: 10px, 20px').kind, kind('margin: 10px, 20px').fix], ['list-comma', '10px 20px']);
+  assert.deepEqual([kind('padding: -10px').kind, kind('padding: -10px').fix], ['negative', '10px']);
+  assert.match(first(css('h1 {\n  padding: 0 -1rem;\n}\n'), 'css/invalid-value').hint, /no pot ser negatiu: 0 1rem\. .*margin negatiu/);
+  assert.deepEqual(kind('margin: 1px 2px 3px 4px 5px'), { property: 'margin', value: '1px 2px 3px 4px 5px', kind: 'too-many', count: 5 });
+  assert.equal(kind('font-size: 1,5em').kind, 'comma');   // la coma decimal té el seu missatge
 });
 
 test('si falta un «;», no es diu també que el valor és invàlid', () => {
@@ -532,4 +543,47 @@ test('colors, lletra i variables: detalls de les regles del capítol 11', () => 
   // Abans del capítol 11, cap d'aquestes regles ni de les pistes noves
   const before = { files: { 'estils.css': 'p {\n  font-family: Georgia;\n  color: var(--x);\n}\n' }, chapter: 10 };
   assert.deepEqual(rulesOf(before), []);
+});
+
+test('el model de caixa: detalls de les regles del capítol 12', () => {
+  // Vora sense estil: proposa on posar solid; no si ja hi és, si és 0 o none, o si l'estil ve després
+  const border = (decls) => first(css(`.a {\n${decls}\n}\n`), 'css/border-without-style')?.data;
+  assert.deepEqual(border('  border: 2px red;'), { property: 'border', value: '2px red', fix: '2px solid red' });
+  assert.equal(border('  border-bottom: red;').fix, 'solid red');
+  for (const decls of ['  border: none;', '  border: 0;', '  border: 3px dashed teal;', '  border: 2px red;\n  border-style: dotted;', '  border: var(--vora);']) {
+    assert.equal(border(decls), undefined, decls);
+  }
+  assert.match(first(css('.a {\n  border: 2px red;\n}\n'), 'css/border-without-style').hint, /border: 2px solid red;/);
+  // Si el valor no és vàlid (sòlid en català), només ho diu css/invalid-value
+  assert.deepEqual(rulesOf(css('.a {\n  border: 2px sòlid red;\n}\n')), ['css/invalid-value']);
+
+  // Elements en línia: amplada, alçada i marges verticals no fan res
+  const inline = (src) => lintCase(css(src)).filter((p) => p.rule === 'css/inline-dimensions').map((p) => [p.line, p.data.property, p.data.element, p.data.kind]);
+  assert.deepEqual(inline('nav a {\n  height: 3rem;\n  margin-top: 1rem;\n  margin: 1rem 0;\n  margin-bottom: 0;\n  padding: 1rem;\n}\n'),
+    [[2, 'height', 'a', 'size'], [3, 'margin-top', 'a', 'margin'], [4, 'margin', 'a', 'margin']]);
+  assert.deepEqual(inline('span {\n  margin: 0 1rem;\n  width: auto;\n}\n'), []);
+  // ...però no si alguna regla (també d'un altre full) les treu de la línia, ni si el selector inclou un altre element
+  assert.deepEqual(inline('a {\n  width: 5rem;\n}\n\nnav a {\n  display: block;\n}\n'), []);
+  assert.deepEqual(inline('a {\n  width: 5rem;\n  float: left;\n}\n'), []);
+  assert.deepEqual(inline('a,\np {\n  width: 5rem;\n}\n'), []);
+  assert.deepEqual(inline('.boto {\n  width: 5rem;\n}\n'), []);
+  const twoSheets = { files: { 'index.html': '<style>\n  a { display: inline-block; }\n</style>\n<a href="#">x</a>\n', 'estils.css': 'a {\n  width: 5rem;\n}\n' } };
+  assert.ok(!rulesOf(twoSheets).includes('css/inline-dimensions'));
+
+  // Dreceres que esborren una propietat d'abans (margin, background, font, border…)
+  const lost = (src) => lintCase(css(src)).filter((p) => p.rule === 'css/shorthand-override').map((p) => [p.line, p.data.property, p.data.shorthand, p.data.line]);
+  assert.deepEqual(lost('.a {\n  background-color: teal;\n  border-radius: 4px;\n  font-size: 2rem;\n  background: white;\n  border: 1px solid;\n  font: 12px serif;\n}\n'),
+    [[2, 'background-color', 'background', 5], [4, 'font-size', 'font', 7]]);
+  assert.deepEqual(lost('.a {\n  border-color: teal;\n  border-top: 2px solid;\n  border: 1px solid;\n}\n'), [[2, 'border-color', 'border', 4], [3, 'border-top', 'border', 4]]);
+  assert.deepEqual(lost('.a {\n  margin-top: 1rem !important;\n  margin: 0;\n}\n'), []);
+  assert.deepEqual(lost('.a {\n  padding-left: 1rem;\n  margin: 0;\n}\n'), []);
+
+  // Escala d'espais (suggeriment): a partir de la cinquena mida diferent; els 0 i les variables no compten
+  const scale = (src) => first(css(src), 'css/spacing-scale');
+  assert.equal(scale('.a {\n  margin: 0 4px;\n  padding: 8px 12px 16px;\n  gap: var(--espai);\n}\n'), undefined);
+  const five = scale('.a {\n  margin: 0 4px;\n  padding: 8px 12px 16px;\n}\n\n.b {\n  padding: 4px 20px;\n}\n');
+  assert.deepEqual([five.line, five.col, five.severity, five.data], [7, 16, 'info', { count: 5, sizes: '4px, 8px, 12px, 16px, 20px' }]);
+
+  // Abans del capítol 12, cap d'aquestes regles
+  assert.deepEqual(rulesOf({ files: { 'estils.css': 'a {\n  width: 5rem;\n  margin-top: 1rem;\n  margin: 0;\n  border: 2px red;\n}\n' }, chapter: 11 }), []);
 });

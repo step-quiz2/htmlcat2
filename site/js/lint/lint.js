@@ -18,7 +18,8 @@
 //   summarize(problems, max?)                → { entries, counts, hidden }
 //
 // env: { supports(prop, value) } (al navegador, CSS.supports)
-// Les regles de CSS reben també les variables (--nom) de tot el CSS.
+// Les regles de CSS reben també tots els fulls d'estil del simulador i les
+// variables (--nom) de tot el CSS.
 // Problem: { file, rule, severity, start, end, line, col, data, text, hint }
 //   start/end: posicions al fitxer (com textarea.selectionStart)
 // Ordre: errors, avisos i suggeriments; dins de cada grup, per fitxer i línia.
@@ -70,7 +71,8 @@ export function lintStatic({ files, mode = 'fragment', chapter = Infinity, env =
     const sources = file.endsWith('.css') ? [{ css: files[file], offset: 0 }] : styleContents(parsed.get(file).tokens, files[file]);
     sheets.set(file, sources.map((source) => ({ ...source, sheet: parseCss(source.css) })));
   });
-  const variables = customProperties([...sheets.values()].flat().map((source) => source.sheet));
+  const allSheets = [...sheets.values()].flat().map((source) => source.sheet);
+  const variables = customProperties(allSheets);
 
   Object.keys(files).forEach((file, fileIndex) => {
     const src = files[file];
@@ -85,7 +87,7 @@ export function lintStatic({ files, mode = 'fragment', chapter = Infinity, env =
     };
     const lintCss = ({ css, offset, sheet }, embedded) => {
       const lineOf = makeLineIndex(css);
-      const ctx = { src: css, sheet, supports: env.supports || null, embedded, page, variables, lineOf: (pos) => lineOf(pos).line };
+      const ctx = { src: css, sheet, sheets: allSheets, supports: env.supports || null, embedded, page, variables, lineOf: (pos) => lineOf(pos).line };
       for (const rule of cssRules) {
         if (!(embedded && rule.embedded === false)) rule.check(ctx, reporter(rule, offset));
       }
