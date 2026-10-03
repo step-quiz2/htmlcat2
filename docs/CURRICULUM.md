@@ -15,7 +15,7 @@
 | # | Títol | Conceptes nous | Hàbit de codi net | Estat |
 |---|---|---|---|---|
 | 1 | Hola, HTML! | Elements, etiquetes, contingut, niuament; esquelet (`<!DOCTYPE html>`, `html lang`, `head`, `meta charset`, `title`, `body`); `h1`, `p` | Tanca el que obres; la indentació reflecteix el niuament | ✅ `cap-1-ex`, `cap-1-bug` |
-| 2 | Text amb significat | `h1`–`h6`, `strong`/`em`, `br`, comentaris, espais en blanc, entitats (`&lt;`, `&amp;`) | El significat abans que l'aspecte | ⏳ |
+| 2 | Text amb significat | `h1`–`h6`, `strong`/`em`, `br`, comentaris, espais en blanc, entitats (`&lt;`, `&amp;`) | El significat abans que l'aspecte | ✅ `cap-2-ex`, `cap-2-bug` |
 | 3 | Llistes | `ul`, `ol`, `li`, llistes niades | Niuament = indentació | ⏳ |
 | 4 | Enllaços | `a href`, rutes absolutes i relatives, àncores `#id`, `id` | Textos d'enllaç que diuen on porten | ⏳ |
 | 5 | Imatges | `img src alt width height`, carpetes, `figure`/`figcaption` | Descriu les imatges per a tothom | ⏳ |

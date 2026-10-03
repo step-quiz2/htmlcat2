@@ -29,6 +29,7 @@ export const PARTS = {
 
 export const CAPITOLS = [
   { num: 1, titol: 'Hola, HTML!', arxiu: 'capitol-1.html', goalId: 'cap-1-ex', part: 'HTML' },
+  { num: 2, titol: 'Text amb significat', arxiu: 'capitol-2.html', goalId: 'cap-2-ex', part: 'HTML' },
 ];
 
 export const REPTES = [];

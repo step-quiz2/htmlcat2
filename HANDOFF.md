@@ -1,6 +1,6 @@
 # HANDOFF — start here (for a Claude session with no prior context)
 
-Last updated: 2026-10-03, after phase 4 (course shell, checks, chapter 1).
+Last updated: 2026-10-03, after chapter 2 (phase 5, content).
 Keep it short and current: when you finish a phase, rewrite the "Where we are" and
 "Next task" sections.
 
@@ -36,6 +36,9 @@ copied here by a GitHub web upload, which dropped every dot-file (see §6).
 - Phase 4 ✅ course shell (`site/js/course/`: data, progress, shell; STATE §2.8), checks DSL v1
   (`site/js/checks/`, "✓ Comprova", hidden 800×600 check frame; STATE §2.7) and chapter 1
   (`site/curs/capitol-1.html`, exercises `cap-1-ex` and `cap-1-bug`, solutions in `tests/solutions/`).
+- Phase 5 (content, one chapter per PR): chapters 1 and 2 done (`site/curs/capitol-2.html`,
+  exercises `cap-2-ex` and `cap-2-bug`). Next: chapter 3, «Llistes» (`html/list-structure`
+  already exists, since 3).
 - Decisions D3, D4, D6–D12: the owner accepted all recommended options (STATE §3).
 - 163 unit tests + static checks + browser checks (editor, panel and every exercise end-to-end), all green.
 - Still pending from phase 0 (owner's job): confirm Cloudflare Pages deploys

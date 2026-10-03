@@ -26,7 +26,7 @@ aquest document (i el codi).
 
 ## 2. Què hi ha ara
 
-**Fase actual: 4 (primer capítol complet) acabada.** Hi ha el capítol 1
+**Fase actual: 5 (continguts, un capítol per PR).** Fets: capítols 1 i 2. Fase 4 acabada: hi ha el capítol 1
 («Hola, HTML!») amb l'estructura del curs (menú de capítols, progrés), els
 exercicis amb «✓ Comprova» i el panell ⚠ Problemes, i l'editor lliure a
 `/editor/`. Següent: un capítol per PR (fase 5).
@@ -50,6 +50,7 @@ site/                  ← l'única carpeta que es publica
   index.html           Portada: dos exemples ressaltats, «Comença el curs», la llista de
                        capítols (de course/data.js, amb ✓) i l'editor lliure
   curs/capitol-1.html  Capítol 1, «Hola, HTML!» (exercicis cap-1-ex i cap-1-bug)
+  curs/capitol-2.html  Capítol 2, «Text amb significat» (exercicis cap-2-ex i cap-2-bug)
   editor/index.html    Editor lliure (simulador a pantalla completa, clau code:editor)
   404.html             Pàgina d'error (Cloudflare la fa servir sola)
   _headers             Capçaleres de seguretat per a Cloudflare Pages
@@ -478,6 +479,8 @@ Fases del BLUEPRINT §9.1:
       amb dos exercicis i solucions, tests del curs). Queda per a més endavant: exportar/importar
       el progrés i les activitats (fase 6), pantalla completa, glossari i la portada amb targetes
       (fase 7).
-- [ ] **Fase 5 — Continguts:** un capítol per PR.
+- [ ] **Fase 5 — Continguts:** un capítol per PR. Fets: 1 i 2. El capítol 2 no ha necessitat regles
+      noves: les seves (ordre dels títols, un sol `<h1>`, `<br>` seguits, elements antics, comentari
+      sense tancar) ja eren al revisor (§2.6).
 - [ ] **Fase 6 — Activitats i eines:** Parsons, qüestionaris, 🌳 Arbre, exportar/importar el progrés.
 - [ ] **Fase 7 — Acabats:** portada amb progrés, glossari, accessibilitat, guia del professorat.
