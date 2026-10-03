@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 300" width="480" height="300" role="img" aria-labelledby="titol">
+  <title id="titol">El model de caixa: contingut, farciment, vora i marge</title>
+  <rect x="0" y="0" width="480" height="300" fill="#ffffff"/>
+  <!-- Marge: l'espai de fora, transparent -->
+  <rect x="10" y="10" width="460" height="280" fill="#fefce8" stroke="#a16207" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="24" y="36" font-family="system-ui, sans-serif" font-size="16" fill="#713f12">marge (margin)</text>
+  <!-- Vora -->
+  <rect x="50" y="50" width="380" height="200" fill="#0f766e"/>
+  <text x="64" y="68" font-family="system-ui, sans-serif" font-size="15" fill="#ffffff">vora (border)</text>
+  <!-- Farciment: té el color de fons de l'element -->
+  <rect x="74" y="76" width="332" height="150" fill="#ccfbf1"/>
+  <text x="88" y="100" font-family="system-ui, sans-serif" font-size="16" fill="#134e4a">farciment (padding)</text>
+  <!-- Contingut -->
+  <rect x="124" y="116" width="232" height="72" fill="#ffffff" stroke="#0f766e" stroke-width="2" stroke-dasharray="4 4"/>
+  <text x="240" y="148" font-family="system-ui, sans-serif" font-size="17" font-weight="700" fill="#18181b" text-anchor="middle">contingut</text>
+  <text x="240" y="171" font-family="system-ui, sans-serif" font-size="14" fill="#3f3f46" text-anchor="middle">width × height</text>
+</svg>

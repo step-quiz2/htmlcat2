@@ -39,6 +39,7 @@ export const CAPITOLS = [
   { num: 9, titol: 'Hola, CSS!', arxiu: 'capitol-9.html', goalId: 'cap-9-ex', part: 'CSS' },
   { num: 10, titol: 'Selectors i cascada', arxiu: 'capitol-10.html', goalId: 'cap-10-ex', part: 'CSS' },
   { num: 11, titol: 'Colors, text i unitats', arxiu: 'capitol-11.html', goalId: 'cap-11-ex', part: 'CSS' },
+  { num: 12, titol: 'El model de caixa', arxiu: 'capitol-12.html', goalId: 'cap-12-ex', part: 'CSS' },
 ];
 
 export const REPTES = [];

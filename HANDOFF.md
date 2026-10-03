@@ -1,6 +1,6 @@
 # HANDOFF — start here (for a Claude session with no prior context)
 
-Last updated: 2026-10-03, after chapter 11 (phase 5, content): part A (HTML) is complete; part B (CSS) is in progress.
+Last updated: 2026-10-03, after chapter 12 (phase 5, content): part A (HTML) is complete; part B (CSS) is in progress.
 Keep it short and current: when you finish a phase, rewrite the "Where we are" and
 "Next task" sections.
 
@@ -31,12 +31,12 @@ copied here by a GitHub web upload, which dropped every dot-file (see §6).
 - Phase 2 ✅ editor (`editor/editor.js`, `editing.js`), sandboxed preview
   (`preview/preview.js`, `srcdoc.js`), simulator component (`sim/simulador.js`),
   free editor at `site/editor/`, asset pack `site/recursos/`.
-- Phase 3 ✅ linter (`site/js/lint/`: 35 rules at the end of phase 3, 71 after chapter 11; Catalan messages, STATE §2.6)
+- Phase 3 ✅ linter (`site/js/lint/`: 35 rules at the end of phase 3, 75 after chapter 12; Catalan messages, STATE §2.6)
   and the "⚠ Problemes" panel (`sim/problems-panel.js`, STATE §2.4).
 - Phase 4 ✅ course shell (`site/js/course/`: data, progress, shell; STATE §2.8), checks DSL v1
   (`site/js/checks/`, "✓ Comprova", hidden 800×600 check frame; STATE §2.7) and chapter 1
   (`site/curs/capitol-1.html`, exercises `cap-1-ex` and `cap-1-bug`, solutions in `tests/solutions/`).
-- Phase 5 (content, one chapter per PR): chapters 1–11 done (`site/curs/capitol-N.html`,
+- Phase 5 (content, one chapter per PR): chapters 1–12 done (`site/curs/capitol-N.html`,
   exercises `cap-N-ex` and `cap-N-bug`); chapter 4 added six link rules, chapter 5 six
   image/attribute rules (per-element attributes in `lang/html-spec.js`), chapter 6 four
   page-structure rules, chapter 7 five table rules (`html/th-scope` is the first `info`
@@ -61,14 +61,25 @@ copied here by a GitHub web upload, which dropped every dot-file (see §6).
   (every custom property of the simulator's CSS), and `uses-css` got `valueIncludes`.
   `css/low-contrast` is static: same-rule `color` + background only (other pairs would give false
   warnings). So far no rule needs the rendered document.
-  Next: chapter 12, «El model de caixa» (`margin`, `border`, `padding`, `width`, `box-sizing`,
-  `display` block/inline; habit: a consistent spacing scale). BLUEPRINT §5 plans
-  "conflicting/unused declarations (info)" for it (e.g. `width` on an inline element, `margin`
-  shorthand overridden in the same rule). Chapters 9–11 show the pattern for two editable files
-  (solutions hold `index.html` and `estils.css`); `style` checks compare computed values,
-  `uses-css` the source (`valueIncludes` for a piece of the value, spaces ignored).
+  Chapter 12 added four box-model rules: `css/border-without-style` (`border: 2px red` draws
+  nothing), `css/inline-dimensions` (`width`/`height`/vertical margins on inline elements; a
+  class selector counts when the simulator's HTML gives that class to one inline element type,
+  via `ctx.page.classElements`; silent if any rule in any sheet changes that element's `display`,
+  `float` or `position`), `css/shorthand-override` (`margin-top: 1rem; margin: 0`) and
+  `css/spacing-scale` (info, more than 4 spacing sizes); more `css/invalid-value` hints (commas
+  between values, negative padding, more than 4 values). CSS rules now get `ctx.sheets` (every
+  parsed sheet). A figure, `site/img/model-caixa.svg`, styled by `.figura` in `course.css`.
+  Beware: a `style` check builds a probe element without the student's classes, so it cannot
+  check `width` of an inline element or `margin: auto` (both resolve differently on the probe);
+  check `display` or use `uses-css` with `valueIncludes` instead.
+  Next: chapter 13, «Flexbox» (`display: flex`, `flex-direction`, `justify-content`,
+  `align-items`, `gap`, `flex-wrap`; habit: layout with intent, not with hacks). BLUEPRINT §5
+  plans no lint rule for it ("layout checks"): consider a `layout` check type (STATE §2.7 lists
+  the current types) or `style` checks on `display`/`flex-direction`/`justify-content`, and
+  maybe lint for flex properties on a non-flex container (e.g. `justify-content` without
+  `display: flex` in the same rule).
 - Decisions D3, D4, D6–D12: the owner accepted all recommended options (STATE §3).
-- 212 unit tests + static checks + browser checks (editor, panel and every exercise end-to-end), all green.
+- 217 unit tests + static checks + browser checks (editor, panel and every exercise end-to-end), all green.
 - Still pending from phase 0 (owner's job): confirm Cloudflare Pages deploys
   `step-quiz2/htmlcat2` (it was connected to the old repo); confirm `/tests/` and `/docs/`
   return 404 on the deployed site; add custom domain `htmlcat.step-quiz.net`.

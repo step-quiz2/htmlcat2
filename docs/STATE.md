@@ -60,12 +60,14 @@ site/                  ← l'única carpeta que es publica
   curs/capitol-9.html  Capítol 9, «Hola, CSS!» (exercicis cap-9-ex i cap-9-bug, amb index.html i estils.css editables)
   curs/capitol-10.html Capítol 10, «Selectors i cascada» (exercicis cap-10-ex i cap-10-bug)
   curs/capitol-11.html Capítol 11, «Colors, text i unitats» (exercicis cap-11-ex i cap-11-bug)
+  curs/capitol-12.html Capítol 12, «El model de caixa» (exercicis cap-12-ex i cap-12-bug)
   editor/index.html    Editor lliure (simulador a pantalla completa, clau code:editor)
   404.html             Pàgina d'error (Cloudflare la fa servir sola)
   _headers             Capçaleres de seguretat per a Cloudflare Pages
   LICENSE.txt          Còpia de LICENSE (el peu hi enllaça)
   recursos/            Paquet d'imatges per als alumnes (gat.svg, animals/, paisatges/) + CREDITS.md
   img/logo.svg         Logotip (també és la icona de la pestanya)
+  img/model-caixa.svg  Figura del capítol 12: contingut, farciment, vora i marge
   css/tokens.css       Variables de disseny (colors, espais, tipografies, ressaltat) i tema fosc
   css/base.css         Reinici, tipografia i estructura (.pagina, .pantalla, .barra, .peu, .avis, .logo, .boto)
   css/highlight.css    Colors del ressaltat (.hl-*) i blocs pre.code-example
@@ -387,7 +389,7 @@ comprovar.
 | `count` | `selector` i `eq`, o `min` i/o `max` | Quants elements hi ha |
 | `text` | `selector` i un de `equals` / `includes` / `matches`; `all`, `ci` | El text (amb els espais normalitzats) del primer element, o de tots amb `all`; `ci`: sense distingir majúscules |
 | `attr` | `selector`, `name` i un de `present` / `nonEmpty` / `equals` / `includes` / `matches`; `all`, `ci` | Un atribut del primer element (o de tots) |
-| `style` | `selector`, `prop`, `equals`; `all` | L'estil calculat, comparat amb el d'un element de prova amb el valor demanat (el navegador normalitza tots dos: `teal` = `rgb(0, 128, 128)`) |
+| `style` | `selector`, `prop`, `equals`; `all` | L'estil calculat, comparat amb el d'un element de prova amb el valor demanat (el navegador normalitza tots dos: `teal` = `rgb(0, 128, 128)`). L'element de prova és del mateix tipus però no té les classes ni l'amplada de l'alumne: no serveix per a l'amplada d'un element en línia ni per a `margin: auto` (per a això, `display` o `uses-css`) |
 | `uses-html` | `tag` i/o `attr` | Que aparegui al **codi font** (no al DOM, que té elements afegits pel navegador) |
 | `uses-css` | `prop`; `selector` (exacte) o `matches`; `value` (exacte) i/o `valueIncludes` (un tros del valor, sense tenir en compte els espais: `var(--color-principal)`) | Que hi hagi la declaració als fitxers CSS o als `<style>` |
 | `lint` | `maxErrors` (per defecte 0), `maxWarnings`, `rules` | Els problemes del revisor de codi (§2.6) al nivell del capítol; `rules` en filtra uns quants |
@@ -546,22 +548,23 @@ Fases del BLUEPRINT §9.1:
 - [x] **Fase 1 — Nucli del llenguatge:** tokenitzador d'HTML, analitzador de CSS, arbre del codi font, ressaltat.
 - [x] **Fase 2 — Editor, previsualització i editor lliure.**
 - [x] **Fase 3 — Revisor de codi v1 i panell ⚠ Problemes** (35 regles fins al capítol 9, §2.6).
-      Després s'hi han afegit les dels capítols 4–11; les dels capítols 4, 5, 10 i 11 que el
+      Després s'hi han afegit les dels capítols 4–12; les dels capítols 4, 5, 10 i 11 que el
       BLUEPRINT preveia sobre el document pintat s'han fet sobre el codi font (§2.6). Queden les
-      dels capítols 12–14 (amb cada capítol) i les correccions ràpides (fase 6). L'arbre del codi font encara no entén `<circle />` dins d'`<svg>`.
+      dels capítols 13–14 (amb cada capítol) i les correccions ràpides (fase 6). L'arbre del codi font encara no entén `<circle />` dins d'`<svg>`.
 - [x] **Fase 4 — Primer capítol complet** (esquelet del curs, progrés, comprovacions, capítol 1
       amb dos exercicis i solucions, tests del curs). Queda per a més endavant: exportar/importar
       el progrés i les activitats (fase 6), pantalla completa, glossari i la portada amb targetes
       (fase 7).
-- [ ] **Fase 5 — Continguts:** un capítol per PR. Fets: 1 a 11 (la part A sencera i els capítols 9 a 11). Els capítols 2 i 3 no han
+- [ ] **Fase 5 — Continguts:** un capítol per PR. Fets: 1 a 12 (la part A sencera i els capítols 9 a 12). Els capítols 2 i 3 no han
       necessitat regles noves; amb el 3, `html/list-structure` assenyala el text solt d'una llista a
       la seva línia. El 4 n'ha afegit sis (enllaços); el 5, sis més (imatges i atributs), a més de
       quatre imatges noves a `site/recursos/`; el 6, quatre (estructura de la pàgina); el 7, cinc
       (taules); el 8, dues (formularis), a més de `form-action 'none'` a la CSP; el 9, tres (CSS:
       comentaris mal escrits, selectors d'elements que no existeixen i el `<link>`); el 10, sis
       (selectors i cascada, §2.6), i l'11, quatre (colors, lletra i variables), més pistes a
-      `css/invalid-value`, el mòdul `lang/css-colors.js` i `valueIncludes` a `uses-css`. Des del capítol 6, els exercicis són documents sencers (D3). Al 7, els
+      `css/invalid-value`, el mòdul `lang/css-colors.js` i `valueIncludes` a `uses-css`; el 12,
+      quatre (model de caixa) i una figura, `site/img/model-caixa.svg`. Des del capítol 6, els exercicis són documents sencers (D3). Al 7, els
       simuladors porten un `estils.css` de només lectura perquè es vegin les vores de les taules
-      (el CSS s'ensenya a la part B). Següent: capítol 12, «El model de caixa».
+      (el CSS s'ensenya a la part B). Següent: capítol 13, «Flexbox».
 - [ ] **Fase 6 — Activitats i eines:** Parsons, qüestionaris, 🌳 Arbre, exportar/importar el progrés.
 - [ ] **Fase 7 — Acabats:** portada amb progrés, glossari, accessibilitat, guia del professorat.
