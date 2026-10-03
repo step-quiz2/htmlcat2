@@ -169,6 +169,35 @@ export const MESSAGES = {
       text: 'Cada element de la llista va dins de <li>…</li>.',
     }[kind],
   }),
+  // ── HTML: enllaços ──
+  'html/missing-href': ({ kind }) => ({
+    text: kind === 'empty' ? 'L\'atribut href és buit.' : 'Aquest enllaç no té href: no porta enlloc.',
+    hint: kind === 'empty'
+      ? 'Escriu-hi l\'adreça o el fitxer on ha de portar l\'enllaç.'
+      : 'Escriu on ha de portar: <a href="pagina.html">…</a>. Sense href, el navegador el mostra com a text normal i no es pot clicar.',
+  }),
+  'html/empty-link': () => ({
+    text: 'Aquest enllaç no té cap text.',
+    hint: 'Escriu entre <a> i </a> el text que es clica, i que digui on porta. Sense text, l\'enllaç no es veu.',
+  }),
+  'html/vague-link-text': ({ text }) => ({
+    text: `«${text}» no diu on porta l'enllaç.`,
+    hint: 'Escriu un text que s\'entengui tot sol, com «les fotos del refugi». Molta gent llegeix només els enllaços, i els lectors de pantalla els poden llegir tots seguits.',
+  }),
+  'html/missing-protocol': ({ href, fix }) => ({
+    text: `A l'adreça «${href}» li falta https://.`,
+    hint: `Sense https://, el navegador la llegeix com un fitxer del teu web. Escriu ${fix}.`,
+  }),
+  'html/duplicate-id': ({ id, firstLine }) => ({
+    text: `L'id «${id}» ja surt a la línia ${firstLine}.`,
+    hint: 'Cada id ha de ser únic a la pàgina: un enllaç a #… només pot portar a un lloc. Canvia\'n un.',
+  }),
+  'html/missing-anchor': ({ id, suggestion }) => ({
+    text: `No hi ha cap element amb id="${id}".`,
+    hint: suggestion
+      ? `Potser volies dir #${suggestion}? Un enllaç a #… porta a l'element que té aquest id.`
+      : `Posa id="${id}" a l'element on ha de portar l'enllaç, o corregeix el nom.`,
+  }),
   'html/inline-style': ({ tag: name }) => ({
     text: `L'atribut style de ${tag(name)} barreja l'estil amb el contingut.`,
     hint: 'Posa una classe a l\'element (class="…") i escriu les declaracions en una regla del fitxer CSS.',

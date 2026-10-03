@@ -330,6 +330,124 @@ const listStructure = {
   },
 };
 
+// ── Enllaços (capítol 4) ──
+
+/** Textos d'enllaç que no diuen on porten (en minúscules, sense puntuació final). */
+const VAGUE_LINK_TEXTS = new Set([
+  'aquí', 'aqui', 'clica', 'clica aquí', 'clica aqui', 'clica-hi', 'clic', 'clic aquí',
+  'fes clic', 'fes clic aquí', 'fes clic aqui', 'prem aquí', 'enllaç', 'aquest enllaç',
+  'més', 'més informació', 'llegeix més', 'click', 'click here', 'here', 'link',
+]);
+
+/** Sembla una adreça d'Internet sense «https://» (www.… o nom.cat/…). */
+const LOOKS_LIKE_DOMAIN = /^(www\.|[\w-]+(\.[\w-]+)*\.(cat|com|org|net|es|eu|info|edu|io)(\/|$))/i;
+
+const links = (root) => htmlElements(root).filter((el) => el.name === 'a');
+const hrefOf = (a) => attrOf(a.startTag, 'href');
+
+/** El text que es veu dins d'un element (els textos dels seus descendents). */
+function visibleText(src, el) {
+  return [...walk(el)].filter((n) => n.type === 'text' && !n.token.raw)
+    .map((n) => src.slice(n.token.start, n.token.end)).join('');
+}
+
+const hasImageWithAlt = (el) => [...walk(el)].some((n) =>
+  isElement(n) && n.name === 'img' && (attrOf(n.startTag, 'alt')?.value || '').trim());
+
+/** Valors de tots els atributs id, amb l'atribut on són (en ordre). */
+const idAttributes = (root) => htmlElements(root)
+  .map((el) => attrOf(el.startTag, 'id'))
+  .filter((attr) => attr && attr.value !== null && attr.value.trim());
+
+const missingHref = {
+  id: 'html/missing-href',
+  lang: 'html',
+  since: 4,
+  severity: 'error',
+  check(ctx, report) {
+    for (const a of links(ctx.root)) {
+      const href = hrefOf(a);
+      if (!href) report(nameRange(a.startTag), { kind: 'missing' });
+      else if (!(href.value || '').trim()) report(href, { kind: 'empty' });
+    }
+  },
+};
+
+const emptyLink = {
+  id: 'html/empty-link',
+  lang: 'html',
+  since: 4,
+  severity: 'warning',
+  check(ctx, report) {
+    for (const a of links(ctx.root)) {
+      if (hrefOf(a) && !visibleText(ctx.src, a).trim() && !hasImageWithAlt(a)) report(nameRange(a.startTag), {});
+    }
+  },
+};
+
+const vagueLinkText = {
+  id: 'html/vague-link-text',
+  lang: 'html',
+  since: 4,
+  severity: 'warning',
+  check(ctx, report) {
+    for (const a of links(ctx.root)) {
+      const text = visibleText(ctx.src, a).replace(/\s+/g, ' ').trim();
+      const key = text.toLowerCase().replace(/[.,:;!?…]+$/, '');
+      if (VAGUE_LINK_TEXTS.has(key)) report(nameRange(a.startTag), { text });
+    }
+  },
+};
+
+const missingProtocol = {
+  id: 'html/missing-protocol',
+  lang: 'html',
+  since: 4,
+  severity: 'warning',
+  check(ctx, report) {
+    for (const a of links(ctx.root)) {
+      const href = hrefOf(a);
+      const value = (href?.value || '').trim();
+      if (LOOKS_LIKE_DOMAIN.test(value)) report(href, { href: value, fix: 'https://' + value });
+    }
+  },
+};
+
+const duplicateId = {
+  id: 'html/duplicate-id',
+  lang: 'html',
+  since: 4,
+  severity: 'error',
+  check(ctx, report) {
+    const firstLine = new Map();
+    for (const attr of idAttributes(ctx.root)) {
+      const id = attr.value.trim();
+      if (firstLine.has(id)) report(attr, { id, firstLine: firstLine.get(id) });
+      else firstLine.set(id, ctx.lineOf(attr.start));
+    }
+  },
+};
+
+// Es fa sobre el codi font (el BLUEPRINT la preveia sobre la pàgina pintada):
+// els id del codi són els que l'alumne ha escrit
+const missingAnchor = {
+  id: 'html/missing-anchor',
+  lang: 'html',
+  since: 4,
+  severity: 'warning',
+  check(ctx, report) {
+    const ids = new Set(idAttributes(ctx.root).map((attr) => attr.value.trim()));
+    for (const a of links(ctx.root)) {
+      const href = hrefOf(a);
+      const value = (href?.value || '').trim();
+      if (!value.startsWith('#') || value === '#') continue;
+      let id = value.slice(1);
+      try { id = decodeURIComponent(id); } catch { /* es compara tal com és */ }
+      if (!ids.has(id)) report(href, { id, suggestion: closest(id, ids) });
+    }
+  },
+};
+
 const inlineStyle = {
   id: 'html/inline-style',
   lang: 'html',
@@ -368,5 +486,11 @@ export const HTML_RULES = [
   singleH1,
   brSpacing,
   listStructure,
+  missingHref,
+  emptyLink,
+  vagueLinkText,
+  missingProtocol,
+  duplicateId,
+  missingAnchor,
   inlineStyle,
 ];
