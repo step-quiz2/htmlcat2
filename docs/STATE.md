@@ -26,7 +26,7 @@ aquest document (i el codi).
 
 ## 2. Què hi ha ara
 
-**Fase actual: 5 (continguts, un capítol per PR).** Fets: capítols 1 a 9 (tota la part A, HTML, i el primer de la part B, CSS). Fase 4 acabada: hi ha el capítol 1
+**Fase actual: 5 (continguts, un capítol per PR).** Fets: capítols 1 a 10 (tota la part A, HTML, i els dos primers de la part B, CSS). Fase 4 acabada: hi ha el capítol 1
 («Hola, HTML!») amb l'estructura del curs (menú de capítols, progrés), els
 exercicis amb «✓ Comprova» i el panell ⚠ Problemes, i l'editor lliure a
 `/editor/`. Següent: un capítol per PR (fase 5).
@@ -58,6 +58,7 @@ site/                  ← l'única carpeta que es publica
   curs/capitol-7.html  Capítol 7, «Taules» (exercicis cap-7-ex i cap-7-bug; un estils.css de només lectura dibuixa les vores)
   curs/capitol-8.html  Capítol 8, «Formularis» (exercicis cap-8-ex i cap-8-bug; tots els simuladors amb data-forms)
   curs/capitol-9.html  Capítol 9, «Hola, CSS!» (exercicis cap-9-ex i cap-9-bug, amb index.html i estils.css editables)
+  curs/capitol-10.html Capítol 10, «Selectors i cascada» (exercicis cap-10-ex i cap-10-bug)
   editor/index.html    Editor lliure (simulador a pantalla completa, clau code:editor)
   404.html             Pàgina d'error (Cloudflare la fa servir sola)
   _headers             Capçaleres de seguretat per a Cloudflare Pages
@@ -536,13 +537,14 @@ Fases del BLUEPRINT §9.1:
       amb dos exercicis i solucions, tests del curs). Queda per a més endavant: exportar/importar
       el progrés i les activitats (fase 6), pantalla completa, glossari i la portada amb targetes
       (fase 7).
-- [ ] **Fase 5 — Continguts:** un capítol per PR. Fets: 1 a 9 (la part A sencera i el capítol 9). Els capítols 2 i 3 no han
+- [ ] **Fase 5 — Continguts:** un capítol per PR. Fets: 1 a 10 (la part A sencera i els capítols 9 i 10). Els capítols 2 i 3 no han
       necessitat regles noves; amb el 3, `html/list-structure` assenyala el text solt d'una llista a
       la seva línia. El 4 n'ha afegit sis (enllaços); el 5, sis més (imatges i atributs), a més de
       quatre imatges noves a `site/recursos/`; el 6, quatre (estructura de la pàgina); el 7, cinc
-      (taules); el 8, dues (formularis), a més de `form-action 'none'` a la CSP, i el 9, tres (CSS:
-      comentaris mal escrits, selectors d'elements que no existeixen i el `<link>`, §2.6). Des del capítol 6, els exercicis són documents sencers (D3). Al 7, els
+      (taules); el 8, dues (formularis), a més de `form-action 'none'` a la CSP; el 9, tres (CSS:
+      comentaris mal escrits, selectors d'elements que no existeixen i el `<link>`), i el 10, sis
+      (selectors i cascada, §2.6). Des del capítol 6, els exercicis són documents sencers (D3). Al 7, els
       simuladors porten un `estils.css` de només lectura perquè es vegin les vores de les taules
-      (el CSS s'ensenya a la part B). Següent: capítol 10, «Selectors i cascada».
+      (el CSS s'ensenya a la part B). Següent: capítol 11, «Colors, text i unitats».
 - [ ] **Fase 6 — Activitats i eines:** Parsons, qüestionaris, 🌳 Arbre, exportar/importar el progrés.
 - [ ] **Fase 7 — Acabats:** portada amb progrés, glossari, accessibilitat, guia del professorat.

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capítol 10 — Selectors i cascada | HTMLCat</title>
+  <link rel="icon" href="../img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/course.css">
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link rel="stylesheet" href="../css/simulador.css">
+  <script type="module" src="../js/pages/course-page.js"></script>
+</head>
+<body data-pagina="capitol" data-num="10">
+
+<main class="curs-content">
+  <header class="chapter-header">
+    <h1>Selectors i cascada</h1>
+    <p class="chapter-lead">En acabar aquest capítol sabràs triar exactament quins elements canvia cada regla, amb classes i selectors combinats, i entendràs quina regla guanya quan n'hi ha diverses.</p>
+  </header>
+
+  <section class="chapter-section">
+    <h2>Classes</h2>
+    <p>Amb el nom d'un element, una regla els canvia tots. Per canviar-ne només uns quants, posa'ls una <strong>classe</strong>:</p>
+    <div class="simulador" data-id="c10-classes" data-height="480">
+      <script type="text/plain" data-file="index.html">
+        <h1>Tauler d'avisos</h1>
+        <p>Dilluns comença l'horari d'hivern.</p>
+        <p class="avis">Dimecres no hi ha piscina.</p>
+        <p>Divendres hi ha reunió de famílies.</p>
+        <p class="avis">Porteu l'autorització abans de dijous.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        p {
+          color: darkslategray;
+        }
+
+        .avis {
+          background-color: lightyellow;
+          color: darkred;
+        }
+      </script>
+    </div>
+    <ul>
+      <li>A l'HTML, l'atribut <code>class</code> posa un nom a uns quants elements: <code>class="avis"</code>.</li>
+      <li>Al CSS, el selector <code>.avis</code> (amb un <strong>punt</strong> davant) tria tots els elements que tenen aquesta classe.</li>
+      <li>Una classe es pot posar a tants elements com vulguis, encara que siguin de tipus diferents.</li>
+      <li>Un element pot tenir diverses classes, separades per espais: <code>class="avis urgent"</code>.</li>
+      <li>Els noms de les classes, com els dels <code>id</code>: en minúscules, sense accents i amb guions (<code>menu-principal</code>).</li>
+    </ul>
+    <p>Els paràgrafs amb la classe <code>avis</code> també són <code>p</code>, i la regla de <code>p</code> els vol grisos. Per què guanya el vermell? Ho veuràs a «La cascada».</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Ids</h2>
+    <p>Un selector amb <code>#</code> tria l'element que té aquest <code>id</code>:</p>
+    <pre class="code-example" data-lang="css" tabindex="0">#horari {
+  color: teal;
+}</pre>
+    <p>
+      Funciona, però per donar estil és millor fer servir classes: un <code>id</code> només pot ser a un element, i guanya
+      sempre a les classes (també ho veuràs a «La cascada»), cosa que fa difícil canviar els estils més endavant. Els
+      <code>id</code> són per als enllaços a una part de la pàgina (capítol 4) i per a les etiquetes dels formularis
+      (capítol 8). Per això el panell ⚠ Problemes avisa quan un selector fa servir un <code>id</code>.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Selectors combinats</h2>
+    <div class="simulador" data-id="c10-combinats" data-height="520">
+      <script type="text/plain" data-file="index.html">
+        <nav>
+          <a href="index.html">Inici</a>
+          <a href="horari.html">Horari</a>
+        </nav>
+        <h1>Institut del Parc</h1>
+        <h2>Avisos</h2>
+        <p>Consulta l'<a href="horari.html">horari nou</a>.</p>
+        <p class="avis">Dimecres no hi ha piscina.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        h1,
+        h2 {
+          color: teal;
+        }
+
+        nav a {
+          color: white;
+          background-color: teal;
+        }
+
+        p.avis {
+          color: darkred;
+        }
+      </script>
+    </div>
+    <ul>
+      <li><code>h1, h2</code>: selectors <strong>agrupats</strong>, separats per comes. Les declaracions s'apliquen a tots dos. Escriu cada selector en una línia.</li>
+      <li><code>nav a</code>: selector <strong>descendent</strong>. L'espai vol dir «que és dins de»: els <code>a</code> que són dins d'un <code>nav</code>. L'enllaç del paràgraf no canvia, perquè no és dins del <code>nav</code>.</li>
+      <li><code>p.avis</code>: els <code>p</code> que tenen la classe <code>avis</code>, tot junt, sense espai. Amb espai (<code>p .avis</code>) voldria dir una altra cosa: els elements amb la classe <code>avis</code> que són dins d'un <code>p</code>.</li>
+    </ul>
+  </section>
+
+  <section class="chapter-section">
+    <h2>La cascada: quina regla guanya?</h2>
+    <p>Aquí hi ha tres regles que donen un color diferent al mateix títol:</p>
+    <div class="simulador" data-id="c10-cascada" data-height="460">
+      <script type="text/plain" data-file="index.html">
+        <h1 class="titol">Hola, món!</h1>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        h1 {
+          color: green;
+        }
+
+        .titol {
+          color: blue;
+        }
+
+        h1 {
+          color: orange;
+        }
+      </script>
+    </div>
+    <p>Quan diverses regles diuen coses diferents del mateix element, el navegador ho decideix així:</p>
+    <ol>
+      <li>Guanya el selector <strong>més específic</strong>. Un <code>id</code> és més específic que una classe, i una classe, més que un element.</li>
+      <li>Si empaten, guanya la regla que ve <strong>més avall</strong>.</li>
+    </ol>
+    <p>
+      Per això el títol és blau: <code>.titol</code> (una classe) guanya a <code>h1</code> (un element), encara que la regla
+      taronja vingui després. Prova d'esborrar la regla <code>.titol</code>: llavors empaten les dues regles de
+      <code>h1</code>, i guanya l'última, la taronja.
+    </p>
+    <p>
+      Per saber quin selector és més específic, compta quants <code>id</code>, quantes classes i quants elements té, i
+      escriu-ho així: (ids, classes, elements).
+    </p>
+    <ul>
+      <li><code>h1</code> → (0, 0, 1)</li>
+      <li><code>nav a</code> → (0, 0, 2)</li>
+      <li><code>.avis</code> → (0, 1, 0)</li>
+      <li><code>p.avis</code> → (0, 1, 1)</li>
+      <li><code>#horari</code> → (1, 0, 0)</li>
+    </ul>
+    <p>
+      Es comparen com les paraules al diccionari: primer el nombre d'<code>id</code>; si empaten, el de classes; si encara
+      empaten, el d'elements. Així, <code>.avis</code> (0, 1, 0) guanya a <code>nav a</code> (0, 0, 2).
+    </p>
+    <p class="nota">
+      També existeix <code>!important</code>, que fa guanyar una declaració per sobre de tot. És una trampa que després
+      fa molt difícil canviar els estils: el panell ⚠ Problemes n'avisa.
+    </p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>L'herència</h2>
+    <div class="simulador" data-id="c10-herencia" data-height="420">
+      <script type="text/plain" data-file="index.html">
+        <h1>Refugi de gats Mixa</h1>
+        <p>Cuidem els gats del barri. <em>Vine a conèixer-los!</em></p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        body {
+          color: navy;
+          font-size: 20px;
+        }
+      </script>
+    </div>
+    <p>
+      La regla només diu <code>body</code>, però tot el text és blau marí i més gran: alguns estils, com
+      <code>color</code> i <code>font-size</code>, <strong>s'hereten</strong>, és a dir, passen de cada element als que té a
+      dins (<code>body</code> → <code>p</code> → <code>em</code>). D'altres, com el fons, no s'hereten.
+    </p>
+    <p>El títol encara és més gran: la mida per defecte d'un <code>h1</code> és el doble de la del seu pare (aquí, 40 píxels).</p>
+    <aside class="codi-net">
+      <p class="codi-net__titol">🧹 Codi net: noms de classe pel significat</p>
+      <ul>
+        <li>Posa a les classes noms que diguin què és l'element: <code>.avis</code>, <code>.preu</code>, <code>.destacat</code>. Res de <code>.vermell</code>, <code>.gran</code> o <code>.centrat</code>: si demà els avisos han de ser blaus, <code>.vermell</code> faria mentir el codi.</li>
+        <li>Per donar estil, classes; els <code>id</code>, per als enllaços i els formularis.</li>
+        <li>Res de <code>!important</code>.</li>
+        <li>Quan agrupes selectors, cadascun en una línia.</li>
+        <li>Noms en minúscules, sense accents i amb guions.</li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Errors típics</h2>
+    <p>Aquests exemples tenen errors. Mira el resultat i llegeix el panell ⚠ Problemes.</p>
+
+    <h3>Un punt a l'HTML</h3>
+    <div class="simulador" data-readonly data-height="340">
+      <script type="text/plain" data-file="index.html">
+        <p class=".avis">Dimecres no hi ha piscina.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        .avis {
+          color: darkred;
+        }
+      </script>
+    </div>
+    <p>El punt només va al CSS. A l'HTML, la classe es diu «.avis», amb el punt inclòs, i el selector <code>.avis</code> no la troba.</p>
+
+    <h3>Una classe mal escrita</h3>
+    <div class="simulador" data-readonly data-height="340">
+      <script type="text/plain" data-file="index.html">
+        <p class="avis">Dimecres no hi ha piscina.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        .avís {
+          color: darkred;
+        }
+      </script>
+    </div>
+    <p>Els noms de les classes han de ser exactament iguals a l'HTML i al CSS: «avís», amb accent, i «avis» són dues classes diferents.</p>
+
+    <h3>Falta el punt al CSS</h3>
+    <div class="simulador" data-readonly data-height="340">
+      <script type="text/plain" data-file="index.html">
+        <p class="avis">Dimecres no hi ha piscina.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        avis {
+          color: darkred;
+        }
+      </script>
+    </div>
+    <p>Sense el punt, <code>avis</code> vol dir «els elements &lt;avis&gt;», que no existeixen. El selector d'una classe porta un punt davant: <code>.avis</code>.</p>
+
+    <h3>Classes separades amb comes</h3>
+    <div class="simulador" data-readonly data-height="400">
+      <script type="text/plain" data-file="index.html">
+        <p class="avis, urgent">Dimecres no hi ha piscina.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        .avis {
+          background-color: lightyellow;
+        }
+
+        .urgent {
+          color: darkred;
+        }
+      </script>
+    </div>
+    <p>El text és vermell (la classe <code>urgent</code> funciona), però no té el fons groc: amb la coma, la primera classe es diu «avis,» i <code>.avis</code> no la troba. Les classes se separen només amb espais.</p>
+
+    <h3>!important</h3>
+    <div class="simulador" data-readonly data-height="400">
+      <script type="text/plain" data-file="index.html">
+        <p>Dilluns comença l'horari d'hivern.</p>
+        <p class="avis">Dimecres no hi ha piscina.</p>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        p {
+          color: gray !important;
+        }
+
+        .avis {
+          color: darkred;
+        }
+      </script>
+    </div>
+    <p>L'avís hauria de ser vermell, però el <code>!important</code> de la regla de <code>p</code> guanya per sobre de tot, fins i tot de la classe.</p>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Exercici: el tauler d'avisos</h2>
+    <p>Dona estil al tauler d'avisos de l'institut:</p>
+    <ul>
+      <li>posa la classe <code>avis</code> als tres avisos, i també la classe <code>urgent</code> al de l'autorització (<code>class="avis urgent"</code>);</li>
+      <li>a <code>estils.css</code>, dona un color de fons als avisos (<code>.avis</code>) i un color de text a l'avís urgent (<code>.urgent</code>);</li>
+      <li>dona un color als enllaços del menú, amb el selector <code>nav a</code>;</li>
+      <li>cap error ni cap avís al panell ⚠ Problemes.</li>
+    </ul>
+    <p>Quan acabis, prem <strong>✓ Comprova</strong>.</p>
+    <div class="simulador" data-id="c10-exercici" data-goal-id="cap-10-ex" data-mode="document" data-height="600">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>Tauler d'avisos</title>
+            <link rel="stylesheet" href="estils.css">
+          </head>
+          <body>
+            <header>
+              <h1>Institut del Parc</h1>
+              <nav>
+                <a href="index.html">Inici</a>
+                <a href="horari.html">Horari</a>
+                <a href="menjador.html">Menjador</a>
+              </nav>
+            </header>
+            <main>
+              <h2>Avisos</h2>
+              <p>Dilluns comença l'horari d'hivern.</p>
+              <p>Dimecres no hi ha piscina: el pavelló està tancat.</p>
+              <p>Porteu l'autorització de la sortida abans de dijous.</p>
+            </main>
+          </body>
+        </html>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        /* Estils del tauler d'avisos */
+
+        body {
+          background-color: whitesmoke;
+        }
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "count", "selector": "main p.avis", "eq": 3,
+            "msg": "Els tres avisos tenen la classe avis." },
+          { "type": "text", "selector": "p.avis.urgent", "includes": "autorització",
+            "msg": "L'avís de l'autorització també té la classe urgent (class=\"avis urgent\")." },
+          { "type": "count", "selector": ".urgent", "eq": 1,
+            "msg": "Només hi ha un avís urgent." },
+          { "type": "uses-css", "selector": ".avis", "prop": "background-color",
+            "msg": "Els avisos (.avis) tenen un color de fons." },
+          { "type": "uses-css", "selector": ".urgent", "prop": "color",
+            "msg": "L'avís urgent (.urgent) té un color de text." },
+          { "type": "uses-css", "selector": "nav a", "prop": "color",
+            "msg": "Els enllaços del menú (nav a) tenen un color." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís (com un selector que no selecciona res)." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Troba l'error</h2>
+    <p>
+      A la pàgina de la botiga de bicis, els preus haurien de ser verds i grans, l'oferta vermella i els títols
+      <code>h2</code> de color <code>teal</code>. Hi ha quatre errors, entre <code>index.html</code> i <code>estils.css</code>.
+      Arregla'ls amb l'ajuda del panell ⚠ Problemes, i quan acabis prem <strong>✓ Comprova</strong>.
+    </p>
+    <div class="simulador" data-id="c10-troba-error" data-goal-id="cap-10-bug" data-mode="document" data-height="600">
+      <script type="text/plain" data-file="index.html">
+        <!DOCTYPE html>
+        <html lang="ca">
+          <head>
+            <meta charset="UTF-8">
+            <title>Bicis Roda</title>
+            <link rel="stylesheet" href="estils.css">
+          </head>
+          <body>
+            <main>
+              <h1>Bicis Roda</h1>
+              <article class="producte">
+                <h2>Bici de muntanya</h2>
+                <p class="preu">450 €</p>
+                <p class=".oferta">Oferta: casc de regal!</p>
+              </article>
+              <article class="producte">
+                <h2>Bici de ciutat</h2>
+                <p class="preu">320 €</p>
+              </article>
+            </main>
+          </body>
+        </html>
+      </script>
+      <script type="text/plain" data-file="estils.css">
+        /* Estils de la botiga */
+
+        .producte {
+          background-color: whitesmoke;
+        }
+
+        .preus {
+          color: darkgreen;
+          font-size: 24px;
+        }
+
+        oferta {
+          color: darkred;
+        }
+
+        h2 {
+          color: navy;
+          color: teal;
+        }
+      </script>
+      <script type="application/json" data-checks>
+        [
+          { "type": "style", "selector": ".preu", "prop": "color", "equals": "darkgreen", "all": true,
+            "msg": "Els preus són de color darkgreen." },
+          { "type": "style", "selector": ".preu", "prop": "font-size", "equals": "24px", "all": true,
+            "msg": "Els preus tenen una lletra de 24 píxels." },
+          { "type": "style", "selector": ".oferta", "prop": "color", "equals": "darkred",
+            "msg": "L'oferta és de color darkred." },
+          { "type": "style", "selector": "h2", "prop": "color", "equals": "teal", "all": true,
+            "msg": "Els títols h2 són de color teal." },
+          { "type": "lint", "maxErrors": 0,
+            "msg": "El panell ⚠ Problemes no mostra cap error." },
+          { "type": "lint", "maxWarnings": 0,
+            "msg": "Tampoc no mostra cap avís." }
+        ]
+      </script>
+    </div>
+  </section>
+
+  <section class="chapter-section">
+    <h2>Resum</h2>
+    <div class="resum">
+      <ul>
+        <li>Una classe: <code>class="nom"</code> a l'HTML i <code>.nom</code> al CSS. Un element pot tenir diverses classes, separades per espais.</li>
+        <li><code>#nom</code> tria l'element amb <code>id="nom"</code>, però per donar estil és millor fer servir classes.</li>
+        <li>Selectors combinats: <code>h1, h2</code> (tots dos), <code>nav a</code> (els <code>a</code> de dins d'un <code>nav</code>), <code>p.avis</code> (els <code>p</code> amb la classe <code>avis</code>).</li>
+        <li>La cascada: guanya el selector més específic, comptant (ids, classes, elements); si empaten, el que ve més avall.</li>
+        <li>Alguns estils, com <code>color</code> i <code>font-size</code>, s'hereten: passen als elements de dins.</li>
+        <li>Noms de classe pel significat: <code>.avis</code>, no <code>.vermell</code>.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+</body>
+</html>
