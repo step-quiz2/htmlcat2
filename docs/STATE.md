@@ -279,6 +279,12 @@ Catàleg (E error, A avís). «Cap.» = capítol a partir del qual s'activa.
 | `html/single-h1` | 2 | A | Més d'un `<h1>` |
 | `html/br-spacing` | 2 | A | Dos o més `<br>` seguits |
 | `html/list-structure` | 3 | E | `<li>` fora de llista; text o altres elements dins de `<ul>`/`<ol>` |
+| `html/missing-href` | 4 | E | `<a>` sense `href`, o amb `href=""` |
+| `html/duplicate-id` | 4 | E | El mateix `id` dues vegades (diu la línia del primer) |
+| `html/empty-link` | 4 | A | Enllaç sense text (ni cap imatge amb `alt`) |
+| `html/vague-link-text` | 4 | A | Textos d'enllaç com «clica aquí», «aquí», «més informació» |
+| `html/missing-protocol` | 4 | A | `href="www.gats.cat"`: falta `https://` (el navegador ho llegeix com un fitxer) |
+| `html/missing-anchor` | 4 | A | `href="#x"` sense cap `id="x"` al codi (suggereix l'id més semblant) |
 | `html/inline-style` | 9 | A | Atribut `style=""` |
 | `css/unbalanced-braces` | 9 | E | Falta `{` o `}`, o sobra una `}` |
 | `css/missing-semicolon` | 9 | E | Falta `;` entre dues declaracions |
@@ -292,9 +298,9 @@ Catàleg (E error, A avís). «Cap.» = capítol a partir del qual s'activa.
 | `css/one-declaration-per-line` | 9 | A | Dues declaracions a la mateixa línia |
 | `css/indentation` | 9 | A | Declaracions no indentades 2 espais, `}` mal alineada (no als `<style>`) |
 
-Les regles que necessiten el document ja pintat (enllaç a un `#id` que no
-existeix, imatge no trobada, selector que no selecciona res, contrast) i les dels
-capítols 4–14 s'afegiran amb cada capítol (BLUEPRINT apèndix C).
+Les regles que necessiten el document ja pintat (imatge no trobada, selector que
+no selecciona res, contrast) i les dels capítols 5–14 s'afegiran amb cada capítol
+(BLUEPRINT apèndix C).
 
 ### 2.7 Comprovacions dels exercicis
 
@@ -396,6 +402,7 @@ motiu; si se'n canvia alguna, s'anota aquí amb la data i el motiu.
 | 2026-10-03 | Als exercicis, el panell té pestanyes (⚠ Problemes / ✓ Comprovacions); «✓ Comprova» obre la segona | Les dues llistes no hi caben alhora en un mòbil |
 | 2026-10-03 | La comprovació `lint` fa servir el revisor estàtic (§2.6); `uses-css` també mira els `<style>` | Encara no hi ha regles que necessitin el document pintat |
 | 2026-10-03 | A l'arrel del repositori hi ha `index.html`: el simulador d'HTML i CSS, com a PyCat (substitueix D1 per a l'adreça `/`). Fa servir els CSS i el JS de `site/`, que continua sent on és el web | Ho ha decidit el propietari. Conseqüències acceptades: Cloudflare publica tot el repositori, de manera que els tests, les solucions dels exercicis (`tests/solutions/`) i la documentació són públics, i `site/_headers` i `site/404.html` no s'apliquen. El test estàtic revisa també aquest fitxer |
+| 2026-10-03 | Revisor, capítol 4: `html/missing-anchor` es fa sobre el codi font (el BLUEPRINT la preveia sobre la pàgina pintada); `html/vague-link-text` és un avís (el BLUEPRINT deia suggeriment); regla nova `html/missing-protocol` | Els id del codi són els que ha escrit l'alumne; els textos d'enllaç clars són l'hàbit de codi net del capítol (i l'exercici els exigeix); oblidar `https://` és un error molt habitual que el navegador no explica |
 | 2026-10-02 | El repositori definitiu és `step-quiz2/htmlcat2` | Ho ha confirmat el propietari. L'historial de les fases 0–2 (PR #1–#4) és a l'antic repositori; el codi es va copiar aquí amb una pujada pel web, que va perdre `.github/`, `.editorconfig` i `.gitignore` (restaurats amb Git el mateix dia) |
 
 ### Decisions confirmades pel propietari el 2026-10-03
@@ -431,7 +438,7 @@ cd tests && npm ci && node course-browser.mjs   # navegador (Playwright + Chromi
 
 | Test | Què comprova |
 |---|---|
-| `unit/` | Cada mòdul pur de `site/js/` (163 tests): tokenitzador, arbre i errors d'estructura, analitzador de CSS, ressaltat (conserva el codi, escapa, una línia per entrada, rendiment), robustesa amb 500 codis aleatoris (també el revisor), edició (Retorn, Tab, Maj+Tab), `localStorage`, document de previsualització, textos de la interfície i revisor de codi: per a cada regla, un codi que la dispara i un que no (un test falla si una regla no en té), missatges sense buits, activació per capítol i mode, ordre, agrupació, rendiment, i que el codi d'exemple de l'editor lliure i de la portada no tingui cap problema; dades del curs i progrés; esquema de les comprovacions i les que no necessiten navegador (`uses-html`, `uses-css`, `lint`) |
+| `unit/` | Cada mòdul pur de `site/js/` (170 tests): tokenitzador, arbre i errors d'estructura, analitzador de CSS, ressaltat (conserva el codi, escapa, una línia per entrada, rendiment), robustesa amb 500 codis aleatoris (també el revisor), edició (Retorn, Tab, Maj+Tab), `localStorage`, document de previsualització, textos de la interfície i revisor de codi: per a cada regla, un codi que la dispara i un que no (un test falla si una regla no en té), missatges sense buits, activació per capítol i mode, ordre, agrupació, rendiment, i que el codi d'exemple de l'editor lliure i de la portada no tingui cap problema; dades del curs i progrés; esquema de les comprovacions i les que no necessiten navegador (`uses-html`, `uses-css`, `lint`) |
 | `course-static.mjs` | Cada pàgina té `<!DOCTYPE html>`, `lang="ca"`, `charset` i `<title>`; cap `style=""` ni `on…=""`; cap tabulació; tots els enllaços relatius existeixen; sintaxi de cada `.js`; cap menció de CC BY-NC-ND; existeixen `.editorconfig`, `.gitignore` i `.github/workflows/ci.yml` (una pujada pel web no els inclou). Curs: dades (`course/data.js`) ↔ fitxers de `site/curs/`; `<body data-pagina data-num>` d'acord amb el fitxer; l'exercici principal de cada capítol hi és; tot simulador editable té `data-id`; `data-id` i `data-goal-id` únics; blocs de codi amb nom permès i sense `<script`; comprovacions vàlides (`checks/schema.js`); cada exercici té la seva solució a `tests/solutions/` |
 | `course-browser.mjs` | Cada pàgina, a 360 i 1280 px: cap error a la consola, cap petició fallida, cap petició a servidors externs, tots els simuladors es munten en arribar-hi, cap desplaçament horitzontal, cap id repetit. Cada exercici dels capítols, en un mòbil: el codi inicial no el supera, la solució sí (i sense errors al panell ⚠ Problemes), el menú hi posa ✓ i es manté després de recarregar. Dos exemples no editables a la mateixa pàgina no repeteixen els ids de les pestanyes. A més, prova l'editor lliure de punta a punta: escriure, indentació automàtica, resultat en directe, Ctrl+Z, `sandbox` i CSP correctes (també amb text abans de `<html>`), cap script ni imatge externa, enllaços interceptats, CSS aplicat i codi desat després de recarregar. I el panell ⚠ Problemes: «Cap problema» amb el codi inicial, un `<p>` sense tancar surt amb la seva línia i es marca, el clic i el teclat porten el cursor a la línia (i canvien de pestanya), i una propietat CSS mal escrita es detecta amb el `CSS.supports` del navegador |
 

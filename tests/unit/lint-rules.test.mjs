@@ -36,6 +36,13 @@ const CASES = {
   'html/single-h1': ['<h1>a</h1>\n<h1>b</h1>\n', '<h1>a</h1>\n<h2>b</h2>\n'],
   'html/br-spacing': ['<p>a<br>\n<br>b</p>\n', '<p>a<br>b<br>c</p>\n'],
   'html/list-structure': ['<li>x</li>\n', '<ul>\n  <li>x</li>\n</ul>\n'],
+  // HTML: enllaços
+  'html/missing-href': ['<p><a>Les fotos</a></p>\n', '<p><a href="fotos.html">Les fotos</a></p>\n'],
+  'html/empty-link': ['<p><a href="fotos.html"></a></p>\n', '<p><a href="fotos.html"><img src="gat.svg" alt="Fotos del gat"></a></p>\n'],
+  'html/vague-link-text': ['<p>Per veure les fotos, <a href="fotos.html">clica aquí</a>.</p>\n', '<p>Mira <a href="fotos.html">les fotos del refugi</a>.</p>\n'],
+  'html/missing-protocol': ['<p><a href="www.gats.cat">Gats</a></p>\n', '<p><a href="https://www.gats.cat">Gats</a> i <a href="fotos/gat.html">el gat</a></p>\n'],
+  'html/duplicate-id': ['<h2 id="fotos">Fotos</h2>\n<h2 id="fotos">Més fotos</h2>\n', '<h2 id="fotos">Fotos</h2>\n<h2 id="videos">Vídeos</h2>\n'],
+  'html/missing-anchor': ['<p><a href="#contacte">Contacte</a></p>\n<h2 id="contacta">Contacte</h2>\n', '<p><a href="#contacte">Contacte</a> · <a href="#">Amunt</a></p>\n<h2 id="contacte">Contacte</h2>\n'],
   'html/inline-style': ['<p style="color: red">x</p>\n', '<p class="avis">x</p>\n'],
   // CSS: errors
   'css/unbalanced-braces': [css('h1 {\n  color: red;\n'), css(GOOD_CSS)],
@@ -161,4 +168,26 @@ test('html/list-structure: text i elements dins de la llista', () => {
 test('html/heading-order: tornar a un nivell més alt sí que es pot', () => {
   assert.deepEqual(lintCase('<h2>a</h2>\n<h3>b</h3>\n<h2>c</h2>\n<h4>d</h4>\n')
     .filter((p) => p.rule === 'html/heading-order').map((p) => p.data), [{ from: 2, to: 4 }]);
+});
+
+test('enllaços: detalls de les regles del capítol 4', () => {
+  // href buit
+  assert.equal(first('<p><a href=" ">x</a></p>\n', 'html/missing-href').data.kind, 'empty');
+  // L'àncora més semblant com a suggeriment, i també amb accents codificats
+  assert.equal(first('<p><a href="#adopcions">x</a></p>\n<h2 id="adopcio">A</h2>\n', 'html/missing-anchor').data.suggestion, 'adopcio');
+  assert.ok(!rulesOf('<p><a href="#secci%C3%B3">x</a></p>\n<h2 id="secció">A</h2>\n').includes('html/missing-anchor'));
+  // L'id repetit diu on és el primer
+  assert.equal(first('<h2 id="fotos">A</h2>\n<p id="fotos">B</p>\n', 'html/duplicate-id').data.firstLine, 1);
+  // Textos vagues amb majúscules i puntuació
+  assert.ok(rulesOf('<p><a href="x.html">Clica aquí!</a></p>\n').includes('html/vague-link-text'));
+  assert.ok(!rulesOf('<p><a href="x.html">Més informació sobre els gats</a></p>\n').includes('html/vague-link-text'));
+  // Adreces: només les que semblen un domini sense https://
+  assert.equal(first('<p><a href="refugimixa.cat/voluntaris">x</a></p>\n', 'html/missing-protocol').data.fix, 'https://refugimixa.cat/voluntaris');
+  for (const href of ['pagina.html', '../index.html', 'gat.jpg', 'https://gats.cat', 'mailto:hola@gats.cat', '#fotos']) {
+    assert.ok(!rulesOf(`<p><a href="${href}">x</a></p>\n`).includes('html/missing-protocol'), href);
+  }
+  // Un enllaç sense href no és també «buit» (ja ho diu missing-href)
+  assert.deepEqual(rulesOf('<p><a></a></p>\n'), ['html/missing-href']);
+  // Abans del capítol 4, cap d'aquestes regles
+  assert.deepEqual(rulesOf({ files: { 'index.html': '<p><a>clica aquí</a></p>\n' }, chapter: 3 }), []);
 });
